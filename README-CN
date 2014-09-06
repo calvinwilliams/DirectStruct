@@ -1,0 +1,720 @@
+DirectStruct - C结构体工具
+
+1.概述
+
+DirectStruct是一个C结构体工具，命令行工具dsc读入IDL定义文件，自动生成C结构体定义及常用函数代码，在应用中直接使用自动化代码以提高开发效率，避免开发冗余和编码风险。
+
+DirectStruct生成了哪些自动化代码？
+* C结构体定义
+* 批量初始化缺省值函数
+* 网络/主机字节序化函数
+* 序列化/反序列化函数（可带压缩）
+* 打印结构体内所有字段值函数
+
+用DirectStruct自动生成的代码能干什么？
+
+* 直接C结构体通讯交换 : 在特定平台之间直接把C结构体变量通过TCP扔给对方是一个很诱人的想法，阻碍我们的主要是整型字段的字节序问题，手工编码是一件冗余的事情，DirectStruct可以帮助你自动化这一过程。解决了字节序问题后就可以直接交换报文，避免了通讯发送前的打包和通讯接收后的解包，所以速度非常快，是某些追求极端性能的场景中的首选报文格式。
+* 结构体序列化/反序列化 : 在跨平台中涉及到字段对齐情况就不适合直接扔TCP了，别烦恼，使用DirectStruct生成的序列化/反序列化函数吧，虽然多了打包解包，但是经过精心设计和算法优化，性能也是很诱人的。如果启用了压缩选项，压缩后的二进制数据块大幅缩小，便于通讯交换。
+* 快速打印结构体内所有字段值 : 对于一个大结构，编写他的打印所有字段值的函数是一件很无聊的事情，你可以用DirectStruct帮助你自动生成日志函数，输出到屏幕，或你自己的日志流中。
+* ( 新主意增加中 ... 把你的需求告诉我吧 )
+
+为什么使用DirectStruct？
+
+* 灵活的报文定义语法 : 命令行工具dsc读入定义文件，生成自动化代码，支持子结构嵌套、子结构数组、定义文件包含等灵活配置方式。
+* 跨平台：DirectStruct支持WINDOWS、Linux、AIX等主流操作系统，尤其是多平台中不同的表达方法，如64位整型，相同的IDL定义文件将生成不同平台的标准。
+
+2.编译安装
+
+for Linux
+$ tar xvzf dsc-1.0.2.tar.gz
+$ cd dsc-1.0.0/src
+$ su
+# make -f makefile.Linux clean
+rm -f util.o
+rm -f main.o
+rm -f dsc.o
+rm -f ReadDscFile.o
+rm -f GenerateCCode.o
+rm -f dsc
+# make -f makefile.Linux install
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c util.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c main.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c dsc.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c ReadDscFile.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c GenerateCCode.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -o dsc util.o main.o dsc.o ReadDscFile.o GenerateCCode.o -L.
+cp -f dsc /usr/bin/
+
+3.基本使用
+
+本章示例都取自于test目录中的测试程序。
+
+3.1.编写IDL定义文件，用自动化代码工具dsc处理之
+
+[code]
+$ cat IDL_AllTypes.dsc
+STRUCT	AllTypes
+{
+	INT	1	n1
+	INT	2	n2
+	INT	4	n4
+	INT	8	n8
+	UINT	1	u1
+	UINT	2	u2
+	UINT	4	u4
+	UINT	8	u8
+	FLOAT	4	f4
+	FLOAT	8	f8
+	CHAR	1	ch
+	UCHAR	1	uch
+	STRING	32	str32
+	STRING	1024	str1024
+}
+[/code]
+
+[code]
+$ dsc -f IDL_AllTypes.dsc -c
+STRUCT AllTypes
+        INT 1 n1
+        INT 2 n2
+        INT 4 n4
+        INT 8 n8
+        UINT 1 u1
+        UINT 2 u2
+        UINT 4 u4
+        UINT 8 u8
+        FLOAT 4 f4
+        FLOAT 8 f8
+        CHAR 1 ch
+        UCHAR 1 uch
+        STRING 32 str32
+        STRING 1024 str1024
+ok!
+$ ls
+IDL_AllTypes.dsc
+IDL_AllTypes.dsc.h
+IDL_AllTypes.dsc.c
+IDL_AllTypes.dsc.LOG.c
+[/code]
+
+IDL_test.dsc.h包含了自动生成的一个C结构体定义。
+IDL_test.dsc.c包含了自动生成的初始化缺省函数、网络/主机字节序化、序列化/反序列化等代码。
+IDL_test.dsc.LOG.c包含了自动生成的一个日志函数用于快速打印报文所有字段到标准输出或你自己的日志流上便于调试。
+
+注意：test/makefile未包含处理.dsc定义文件的动作，如修改.dsc文件后需要手工处理之。
+
+3.2.编写应用代码，调用网络/主机字节序化函数
+
+[code]
+$ cat test_netorder.c
+int test_netorder()
+{
+	AllTypes	st ;
+	int		nret = 0 ;
+	
+	/* client code */
+	memset( & st , 0x00 , sizeof(AllTypes) );
+	
+	st.n1 = -0x11 ;
+	st.n2 = -0x1122 ;
+	st.n4 = -0x11223344 ;
+	st.n8 = LL(-0x1122334455667788) ;
+	st.u1 = 0x11 ;
+	st.u2 = 0x1122 ;
+	st.u4 = 0x11223344 ;
+	st.u8 = ULL(0x1122334455667788) ;
+	st.f4 = 100.00 ;
+	st.f8 = 10000.00 ;
+	st.ch = 'A' ;
+	st.uch = 'B' ;
+	strcpy( st.str32 , "calvin" );
+	strcpy( st.str1024 , "XXXXXXXXXXXXXXXX" );
+	
+	DSCLOG_AllTypes( & st );
+	
+	nret = DSCNETORDER_AllTypes( & st ) ;
+	if( nret )
+	{
+		printf( "DSCNETORDER_AllTypes failed[%d]\n" , nret );
+		return nret;
+	}
+	else
+	{
+		printf( "DSCNETORDER_AllTypes ok\n" );
+	}
+	
+	/* ... client send communication struct to server ... */
+	
+	/* server code */
+	nret = DSCHOSTORDER_AllTypes( & st ) ;
+	if( nret )
+	{
+		printf( "DSCHOSTORDER_AllTypes failed[%d]\n" , nret );
+		return nret;
+	}
+	else
+	{
+		printf( "DSCHOSTORDER_AllTypes ok\n" );
+	}
+	
+	DSCLOG_AllTypes( & st );
+	
+	return 0;
+}
+$ make -f makefile.Linux
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c test_netorder.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c IDL_AllTypes.dsc.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -o test_netorder test_netorder.o IDL_AllTypes.dsc.o -L.
+$ ./test_netorder
+AllTypes.n1[-17]
+AllTypes.n2[-4386]
+AllTypes.n4[-287454020]
+AllTypes.n8[-1234605616436508552]
+AllTypes.u1[17]
+AllTypes.u2[4386]
+AllTypes.u4[287454020]
+AllTypes.u8[1234605616436508552]
+AllTypes.f4[100.000000]
+AllTypes.f8[10000.000000]
+AllTypes.ch[A]
+AllTypes.uch[B]
+AllTypes.str32[calvin]
+AllTypes.str1024[XXXXXXXXXXXXXXXX]
+DSCNETORDER_AllTypes ok
+0x0000000000  ef 00 ee de ee dd cc bc ee dd cc bb aa 99 88 78 ...............x
+0x0000000001  11 00 11 22 11 22 33 44 11 22 33 44 55 66 77 88 ..."."3D."3DUfw.
+0x0000000002  00 00 c8 42 00 00 00 00 00 88 c3 40 41 42 63 61 ...B.......@ABca
+0x0000000003  6c 76 69 6e 00 00 00 00 00 00 00 00 00 00 00 00 lvin............
+0x0000000004  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 58 ...............X
+0x0000000005  58 58 58 58 58 58 58 58 58 58 58 58 58 58 58 00 XXXXXXXXXXXXXXX.
+...
+DSCHOSTORDER_AllTypes ok
+AllTypes.n1[-17]
+AllTypes.n2[-4386]
+AllTypes.n4[-287454020]
+AllTypes.n8[-1234605616436508552]
+AllTypes.u1[17]
+AllTypes.u2[4386]
+AllTypes.u4[287454020]
+AllTypes.u8[1234605616436508552]
+AllTypes.f4[100.000000]
+AllTypes.f8[10000.000000]
+AllTypes.ch[A]
+AllTypes.uch[B]
+AllTypes.str32[calvin]
+AllTypes.str1024[XXXXXXXXXXXXXXXX]
+[/code]
+
+3.3.编写应用代码，调用序列化/反序列化函数
+
+[code]
+$ cat test_serialize_compact.c
+int test_serialize_compact()
+{
+	AllTypes	st ;
+	char		buf[ DSCSERIALIZE_COMPACT_BUFSIZE_AllTypes + 1 ] ;
+	int		len ;
+	int		nret = 0 ;
+	
+	/* client code */
+	memset( & st , 0x00 , sizeof(AllTypes) );
+	
+	st.n1 = -0x11 ;
+	st.n2 = -0x1122 ;
+	st.n4 = -0x11223344 ;
+	st.n8 = LL(-0x1122334455667788) ;
+	st.u1 = 0x11 ;
+	st.u2 = 0x1122 ;
+	st.u4 = 0x11223344 ;
+	st.u8 = ULL(0x1122334455667788) ;
+	st.f4 = 100.00 ;
+	st.f8 = 10000.00 ;
+	st.ch = 'A' ;
+	st.uch = 'B' ;
+	strcpy( st.str32 , "calvin" );
+	strcpy( st.str1024 , "XXXXXXXXXXXXXXXX" );
+	
+	memset( buf , 0x00 , sizeof(buf) );
+	nret = DSCSERIALIZE_COMPACT_AllTypes( & st , buf , & len ) ;
+	if( nret )
+	{
+		printf( "DSCSERIALIZE_COMPACT_AllTypes failed[%d]\n" , nret );
+		return nret;
+	}
+	else
+	{
+		printf( "DSCSERIALIZE_COMPACT_AllTypes ok , len[%d]\n" , len );
+	}
+	
+	dump( buf , len );
+	
+	/* ... client send communication struct to server ... */
+	
+	/* server code */
+	memset( & st , 0x00 , sizeof(AllTypes) );
+	nret = DSCDESERIALIZE_COMPACT_AllTypes( buf , & len , & st ) ;
+	if( nret )
+	{
+		printf( "DSCDESERIALIZE_COMPACT_AllTypes failed[%d]\n" , nret );
+		return nret;
+	}
+	else
+	{
+		printf( "DSCDESERIALIZE_COMPACT_AllTypes ok\n" );
+	}
+	
+	DSCLOG_AllTypes( & st );
+	
+	return 0;
+}
+$ make -f makefile.Linux
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c test_netorder.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c test_serialize_compact.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -o test_serialize_compact test_serialize_compact.o IDL_AllTypes.dsc.o -L.
+$ ./test_serialize_compact
+DSCSERIALIZE_COMPACT_AllTypes ok , len[1100]
+0x0000000000  ef ee de ee dd cc bc ee dd cc bb aa 99 88 78 11 ..............x.
+0x0000000001  11 22 11 22 33 44 11 22 33 44 55 66 77 88 00 00 ."."3D."3DUfw...
+0x0000000002  c8 42 00 00 00 00 00 88 c3 40 41 42 63 61 6c 76 .B.......@ABcalv
+0x0000000003  69 6e 00 00 00 00 00 00 00 00 00 00 00 00 00 00 in..............
+0x0000000004  00 00 00 00 00 00 00 00 00 00 00 00 58 58 58 58 ............XXXX
+0x0000000005  58 58 58 58 58 58 58 58 58 58 58 58 00 00 00 00 XXXXXXXXXXXX....
+...
+DSCDESERIALIZE_COMPACT_AllTypes ok
+AllTypes.n1[-17]
+AllTypes.n2[-4386]
+AllTypes.n4[-287454020]
+AllTypes.n8[-1234605616436508552]
+AllTypes.u1[17]
+AllTypes.u2[4386]
+AllTypes.u4[287454020]
+AllTypes.u8[1234605616436508552]
+AllTypes.f4[100.000000]
+AllTypes.f8[10000.000000]
+AllTypes.ch[A]
+AllTypes.uch[B]
+AllTypes.str32[calvin]
+AllTypes.str1024[XXXXXXXXXXXXXXXX]
+[/code]
+
+使用带压缩的序列化函数可以使得最终二进制数据块更小
+$ cat test_serialize_compress.c
+[code]
+...
+int test_serialize_compress()
+{
+	AllTypes	st ;
+	char		buf[ DSCSERIALIZE_COMPRESS_BUFSIZE_AllTypes + 1 ] ;
+	int		len ;
+	int		nret = 0 ;
+	
+	/* client code */
+	memset( & st , 0x00 , sizeof(AllTypes) );
+	
+	st.n1 = -0x11 ;
+	st.n2 = -0x1122 ;
+	st.n4 = -0x11223344 ;
+	st.n8 = LL(-0x1122334455667788) ;
+	st.u1 = 0x11 ;
+	st.u2 = 0x1122 ;
+	st.u4 = 0x11223344 ;
+	st.u8 = ULL(0x1122334455667788) ;
+	st.f4 = 100.00 ;
+	st.f8 = 10000.00 ;
+	st.ch = 'A' ;
+	st.uch = 'B' ;
+	strcpy( st.str32 , "calvin" );
+	strcpy( st.str1024 , "XXXXXXXXXXXXXXXX" );
+	
+	DSCLOG_AllTypes( & st );
+	
+	memset( buf , 0x00 , sizeof(buf) );
+	nret = DSCSERIALIZE_COMPRESS_AllTypes( & st , buf , & len ) ;
+	if( nret )
+	{
+		printf( "DSCSERIALIZE_COMPRESS_AllTypes failed[%d]\n" , nret );
+		return nret;
+	}
+	else
+	{
+		printf( "DSCSERIALIZE_COMPRESS_AllTypes ok , len[%d]\n" , len );
+	}
+	
+	dump( buf , len );
+	
+	/* ... client send communication struct to server ... */
+	
+	/* server code */
+	memset( & st , 0x00 , sizeof(AllTypes) );
+	nret = DSCDESERIALIZE_COMPRESS_AllTypes( buf , & len , & st ) ;
+	if( nret )
+	{
+		printf( "DSCDESERIALIZE_COMPRESS_AllTypes failed[%d]\n" , nret );
+		return nret;
+	}
+	else
+	{
+		printf( "DSCDESERIALIZE_COMPRESS_AllTypes ok\n" );
+	}
+	
+	DSCLOG_AllTypes( & st );
+	
+	return 0;
+}
+...
+$ make -f makefile.Linux
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c test_netorder.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c test_serialize_compress.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -o test_serialize_compress test_serialize_compress.o IDL_AllTypes.dsc.o -L.
+$ ./test_serialize_compress
+AllTypes.n1[-17]
+AllTypes.n2[-4386]
+AllTypes.n4[-287454020]
+AllTypes.n8[-1234605616436508552]
+AllTypes.u1[17]
+AllTypes.u2[4386]
+AllTypes.u4[287454020]
+AllTypes.u8[1234605616436508552]
+AllTypes.f4[100.000000]
+AllTypes.f8[10000.000000]
+AllTypes.ch[A]
+AllTypes.uch[B]
+AllTypes.str32[calvin]
+AllTypes.str1024[XXXXXXXXXXXXXXXX]
+DSCSERIALIZE_COMPRESS_AllTypes ok , len[74]
+0x0000000000  ef ee de 14 11 22 33 44 18 11 22 33 44 55 66 77 ....."3D.."3DUfw
+0x0000000001  88 11 11 22 04 11 22 33 44 08 11 22 33 44 55 66 ...".."3D.."3DUf
+0x0000000002  77 88 00 00 c8 42 00 00 00 00 00 88 c3 40 41 42 w....B.......@AB
+0x0000000003  01 06 63 61 6c 76 69 6e 01 10 58 58 58 58 58 58 ..calvin..XXXXXX
+0x0000000004  58 58 58 58 58 58 58 58 58 58                   XXXXXXXXXX
+DSCDESERIALIZE_COMPRESS_AllTypes ok
+AllTypes.n1[-17]
+AllTypes.n2[-4386]
+AllTypes.n4[-287454020]
+AllTypes.n8[-1234605616436508552]
+AllTypes.u1[17]
+AllTypes.u2[4386]
+AllTypes.u4[287454020]
+AllTypes.u8[1234605616436508552]
+AllTypes.f4[100.000000]
+AllTypes.f8[10000.000000]
+AllTypes.ch[A]
+AllTypes.uch[B]
+AllTypes.str32[calvin]
+AllTypes.str1024[XXXXXXXXXXXXXXXX]
+[/code]
+
+这个示例中不压缩的二进制数据块有1100字节，压缩后只有74字节，适用于网络数据交换。
+
+4.DirectStruct报文定义文件语法
+
+每个结构或内嵌子结构定义格式都以
+[code]
+STRUCT	结构名	ARRAY	数组数量
+{
+	...
+}
+[/code]
+囊括，其中首行的ARRAY及后是可选的
+
+每个字段定义行格式为
+[code]
+字段类型	字段长度	字段名	DEFAULT	缺省值
+[/code]
+其中字段类型及长度目前支持
+INT 1,2,4,8 ( 8位至64位整型 )
+FLOAT 4,8
+CHAR 1
+STRING (N)
+DEFAULT及后是可选的
+
+任何行位置可以用
+[code]
+INCLUDE	文件名
+[/code]
+引用其它.dsc文件
+
+下面是一个综合的例子：
+[code]
+$ cat IDL_BankTransaction.dsc
+STRUCT	BankTransaction
+{
+	INT	1	version				DEFAULT		1
+	INCLUDE IDL_ResponseHeader.dsc
+	STRUCT QueryTransactionDetails
+	{
+		STRUCT AddonMessages ARRAY 3
+		{
+			STRING	64	message_text
+		}
+		STRUCT TransactionDetailTitle
+		{
+			STRING	64	title_text
+			INT	2	page_no
+			INT	2	page_size
+		}
+		STRUCT TransactionDetails ARRAY 10
+		{
+			STRING	10	trans_date
+			STRING	10	trans_time
+			STRING	6	outlet_id
+			STRING	20	card_no
+			FLOAT	4	trans_amount
+		}
+	}
+}
+$ cat IDL_ResponseHeader.dsc
+	STRUCT	ResponseHeader
+	{
+		STRING	32	transaction_code
+		INT	4	trans_jnlsno
+		INT	4	response_code		DEFAULT		0
+		STRING	1024	response_desc		DEFAULT		"OK"
+	}
+[/code]
+附加说明：DEFAULT后面的缺省值，由自动化生成的函数FMCINIT_BankTransaction批量初始化。
+
+5.性能压测
+
+压测环境：
+CPU      : Intel(R) Core(TM) i3-3240 CPU 3.4GHz/3.4GHz
+内存     : 2GB
+操作系统 : WINDOWS XP SP3 ( VMWare 6.0.1 ( Red Hat Enterprise Linux Server release 5.4 ) )
+
+[code]
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <time.h>
+
+#include "IDL_AllTypes.dsc.h"
+#include "IDL_AllTypes.dsc.LOG.c"
+
+static void dump( char *buf , int len )
+{
+	int		i , j ;
+	
+	for( i = 0 ; i < len / 16 + 1 ; i++ )
+	{
+		printf( "0x%010X" , i );
+		
+		printf( " " );
+		
+		for( j = 0 ; j < 16 ; j++ )
+		{
+			if( i*16+j<len )
+			{
+				printf( " %02x" , (unsigned char)*(buf+i*16+j) );
+			}
+			else
+			{
+				printf( "   " );
+			}
+		}
+		
+		printf( " " );
+		
+		for( j = 0 ; j < 16 ; j++ )
+		{
+			if( i*16+j<len )
+			{
+				if( isprint(*(buf+i*16+j)) )
+					putchar( *(buf+i*16+j) );
+				else
+					putchar( '.' );
+			}
+			else
+			{
+				putchar( ' ' );
+			}
+		}
+		
+		putchar( '\n' );
+	}
+	
+	return;
+}
+
+int test_serialize_compress_press( long count )
+{
+	AllTypes	st ;
+	char		buf[ DSCSERIALIZE_COMPRESS_BUFSIZE_AllTypes + 1 ] ;
+	int		len ;
+	
+	long		c ;
+	long		t1 , t2 , dt ;
+	
+	int		nret = 0 ;
+	
+	memset( & st , 0x00 , sizeof(AllTypes) );
+	
+	st.n1 = -0x11 ;
+	st.n2 = -0x1122 ;
+	st.n4 = -0x11223344 ;
+	st.n8 = LL(-0x1122334455667788) ;
+	st.u1 = 0x11 ;
+	st.u2 = 0x1122 ;
+	st.u4 = 0x11223344 ;
+	st.u8 = ULL(0x1122334455667788) ;
+	st.f4 = 100.00 ;
+	st.f8 = 10000.00 ;
+	st.ch = 'A' ;
+	st.uch = 'B' ;
+	strcpy( st.str32 , "calvin" );
+	strcpy( st.str1024 , "XXXXXXXXXXXXXXXX" );
+	
+	DSCLOG_AllTypes( & st );
+	
+	printf( "Press begin\n" );
+	time( & t1 );
+	
+	for( c = 0 ; c < count ; c++ )
+	{
+		memset( buf , 0x00 , sizeof(buf) );
+		nret = DSCSERIALIZE_COMPRESS_AllTypes( & st , buf , & len ) ;
+		if( nret )
+		{
+			printf( "DSCSERIALIZE_COMPRESS_AllTypes failed[%d]\n" , nret );
+			return nret;
+		}
+		
+		memset( & st , 0x00 , sizeof(AllTypes) );
+		nret = DSCDESERIALIZE_COMPRESS_AllTypes( buf , & len , & st ) ;
+		if( nret )
+		{
+			printf( "DSCDESERIALIZE_COMPRESS_AllTypes failed[%d]\n" , nret );
+			return nret;
+		}
+	}
+	
+	printf( "Press end\n" );
+	time( & t2 );
+	dt = t2 - t1 ;
+	printf( "data compress size[%d] - compact size[%d]\n" , len , DSCSERIALIZE_COMPACT_BUFSIZE_AllTypes );
+	printf( "Elapse %ld seconds\n" , dt );
+	
+	dump( buf , len );
+	
+	DSCLOG_AllTypes( & st );
+	
+	return 0;
+}
+
+void usage()
+{
+	printf( "USAGE : test_serialize_compress_press count\n" );
+	return;
+}
+
+int main( int argc , char *argv[] )
+{
+	if( argc == 1 + 1 )
+	{
+		return -test_serialize_compress_press( atol(argv[1]) );
+	}
+	else
+	{
+		usage();
+		exit(7);
+	}
+}
+$ make -f makefile.Linux
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c IDL_AllTypes.dsc.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c test_serialize_compress_press.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -o test_serialize_compress_press test_serialize_compress_press.o IDL_AllTypes.dsc.o -L.
+$ time ./test_serialize_compress_press 10000000
+...
+AllTypes.n1[-17]
+AllTypes.n2[-4386]
+AllTypes.n4[-287454020]
+AllTypes.n8[-1234605616436508552]
+AllTypes.u1[17]
+AllTypes.u2[4386]
+AllTypes.u4[287454020]
+AllTypes.u8[1234605616436508552]
+AllTypes.f4[100.000000]
+AllTypes.f8[10000.000000]
+AllTypes.ch[A]
+AllTypes.uch[B]
+AllTypes.str32[calvin]
+AllTypes.str1024[XXXXXXXXXXXXXXXX]
+Press begin
+Press end
+data compress size[74] - compact size[1100]
+Elapse 1 seconds
+0x0000000000  ef ee de 04 11 22 33 44 08 11 22 33 44 55 66 77 ....."3D.."3DUfw
+0x0000000001  88 11 11 22 04 11 22 33 44 08 11 22 33 44 55 66 ...".."3D.."3DUf
+0x0000000002  77 88 00 00 c8 42 00 00 00 00 00 88 c3 40 41 42 w....B.......@AB
+0x0000000003  01 06 63 61 6c 76 69 6e 01 10 58 58 58 58 58 58 ..calvin..XXXXXX
+0x0000000004  58 58 58 58 58 58 58 58 58 58                   XXXXXXXXXX
+AllTypes.n1[-17]
+AllTypes.n2[-4386]
+AllTypes.n4[-287454020]
+AllTypes.n8[-1234605616436508552]
+AllTypes.u1[17]
+AllTypes.u2[4386]
+AllTypes.u4[287454020]
+AllTypes.u8[1234605616436508552]
+AllTypes.f4[100.000000]
+AllTypes.f8[10000.000000]
+AllTypes.ch[A]
+AllTypes.uch[B]
+AllTypes.str32[calvin]
+AllTypes.str1024[XXXXXXXXXXXXXXXX]
+
+real    0m1.002s
+user    0m0.993s
+sys     0m0.009s
+[/code]
+
+对AllTypesAllTypes.n1[-17]
+AllTypes.n2[-4386]
+AllTypes.n4[-287454020]
+AllTypes.n8[-1234605616436508552]
+AllTypes.u1[17]
+AllTypes.u2[4386]
+AllTypes.u4[287454020]
+AllTypes.u8[1234605616436508552]
+AllTypes.f4[100.000000]
+AllTypes.f8[10000.000000]
+AllTypes.ch[A]
+AllTypes.uch[B]
+AllTypes.str32[calvin]
+AllTypes.str1024[XXXXXXXXXXXXXXXX]
+Press begin
+Press end
+data compress size[74] - compact size[1100]
+Elapse 1 seconds
+0x0000000000  ef ee de 04 11 22 33 44 08 11 22 33 44 55 66 77 ....."3D.."3DUfw
+0x0000000001  88 11 11 22 04 11 22 33 44 08 11 22 33 44 55 66 ...".."3D.."3DUf
+0x0000000002  77 88 00 00 c8 42 00 00 00 00 00 88 c3 40 41 42 w....B.......@AB
+0x0000000003  01 06 63 61 6c 76 69 6e 01 10 58 58 58 58 58 58 ..calvin..XXXXXX
+0x0000000004  58 58 58 58 58 58 58 58 58 58                   XXXXXXXXXX
+AllTypes.n1[-17]
+AllTypes.n2[-4386]
+AllTypes.n4[-287454020]
+AllTypes.n8[-1234605616436508552]
+AllTypes.u1[17]
+AllTypes.u2[4386]
+AllTypes.u4[287454020]
+AllTypes.u8[1234605616436508552]
+AllTypes.f4[100.000000]
+AllTypes.f8[10000.000000]
+AllTypes.ch[A]
+AllTypes.uch[B]
+AllTypes.str32[calvin]
+AllTypes.str1024[XXXXXXXXXXXXXXXX]
+
+real    0m1.002s
+user    0m0.993s
+sys     0m0.009s
+
+对AllTypes结构所有字段进行填充，然后反复序列化/反序列化(带压缩)1000万次，整个过程总耗时大约1秒。
+
+6.最后
+
+欢迎使用，如果你使用中碰到了问题或者有更酷的想法请告诉我，谢谢 ^_^
+
+首页传送门 : [url]http://git.oschina.net/calvinwilliams/DirectStruct[/url]
+作者邮箱   : calvinwilliams.c@gmail.com

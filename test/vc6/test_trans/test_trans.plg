@@ -1,0 +1,42 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: test_trans - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP296.tmp" with contents
+[
+/nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/test_trans.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\Work\C Projects\dsc-1.0.2\test\IDL_BankTransaction.dsc.c"
+"D:\Work\C Projects\dsc-1.0.2\test\IDL_CommHead.dsc.c"
+"D:\Work\C Projects\dsc-1.0.2\test\IDL_ResponseHeader.dsc.c"
+"D:\Work\C Projects\dsc-1.0.2\test\test_trans.c"
+]
+Creating command line "cl.exe @C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP296.tmp" 
+Creating temporary file "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP297.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/test_trans.pdb" /debug /machine:I386 /out:"Debug/test_trans.exe" /pdbtype:sept 
+".\Debug\IDL_BankTransaction.dsc.obj"
+".\Debug\IDL_CommHead.dsc.obj"
+".\Debug\IDL_ResponseHeader.dsc.obj"
+".\Debug\test_trans.obj"
+]
+Creating command line "link.exe @C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP297.tmp"
+<h3>Output Window</h3>
+Compiling...
+IDL_BankTransaction.dsc.c
+IDL_CommHead.dsc.c
+IDL_ResponseHeader.dsc.c
+test_trans.c
+Linking...
+   Creating library Debug/test_trans.lib and object Debug/test_trans.exp
+
+
+
+<h3>Results</h3>
+test_trans.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

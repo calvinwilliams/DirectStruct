@@ -1,0 +1,580 @@
+DirectStruct - C Structure Tools
+
+1.Overview
+
+DirectStruct is a C struct tool, command-line tool 'dsc' based on IDL definition file, generate the C structure definition and the corresponding code automatically, use directly in order to improve the development efficiency in applications, avoid the risk of development of redundancy and coding.
+
+What automation code DirectStruct generated ?
+* C structure definition
+* Default batch Initialize function
+* Network/host byte ordering functions
+* Serialization/deserialization functions ( without or with compression )
+* Print all field value functions in structure or output to your own log stream
+
+What to do with DirectStruct ?
+
+* C structure communication exchange directly : Threw the C structure variables directly by TCP between the specific platform to the other pair is a tempting idea, There is one problem about byte-order sequence of integer field, manual coding is a redundant thing, DirectStruct can help you automate the process. solve the problem of the byte-order directly in the exchange of messages , to avoid packaging before communication sent and unpacking after communications received , so very fast, is a message format for extreme performance in some scenes.
+* Structure serialization/deserialization : In the cross-platform , it is not applicable for sending structure directly, don't worry, use DirectStruct generated serialization/deserialization function, although much packaging solution package, but after careful design and algorithm optimization, performance is also very attractive. If you enable compression options, binary data block greatly narrowed, facilitate communication exchange.
+* Fast printing all field values in structure : for a large structure, dumping it is a boring thing, you can use DirectStruct helps you to automatically generate log function, output to the screen, or your own log stream. 
+* ( new idea increasing ... tell me what you need )
+
+Why use DirectStruct ?
+
+* Flexible struct defined syntax : command line tools 'dsc' read definition file, generate automation code, supports sub struct nested, struct array, such as the definition file contains the flexible configuration mode. 
+* Cross-platform : DirectStruct supports WINDOWS, Linux, AIX , such as the 64-bits integer, the standard IDL definition file will generate different platforms standard.
+
+2.Install with compiling
+
+for Linux
+$ tar xvzf dsc-1.0.2.tar.gz
+$ cd dsc-1.0.0/src
+$ su
+# make -f makefile.Linux clean
+rm -f util.o
+rm -f main.o
+rm -f dsc.o
+rm -f ReadDscFile.o
+rm -f GenerateCCode.o
+rm -f dsc
+# make -f makefile.Linux install
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c util.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c main.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c dsc.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c ReadDscFile.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c GenerateCCode.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -o dsc util.o main.o dsc.o ReadDscFile.o GenerateCCode.o -L.
+cp -f dsc /usr/bin/
+
+3.Basic use
+
+3.1.Write a IDL definition file , Use the tools 'dsc' processing it and generate automation code
+
+[code]
+$ cat IDL_AllTypes.dsc
+STRUCT	AllTypes
+{
+	INT	1	n1
+	INT	2	n2
+	INT	4	n4
+	INT	8	n8
+	UINT	1	u1
+	UINT	2	u2
+	UINT	4	u4
+	UINT	8	u8
+	FLOAT	4	f4
+	FLOAT	8	f8
+	CHAR	1	ch
+	UCHAR	1	uch
+	STRING	32	str32
+	STRING	1024	str1024
+}[/code]
+
+[code]
+$ dsc -f IDL_AllTypes.dsc -c
+STRUCT AllTypes
+        INT 1 n1
+        INT 2 n2
+        INT 4 n4
+        INT 8 n8
+        UINT 1 u1
+        UINT 2 u2
+        UINT 4 u4
+        UINT 8 u8
+        FLOAT 4 f4
+        FLOAT 8 f8
+        CHAR 1 ch
+        UCHAR 1 uch
+        STRING 32 str32
+        STRING 1024 str1024
+ok!
+$ ls
+IDL_AllTypes.dsc
+IDL_AllTypes.dsc.h
+IDL_AllTypes.dsc.c
+IDL_AllTypes.dsc.LOG.c
+[/code]
+
+IDL_test.dsc.h contains the C structure definition.
+IDL_test.dsc.c contains the default initialization function, network/host byte ordering functions, and serialization/deserialization functions.
+IDL_test.dsc.LOG.c contains a log function is used to print a message all fields to the standard output or your own log stream for debugging.
+
+Note: test/makefile not contains processing .dsc definition file, if you modified .dsc then require manual processing.
+
+3.2.Create application , call network/host byte ordering functions
+
+[code]
+$ cat test_netorder.c
+int test_netorder()
+{
+	AllTypes	st ;
+	int		nret = 0 ;
+	
+	/* client code */
+	memset( & st , 0x00 , sizeof(AllTypes) );
+	
+	st.n1 = -0x11 ;
+	st.n2 = -0x1122 ;
+	st.n4 = -0x11223344 ;
+#if ( defined __unix ) | ( defined __linux__ )
+	st.n8 = -0x1122334455667788LL ;
+#elif ( defined _WIN32 )
+	st.n8 = -0x1122334455667788 ;
+#endif
+	st.u1 = 0x11 ;
+	st.u2 = 0x1122 ;
+	st.u4 = 0x11223344 ;
+#if ( defined __unix ) | ( defined __linux__ )
+	st.u8 = 0x1122334455667788ULL ;
+#elif ( defined _WIN32 )
+	st.u8 = 0x1122334455667788 ;
+#endif
+	st.f4 = 100.00 ;
+	st.f8 = 10000.00 ;
+	st.ch = 'A' ;
+	st.uch = 'B' ;
+	strcpy( st.str32 , "calvin" );
+	strcpy( st.str1024 , "XXXXXXXXXXXXXXXX" );
+	
+	DSCLOG_AllTypes( & st );
+	
+	nret = DSCNETORDER_AllTypes( & st ) ;
+	if( nret )
+	{
+		printf( "DSCNETORDER_AllTypes failed[%d]\n" , nret );
+		return nret;
+	}
+	else
+	{
+		printf( "DSCNETORDER_AllTypes ok\n" );
+	}
+	
+	/* ... client send communication struct to server ... */
+	
+	/* server code */
+	nret = DSCHOSTORDER_AllTypes( & st ) ;
+	if( nret )
+	{
+		printf( "DSCHOSTORDER_AllTypes failed[%d]\n" , nret );
+		return nret;
+	}
+	else
+	{
+		printf( "DSCHOSTORDER_AllTypes ok\n" );
+	}
+	
+	DSCLOG_AllTypes( & st );
+	
+	return 0;
+}
+$ make
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c test_netorder.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c IDL_AllTypes.dsc.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -o test_netorder test_netorder.o IDL_AllTypes.dsc.o -L.
+$ ./test_netorder
+AllTypes.n1[-17]
+AllTypes.n2[-4386]
+AllTypes.n4[-287454020]
+AllTypes.n8[-1234605616436508552]
+AllTypes.u1[17]
+AllTypes.u2[4386]
+AllTypes.u4[287454020]
+AllTypes.u8[1234605616436508552]
+AllTypes.f4[100.000000]
+AllTypes.f8[10000.000000]
+AllTypes.ch[A]
+AllTypes.uch[B]
+AllTypes.str32[calvin]
+AllTypes.str1024[XXXXXXXXXXXXXXXX]
+DSCNETORDER_AllTypes ok
+0x0000000000  ef 00 ee de ee dd cc bc ee dd cc bb aa 99 88 78 ...............x
+0x0000000001  11 00 11 22 11 22 33 44 11 22 33 44 55 66 77 88 ..."."3D."3DUfw.
+0x0000000002  00 00 c8 42 00 00 00 00 00 88 c3 40 41 42 63 61 ...B.......@ABca
+0x0000000003  6c 76 69 6e 00 00 00 00 00 00 00 00 00 00 00 00 lvin............
+0x0000000004  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 58 ...............X
+0x0000000005  58 58 58 58 58 58 58 58 58 58 58 58 58 58 58 00 XXXXXXXXXXXXXXX.
+...
+DSCHOSTORDER_AllTypes ok
+AllTypes.n1[-17]
+AllTypes.n2[-4386]
+AllTypes.n4[-287454020]
+AllTypes.n8[-1234605616436508552]
+AllTypes.u1[17]
+AllTypes.u2[4386]
+AllTypes.u4[287454020]
+AllTypes.u8[1234605616436508552]
+AllTypes.f4[100.000000]
+AllTypes.f8[10000.000000]
+AllTypes.ch[A]
+AllTypes.uch[B]
+AllTypes.str32[calvin]
+AllTypes.str1024[XXXXXXXXXXXXXXXX]
+[/code]
+
+3.3.Create application , call serialize/deserilize functions
+
+[code]
+$ cat test_serialize_compact.c
+int test_serialize_compact()
+{
+	AllTypes	st ;
+	char		buf[ DSCSERIALIZE_COMPACT_BUFSIZE_AllTypes + 1 ] ;
+	int		len ;
+	int		nret = 0 ;
+	
+	/* client code */
+	memset( & st , 0x00 , sizeof(AllTypes) );
+	
+	st.n1 = -0x11 ;
+	st.n2 = -0x1122 ;
+	st.n4 = -0x11223344 ;
+	st.n8 = LL(-0x1122334455667788) ;
+	st.u1 = 0x11 ;
+	st.u2 = 0x1122 ;
+	st.u4 = 0x11223344 ;
+	st.u8 = ULL(0x1122334455667788) ;
+	st.f4 = 100.00 ;
+	st.f8 = 10000.00 ;
+	st.ch = 'A' ;
+	st.uch = 'B' ;
+	strcpy( st.str32 , "calvin" );
+	strcpy( st.str1024 , "XXXXXXXXXXXXXXXX" );
+	
+	memset( buf , 0x00 , sizeof(buf) );
+	nret = DSCSERIALIZE_COMPACT_AllTypes( & st , buf , & len ) ;
+	if( nret )
+	{
+		printf( "DSCSERIALIZE_COMPACT_AllTypes failed[%d]\n" , nret );
+		return nret;
+	}
+	else
+	{
+		printf( "DSCSERIALIZE_COMPACT_AllTypes ok , len[%d]\n" , len );
+	}
+	
+	dump( buf , len );
+	
+	/* ... client send communication struct to server ... */
+	
+	/* server code */
+	memset( & st , 0x00 , sizeof(AllTypes) );
+	nret = DSCDESERIALIZE_COMPACT_AllTypes( buf , & len , & st ) ;
+	if( nret )
+	{
+		printf( "DSCDESERIALIZE_COMPACT_AllTypes failed[%d]\n" , nret );
+		return nret;
+	}
+	else
+	{
+		printf( "DSCDESERIALIZE_COMPACT_AllTypes ok\n" );
+	}
+	
+	DSCLOG_AllTypes( & st );
+	
+	return 0;
+}
+$ make -f makefile.Linux
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c test_netorder.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c test_serialize_compact.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -o test_serialize_compact test_serialize_compact.o IDL_AllTypes.dsc.o -L.
+$ ./test_serialize_compact
+DSCSERIALIZE_COMPACT_AllTypes ok , len[1100]
+0x0000000000  ef ee de ee dd cc bc ee dd cc bb aa 99 88 78 11 ..............x.
+0x0000000001  11 22 11 22 33 44 11 22 33 44 55 66 77 88 00 00 ."."3D."3DUfw...
+0x0000000002  c8 42 00 00 00 00 00 88 c3 40 41 42 63 61 6c 76 .B.......@ABcalv
+0x0000000003  69 6e 00 00 00 00 00 00 00 00 00 00 00 00 00 00 in..............
+0x0000000004  00 00 00 00 00 00 00 00 00 00 00 00 58 58 58 58 ............XXXX
+0x0000000005  58 58 58 58 58 58 58 58 58 58 58 58 00 00 00 00 XXXXXXXXXXXX....
+...
+DSCDESERIALIZE_COMPACT_AllTypes ok
+AllTypes.n1[-17]
+AllTypes.n2[-4386]
+AllTypes.n4[-287454020]
+AllTypes.n8[-1234605616436508552]
+AllTypes.u1[17]
+AllTypes.u2[4386]
+AllTypes.u4[287454020]
+AllTypes.u8[1234605616436508552]
+AllTypes.f4[100.000000]
+AllTypes.f8[10000.000000]
+AllTypes.ch[A]
+AllTypes.uch[B]
+AllTypes.str32[calvin]
+AllTypes.str1024[XXXXXXXXXXXXXXXX]
+[/code]
+
+Using serialization function with compressed make data block smaller.
+$ cat test_serialize_compress.c
+[code]
+...
+int test_serialize_compress()
+{
+	AllTypes	st ;
+	char		buf[ DSCSERIALIZE_COMPRESS_BUFSIZE_AllTypes + 1 ] ;
+	int		len ;
+	int		nret = 0 ;
+	
+	/* client code */
+	memset( & st , 0x00 , sizeof(AllTypes) );
+	
+	st.n1 = -0x11 ;
+	st.n2 = -0x1122 ;
+	st.n4 = -0x11223344 ;
+	st.n8 = LL(-0x1122334455667788) ;
+	st.u1 = 0x11 ;
+	st.u2 = 0x1122 ;
+	st.u4 = 0x11223344 ;
+	st.u8 = ULL(0x1122334455667788) ;
+	st.f4 = 100.00 ;
+	st.f8 = 10000.00 ;
+	st.ch = 'A' ;
+	st.uch = 'B' ;
+	strcpy( st.str32 , "calvin" );
+	strcpy( st.str1024 , "XXXXXXXXXXXXXXXX" );
+	
+	DSCLOG_AllTypes( & st );
+	
+	memset( buf , 0x00 , sizeof(buf) );
+	nret = DSCSERIALIZE_COMPRESS_AllTypes( & st , buf , & len ) ;
+	if( nret )
+	{
+		printf( "DSCSERIALIZE_COMPRESS_AllTypes failed[%d]\n" , nret );
+		return nret;
+	}
+	else
+	{
+		printf( "DSCSERIALIZE_COMPRESS_AllTypes ok , len[%d]\n" , len );
+	}
+	
+	dump( buf , len );
+	
+	/* ... client send communication struct to server ... */
+	
+	/* server code */
+	memset( & st , 0x00 , sizeof(AllTypes) );
+	nret = DSCDESERIALIZE_COMPRESS_AllTypes( buf , & len , & st ) ;
+	if( nret )
+	{
+		printf( "DSCDESERIALIZE_COMPRESS_AllTypes failed[%d]\n" , nret );
+		return nret;
+	}
+	else
+	{
+		printf( "DSCDESERIALIZE_COMPRESS_AllTypes ok\n" );
+	}
+	
+	DSCLOG_AllTypes( & st );
+	
+	return 0;
+}
+...
+$ make -f makefile.Linux
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c test_netorder.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c test_serialize_compress.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -o test_serialize_compress test_serialize_compress.o IDL_AllTypes.dsc.o -L.
+$ ./test_serialize_compress
+AllTypes.n1[-17]
+AllTypes.n2[-4386]
+AllTypes.n4[-287454020]
+AllTypes.n8[-1234605616436508552]
+AllTypes.u1[17]
+AllTypes.u2[4386]
+AllTypes.u4[287454020]
+AllTypes.u8[1234605616436508552]
+AllTypes.f4[100.000000]
+AllTypes.f8[10000.000000]
+AllTypes.ch[A]
+AllTypes.uch[B]
+AllTypes.str32[calvin]
+AllTypes.str1024[XXXXXXXXXXXXXXXX]
+DSCSERIALIZE_COMPRESS_AllTypes ok , len[74]
+0x0000000000  ef ee de 14 11 22 33 44 18 11 22 33 44 55 66 77 ....."3D.."3DUfw
+0x0000000001  88 11 11 22 04 11 22 33 44 08 11 22 33 44 55 66 ...".."3D.."3DUf
+0x0000000002  77 88 00 00 c8 42 00 00 00 00 00 88 c3 40 41 42 w....B.......@AB
+0x0000000003  01 06 63 61 6c 76 69 6e 01 10 58 58 58 58 58 58 ..calvin..XXXXXX
+0x0000000004  58 58 58 58 58 58 58 58 58 58                   XXXXXXXXXX
+DSCDESERIALIZE_COMPRESS_AllTypes ok
+AllTypes.n1[-17]
+AllTypes.n2[-4386]
+AllTypes.n4[-287454020]
+AllTypes.n8[-1234605616436508552]
+AllTypes.u1[17]
+AllTypes.u2[4386]
+AllTypes.u4[287454020]
+AllTypes.u8[1234605616436508552]
+AllTypes.f4[100.000000]
+AllTypes.f8[10000.000000]
+AllTypes.ch[A]
+AllTypes.uch[B]
+AllTypes.str32[calvin]
+AllTypes.str1024[XXXXXXXXXXXXXXXX]
+[/code]
+
+This case with compression , data block is 74 bytes , without compression is 1100 bytes.
+
+4.DirectStruct struct definition syntax
+
+Each structure or embedded substructure definition format
+[code]
+STRUCT	struct_name	ARRAY	struct_count
+{
+	...
+}
+[/code]
+after the first line ARRAY and is optional
+
+Each field definition line format
+[code]
+field_type	field_length	field_name	DEFAULT	default_value
+[/code]
+field type and length supported
+INT 1,2,4,8 ( 8 to 64 bits integer )
+FLOAT 4,8
+CHAR 1
+STRING (N)
+After DEFAULT is optional 
+
+Any line position can use references other .dsc file by
+[code]
+INCLUDE	file_name
+[/code]
+
+Below is an example of a comprehensive
+[code]
+$ cat IDL_BankTransaction.dsc
+STRUCT	BankTransaction
+{
+	INT	1	version				DEFAULT		1
+	INCLUDE IDL_ResponseHeader.dsc
+	STRUCT QueryTransactionDetails
+	{
+		STRUCT AddonMessages ARRAY 3
+		{
+			STRING	64	message_text
+		}
+		STRUCT TransactionDetailTitle
+		{
+			STRING	64	title_text
+			INT	2	page_no
+			INT	2	page_size
+		}
+		STRUCT TransactionDetails ARRAY 10
+		{
+			STRING	10	trans_date
+			STRING	10	trans_time
+			STRING	6	outlet_id
+			STRING	20	card_no
+			FLOAT	4	trans_amount
+		}
+	}
+}
+$ cat IDL_ResponseHeader.dsc
+	STRUCT	ResponseHeader
+	{
+		STRING	32	transaction_code
+		INT	4	trans_jnlsno
+		INT	4	response_code		DEFAULT		0
+		STRING	1024	response_desc		DEFAULT		"OK"
+	}
+[/code]
+
+5.Performance pressure
+
+Pressure environment :
+CPU    : Intel(R) Core(TM) i3-3240 CPU 3.4GHz/3.4GHz
+Memory : 2GB
+OS     : WINDOWS XP SP3 ( VMWare 6.0.1 ( Red Hat Enterprise Linux Server release 5.4 ) )
+
+[code]
+$ cat IDL_test.dsc
+STRUCT	PersonalInfo
+{
+	INT	4	id
+	STRING	64	name
+	INT	1	age
+	STRING	1	gender		DEFAULT		"M"
+	INT	4	phone_num
+}
+$ cat test.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#include "IDL_test.dsc.h"
+#include "IDL_test.dsc.LOG.c"
+
+int press( long press_count )
+{
+	PersonalInfo	data ;
+	long			c ;
+	long			t1 , t2 , dt ;
+	
+	time( & t1 );
+	
+	memset( & data , 0x00 , sizeof(PersonalInfo) );
+	DSCINIT_PersonalInfo( & data );
+	
+	data.id = 1001 ;
+	strcpy( data.name , "Calvin" );
+	data.age = 35 ;
+	data.phone_num = 12345678 ;
+	
+	for( c = 0 ; c < press_count ; c++ )
+	{
+		DSCNETORDER_PersonalInfo( & data );
+		DSCHOSTORDER_PersonalInfo( & data );
+	}
+	
+	FUNCNAME_DSCLOG_PersonalInfo( & data );
+	
+	time( & t2 );
+	dt = t2 - t1 ;
+	
+	printf( "sizeof(PersonalInfo)[%d]\n" , sizeof(PersonalInfo) );
+	printf( "EPLASE %ld seconds\n" , dt );
+	
+	return 0;
+}
+
+static void usage()
+{
+	printf( "USAGE : test press_count\n" );
+}
+
+int main( int argc , char *argv[] )
+{
+	if( argc != 1 + 1 )
+	{
+		usage();
+		exit(7);
+	}
+	
+	return -press( atol(argv[1]) );
+}
+$ make -f makefile.Linux
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c test.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c IDL_test.dsc.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -o test test.o IDL_test.dsc.o -L.
+$ time ./test 100000000
+...
+PersonalInfoList.PersonalInfo[index[1]].id[1001]
+PersonalInfoList.PersonalInfo[index[1]].name[Calvin]
+PersonalInfoList.PersonalInfo[index[1]].age[35]
+PersonalInfoList.PersonalInfo[index[1]].gender[M]
+PersonalInfoList.PersonalInfo[index[1]].phone_num[12345678]
+sizeof(FMCCOM_PersonalInfoList)[2812]
+EPLASE 7 seconds
+
+real    0m6.455s
+user    0m6.306s
+sys     0m0.018s
+[/code]
+
+Fill AllTypes structure all fields, and then repeated serialization/deserialization (with compression) 10 million times, the entire process takes about 1 second. 
+
+6.Finally
+
+Welcome to use, if you have any problems or have a cool idea about DirectStruct, please tell me, thank you ^_^
+
+Project home page : [url]https://github.com/calvinwilliams/DirectStruct[/url]
+Author email      : calvinwilliams.c@gmail.com

@@ -1,0 +1,10 @@
+ver 2.0.0	2014-09-5	calvin
+		* add generate code automatically : compack/compress serialize/unserialize functions
+
+ver 1.0.1	2014-09-01	calvin
+		* add type INT 8 and UINT (1,2,4,8) and UCHAR
+
+ver 1.0.0	2014-08-29	calvin
+		* create
+		* read abstract definition file
+		* add generate code automatically : network/host byte-order convert functions , log output function
