@@ -1,0 +1,12 @@
+message PressProtobuf
+{
+	required sint32		n4 = 2 ;
+	required sint64		n8 =3 ;
+	required int32		un4 = 5 ;
+	required int64		un8 = 6 ;
+	required float		f4 = 7 ;
+	required double		f8 = 8 ;
+	required string		str32 = 9 ;
+	required string		str1024 = 10 ;
+}
+

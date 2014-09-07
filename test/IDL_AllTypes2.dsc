@@ -1,0 +1,11 @@
+STRUCT	AllTypes2
+{
+	INT	4	n4
+	INT	8	n8
+	UINT	4	u4
+	UINT	8	u8
+	FLOAT	4	f4
+	FLOAT	8	f8
+	STRING	32	str32
+	STRING	1024	str1024
+}

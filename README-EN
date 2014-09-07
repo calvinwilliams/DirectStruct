@@ -513,102 +513,258 @@ $ cat IDL_ResponseHeader.dsc
 
 5.Performance
 
+In high-performance situations, data serialization and deserialization efficiency is critical, mainly inspects the final message size and speed of serialization.
+At the same time, we also took Google's Protocol Buffer to do comparative. 
+
 Pressure environment :
 CPU    : Intel(R) Core(TM) i3-3240 CPU 3.4GHz/3.4GHz
 Memory : 2GB
 OS     : WINDOWS XP SP3 ( VMWare 6.0.1 ( Red Hat Enterprise Linux Server release 5.4 ) )
 
+Pressure structure :
+
+DirectStruct
 [code]
-$ cat IDL_test.dsc
-STRUCT	PersonalInfo
+$ cat IDL_AllTypes2.dsc
+STRUCT	AllTypes2
 {
-	INT	4	id
-	STRING	64	name
-	INT	1	age
-	STRING	1	gender		DEFAULT		"M"
-	INT	4	phone_num
+	INT	4	n4
+	INT	8	n8
+	UINT	4	u4
+	UINT	8	u8
+	FLOAT	4	f4
+	FLOAT	8	f8
+	STRING	32	str32
+	STRING	1024	str1024
 }
-$ cat test.c
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+$ dsc -f IDL_AllTypes2.dsc -c
+$ ls
+IDL_AllTypes2.dsc.c	IDL_AllTypes2.dsc.h
+[/code]
 
-#include "IDL_test.dsc.h"
-#include "IDL_test.dsc.LOG.c"
-
-int press( long press_count )
+Google Protocol Buffer
+[code]
+$ cat PressProtobuf.proto
+message PressProtobuf
 {
-	PersonalInfo	data ;
-	long			c ;
-	long			t1 , t2 , dt ;
+	required sint32		n4 = 2 ;
+	required sint64		n8 =3 ;
+	required int32		un4 = 5 ;
+	required int64		un8 = 6 ;
+	required float		f4 = 7 ;
+	required double		f8 = 8 ;
+	required string		str32 = 9 ;
+	required string		str1024 = 10 ;
+}
+$ protoc -I=. --cpp_out=. PressProtobuf.proto
+$ ls
+PressProtobuf.pb.cc	PressProtobuf.pb.h
+[/code]
+
+Pressure code :
+
+DirectStruct
+[code]
+$ cat test/test_serialize_compress_press.c
+...
+int test_serialize_compress_press( long count )
+{
+	AllTypes2	st ;
+	char		buf[ DSCSERIALIZE_COMPRESS_BUFSIZE_AllTypes2 + 1 ] ;
+	int		len ;
 	
+	long		c ;
+	long		t1 , t2 , dt ;
+	
+	int		nret = 0 ;
+	
+	memset( & st , 0x00 , sizeof(AllTypes2) );
+	
+	st.n4 = -0x11223344 ;
+	st.n8 = LL(-0x1122334455667788) ;
+	st.u4 = 0x11223344 ;
+	st.u8 = ULL(0x1122334455667788) ;
+	st.f4 = 100.00 ;
+	st.f8 = 10000.00 ;
+	strcpy( st.str32 , "calvin" );
+	strcpy( st.str1024 , "XXXXXXXXXXXXXXXX" );
+	
+	DSCLOG_AllTypes2( & st );
+	
+	printf( "Press begin\n" );
 	time( & t1 );
 	
-	memset( & data , 0x00 , sizeof(PersonalInfo) );
-	DSCINIT_PersonalInfo( & data );
-	
-	data.id = 1001 ;
-	strcpy( data.name , "Calvin" );
-	data.age = 35 ;
-	data.phone_num = 12345678 ;
-	
-	for( c = 0 ; c < press_count ; c++ )
+	for( c = 0 ; c < count ; c++ )
 	{
-		DSCNETORDER_PersonalInfo( & data );
-		DSCHOSTORDER_PersonalInfo( & data );
+		memset( buf , 0x00 , sizeof(buf) );
+		nret = DSCSERIALIZE_COMPRESS_AllTypes2( & st , buf , & len ) ;
+		if( nret )
+		{
+			printf( "DSCSERIALIZE_COMPRESS_AllTypes2 failed[%d]\n" , nret );
+			return nret;
+		}
+		
+		memset( & st , 0x00 , sizeof(AllTypes2) );
+		nret = DSCDESERIALIZE_COMPRESS_AllTypes2( buf , & len , & st ) ;
+		if( nret )
+		{
+			printf( "DSCDESERIALIZE_COMPRESS_AllTypes2 failed[%d]\n" , nret );
+			return nret;
+		}
 	}
 	
-	FUNCNAME_DSCLOG_PersonalInfo( & data );
-	
+	printf( "Press end\n" );
 	time( & t2 );
 	dt = t2 - t1 ;
+	printf( "data compress size[%d] - compact size[%d]\n" , len , DSCSERIALIZE_COMPACT_BUFSIZE_AllTypes2 );
+	printf( "Elapse %ld seconds\n" , dt );
 	
-	printf( "sizeof(PersonalInfo)[%d]\n" , sizeof(PersonalInfo) );
-	printf( "EPLASE %ld seconds\n" , dt );
+	dump( buf , len );
+	
+	DSCLOG_AllTypes2( & st );
 	
 	return 0;
 }
-
-static void usage()
-{
-	printf( "USAGE : test press_count\n" );
-}
-
-int main( int argc , char *argv[] )
-{
-	if( argc != 1 + 1 )
-	{
-		usage();
-		exit(7);
-	}
-	
-	return -press( atol(argv[1]) );
-}
-$ make -f makefile.Linux
-gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c test.c
-gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c IDL_test.dsc.c
-gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -o test test.o IDL_test.dsc.o -L.
-$ time ./test 100000000
 ...
-PersonalInfoList.PersonalInfo[index[1]].id[1001]
-PersonalInfoList.PersonalInfo[index[1]].name[Calvin]
-PersonalInfoList.PersonalInfo[index[1]].age[35]
-PersonalInfoList.PersonalInfo[index[1]].gender[M]
-PersonalInfoList.PersonalInfo[index[1]].phone_num[12345678]
-sizeof(FMCCOM_PersonalInfoList)[2812]
-EPLASE 7 seconds
-
-real    0m6.455s
-user    0m6.306s
-sys     0m0.018s
+$ make -f makefile
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c IDL_AllTypes2.dsc.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c test_serialize_compress_press.c
+gcc -o test_serialize_compress_press test_serialize_compress_press.o IDL_AllTypes2.dsc.o -L.
 [/code]
 
-Fill AllTypes structure all fields, and then repeated serialization/deserialization (with compression) 10 million times, the entire process takes about 1 second. 
+Google Protocol Buffer
+[code]
+$ cat test_protobuf/test_protobuf_press.cc
+...
+int test_protobuf_press( int count )
+{
+	PressProtobuf	press ;
+	PressProtobuf	press2 ;
+	string		str ;
+	int		len ;
+	int		c ;
+	
+	press.set_n4( -0x11223344 );
+	press.set_n8( -0x1122334455667788LL );
+	press.set_un4( 0x11223344 );
+	press.set_un8( 0x1122334455667788LL );
+	press.set_f4( 100.00 );
+	press.set_f8( 10000.00 );
+	press.set_str32( "calvin" );
+	press.set_str1024( "XXXXXXXXXXXXXXXX" );
+	
+	printf( "[%d]\n" , press.n4() );
+	printf( "[%lld]\n" , press.n8() );
+	printf( "[%d]\n" , press.un4() );
+	printf( "[%lld]\n" , press.un8() );
+	printf( "[%f]\n" , press.f4() );
+	printf( "[%lf]\n" , press.f8() );
+	printf( "[%s]\n" , press.str32().c_str() );
+	printf( "[%s]\n" , press.str1024().c_str() );
+	
+	for( c = 0 ; c < count ; c++ )
+	{
+		str = press.SerializeAsString() ;
+		press2.ParseFromString( str );
+	}
+	
+	len = str.length() ;
+	printf( "[%d]\n" , len );
+	dump( (char*)str.c_str() , len );
+	
+	printf( "[%d]\n" , press2.n4() );
+	printf( "[%lld]\n" , press2.n8() );
+	printf( "[%d]\n" , press2.un4() );
+	printf( "[%lld]\n" , press2.un8() );
+	printf( "[%f]\n" , press2.f4() );
+	printf( "[%lf]\n" , press2.f8() );
+	printf( "[%s]\n" , press2.str32().c_str() );
+	printf( "[%s]\n" , press2.str1024().c_str() );
+	
+	return 0;
+}
+...
+make
+g++ -I. -c test_protobuf_press.cc
+g++ -o test_protobuf_press test_protobuf_press.o PressProtobuf.pb.cc -L/usr/local/lib -lprotobuf -lpthread
+[/code]
+
+Pressure output :
+
+DirectStruct
+[code]
+time ./test_serialize_compress_press 10000000
+AllTypes2.n4[-287454020]
+AllTypes2.n8[-1234605616436508552]
+AllTypes2.u4[287454020]
+AllTypes2.u8[1234605616436508552]
+AllTypes2.f4[100.000000]
+AllTypes2.f8[10000.000000]
+AllTypes2.str32[calvin]
+AllTypes2.str1024[XXXXXXXXXXXXXXXX]
+Press begin
+Press end
+data compress size[66] - compact size[1092]
+Elapse 1 seconds
+0x0000000000  04 11 22 33 44 08 11 22 33 44 55 66 77 88 04 11 .."3D.."3DUfw...
+0x0000000001  22 33 44 08 11 22 33 44 55 66 77 88 00 00 c8 42 "3D.."3DUfw....B
+0x0000000002  00 00 00 00 00 88 c3 40 01 06 63 61 6c 76 69 6e .......@..calvin
+0x0000000003  01 10 58 58 58 58 58 58 58 58 58 58 58 58 58 58 ..XXXXXXXXXXXXXX
+0x0000000004  58 58                                           XX
+AllTypes2.n4[-287454020]
+AllTypes2.n8[-1234605616436508552]
+AllTypes2.u4[287454020]
+AllTypes2.u8[1234605616436508552]
+AllTypes2.f4[100.000000]
+AllTypes2.f8[10000.000000]
+AllTypes2.str32[calvin]
+AllTypes2.str1024[XXXXXXXXXXXXXXXX]
+
+real    0m1.080s
+user    0m1.074s
+sys     0m0.007s
+[/code]
+
+Google Protocol Buffer
+[code]
+$ time ./test_protobuf_press 10000000
+[-287454020]
+[-1234605616436508552]
+[287454020]
+[1234605616436508552]
+[100.000000]
+[10000.000000]
+[calvin]
+[XXXXXXXXXXXXXXXX]
+[72]
+0x0000000000  10 87 cd 91 92 02 18 8f de b3 d6 8a d1 99 a2 22 ..............."
+0x0000000001  28 c4 e6 88 89 01 30 88 ef 99 ab c5 e8 8c 91 11 (.....0.........
+0x0000000002  3d 00 00 c8 42 41 00 00 00 00 00 88 c3 40 4a 06 =...BA.......@J.
+0x0000000003  63 61 6c 76 69 6e 52 10 58 58 58 58 58 58 58 58 calvinR.XXXXXXXX
+0x0000000004  58 58 58 58 58 58 58 58                         XXXXXXXX
+[-287454020]
+[-1234605616436508552]
+[287454020]
+[1234605616436508552]
+[100.000000]
+[10000.000000]
+[calvin]
+[XXXXXXXXXXXXXXXX]
+
+real    0m4.248s
+user    0m4.235s
+sys     0m0.011s
+[/code]
+
+Pressure conclusion :
+
+* DirectStruct serialization(with compression) packet size is 66 bytes, while Google Protocol Buffer is 72 bytes, DirectStruct narrowly on serialization packet size.
+* DirectStruct serialization/deserialization(with compression) again and again 10 million times costs 1.080s, while Google Protocol Buffer takes 4.248s, DirectStruct victory on serialization/deserialization performance.
+* DirectStruct compilation client application code does not need additional header files and library files, only need IDL_AllTypes2.dsc.c,IDL_AllTypes2.dsc.h what generated by tool 'dsc' , while Google Protocol Buffer needs not only PressProtobuf.pb.cc,PressProtobuf.pb.h , also need a big pile head in /usr/local/include/Google/protobuf under and lib file /usr/local/lib/libprotobuf.a(9MB), also depends on the -lpthread, compile environment is complicated.
 
 6.Finally
 
-Welcome to use, if you have any problems or have a cool idea about DirectStruct, please tell me, thank you ^_^
+Welcome to use DirectStruct, if you have any problems or have a cool idea about DirectStruct, please tell me, thank you ^_^
 
 Project home page : [url]https://github.com/calvinwilliams/DirectStruct[/url]
 Author email      : calvinwilliams.c@gmail.com
