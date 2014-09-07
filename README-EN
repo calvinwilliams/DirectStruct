@@ -521,6 +521,11 @@ CPU    : Intel(R) Core(TM) i3-3240 CPU 3.4GHz/3.4GHz
 Memory : 2GB
 OS     : WINDOWS XP SP3 ( VMWare 6.0.1 ( Red Hat Enterprise Linux Server release 5.4 ) )
 
+Pressure version :
+
+DirectStruct-1.0.3.tar.gz
+protobuf-2.3.0.tar.gz
+
 Pressure structure :
 
 DirectStruct
