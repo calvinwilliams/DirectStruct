@@ -1,5 +1,5 @@
-#ifndef _H_AllTypes_
-#define _H_AllTypes_
+#ifndef _H_AllTypes2_
+#define _H_AllTypes2_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -307,36 +307,30 @@
 	}
 #endif
 
-#define DSCSERIALIZE_COMPACT_BUFSIZE_AllTypes	1100
-#define DSCSERIALIZE_COMPRESS_BUFSIZE_AllTypes	1114
+#define DSCSERIALIZE_COMPACT_BUFSIZE_AllTypes2	1092
+#define DSCSERIALIZE_COMPRESS_BUFSIZE_AllTypes2	1100
 
 typedef struct
 {
-	char	n1 ;
-	short	n2 ;
 	int	n4 ;
 	longlong n8 ;
-	unsigned char	u1 ;
-	unsigned short	u2 ;
 	unsigned int	u4 ;
 	unsigned longlong u8 ;
 	float	f4 ;
 	double	f8 ;
-	char	ch ;
-	unsigned char uch ;
 	char	str32[ 32 + 1 ] ;
 	char	str1024[ 1024 + 1 ] ;
-} AllTypes ;
+} AllTypes2 ;
 
-_WINDLL_FUNC int DSCINIT_AllTypes( AllTypes *pst );
+_WINDLL_FUNC int DSCINIT_AllTypes2( AllTypes2 *pst );
 
-_WINDLL_FUNC int DSCNETORDER_AllTypes( AllTypes *pst );
-_WINDLL_FUNC int DSCHOSTORDER_AllTypes( AllTypes *pst );
+_WINDLL_FUNC int DSCNETORDER_AllTypes2( AllTypes2 *pst );
+_WINDLL_FUNC int DSCHOSTORDER_AllTypes2( AllTypes2 *pst );
 
-_WINDLL_FUNC int DSCSERIALIZE_COMPACT_AllTypes( AllTypes *pst , char *buf , int *p_len );
-_WINDLL_FUNC int DSCDESERIALIZE_COMPACT_AllTypes( char *buf , int *p_len , AllTypes *pst );
+_WINDLL_FUNC int DSCSERIALIZE_COMPACT_AllTypes2( AllTypes2 *pst , char *buf , int *p_len );
+_WINDLL_FUNC int DSCDESERIALIZE_COMPACT_AllTypes2( char *buf , int *p_len , AllTypes2 *pst );
 
-_WINDLL_FUNC int DSCSERIALIZE_COMPRESS_AllTypes( AllTypes *pst , char *buf , int *p_len );
-_WINDLL_FUNC int DSCDESERIALIZE_COMPRESS_AllTypes( char *buf , int *p_len , AllTypes *pst );
+_WINDLL_FUNC int DSCSERIALIZE_COMPRESS_AllTypes2( AllTypes2 *pst , char *buf , int *p_len );
+_WINDLL_FUNC int DSCDESERIALIZE_COMPRESS_AllTypes2( char *buf , int *p_len , AllTypes2 *pst );
 
 #endif

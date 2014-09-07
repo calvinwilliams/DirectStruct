@@ -9,6 +9,7 @@
 #@ c_FILE
 c_FILE		=	\
 			IDL_AllTypes.dsc.c		\
+			IDL_AllTypes2.dsc.c		\
 			IDL_CommHead.dsc.c		\
 			IDL_ResponseHeader.dsc.c	\
 			IDL_BankTransaction.dsc.c	\
@@ -54,8 +55,9 @@ test_serialize_compact	:	test_serialize_compact.o IDL_AllTypes.dsc.o
 test_serialize_compress	:	test_serialize_compress.o IDL_AllTypes.dsc.o
 	$(CC) -o $@ test_serialize_compress.o IDL_AllTypes.dsc.o $(LFLAGS)
 
-test_serialize_compress_press	:	test_serialize_compress_press.o IDL_AllTypes.dsc.o
-	$(CC) -o $@ test_serialize_compress_press.o IDL_AllTypes.dsc.o $(LFLAGS)
+test_serialize_compress_press	:	test_serialize_compress_press.o IDL_AllTypes2.dsc.o
+	# $(CC) -o $@ test_serialize_compress_press.o IDL_AllTypes2.dsc.o $(LFLAGS)
+	gcc -o $@ test_serialize_compress_press.o IDL_AllTypes2.dsc.o $(LFLAGS)
 
 test_trans	:	test_trans.o IDL_CommHead.dsc.o IDL_BankTransaction.dsc.o
 	$(CC) -o $@ test_trans.o IDL_CommHead.dsc.o IDL_BankTransaction.dsc.o $(LFLAGS)

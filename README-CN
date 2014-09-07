@@ -510,70 +510,65 @@ $ cat IDL_ResponseHeader.dsc
 
 5.性能压测
 
+在高性能场合中，数据序列化和反序列化效率很关键，其中主要考察最终报文大小和序列化速度。
+同时，我们还拿了Google公司大名鼎鼎的Protocol Buffer来做对比实验。
+
 压测环境：
+
 CPU      : Intel(R) Core(TM) i3-3240 CPU 3.4GHz/3.4GHz
 内存     : 2GB
 操作系统 : WINDOWS XP SP3 ( VMWare 6.0.1 ( Red Hat Enterprise Linux Server release 5.4 ) )
 
+压测报文结构：
+
+DirectStruct
 [code]
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <time.h>
-
-#include "IDL_AllTypes.dsc.h"
-#include "IDL_AllTypes.dsc.LOG.c"
-
-static void dump( char *buf , int len )
+$ cat IDL_AllTypes2.dsc
+STRUCT	AllTypes2
 {
-	int		i , j ;
-	
-	for( i = 0 ; i < len / 16 + 1 ; i++ )
-	{
-		printf( "0x%010X" , i );
-		
-		printf( " " );
-		
-		for( j = 0 ; j < 16 ; j++ )
-		{
-			if( i*16+j<len )
-			{
-				printf( " %02x" , (unsigned char)*(buf+i*16+j) );
-			}
-			else
-			{
-				printf( "   " );
-			}
-		}
-		
-		printf( " " );
-		
-		for( j = 0 ; j < 16 ; j++ )
-		{
-			if( i*16+j<len )
-			{
-				if( isprint(*(buf+i*16+j)) )
-					putchar( *(buf+i*16+j) );
-				else
-					putchar( '.' );
-			}
-			else
-			{
-				putchar( ' ' );
-			}
-		}
-		
-		putchar( '\n' );
-	}
-	
-	return;
+	INT	4	n4
+	INT	8	n8
+	UINT	4	u4
+	UINT	8	u8
+	FLOAT	4	f4
+	FLOAT	8	f8
+	STRING	32	str32
+	STRING	1024	str1024
 }
+$ dsc -f IDL_AllTypes2.dsc -c
+$ ls
+IDL_AllTypes2.dsc.c	IDL_AllTypes2.dsc.h
+[/code]
 
+Google Protocol Buffer
+[code]
+$ cat PressProtobuf.proto
+message PressProtobuf
+{
+	required sint32		n4 = 2 ;
+	required sint64		n8 =3 ;
+	required int32		un4 = 5 ;
+	required int64		un8 = 6 ;
+	required float		f4 = 7 ;
+	required double		f8 = 8 ;
+	required string		str32 = 9 ;
+	required string		str1024 = 10 ;
+}
+$ protoc -I=. --cpp_out=. PressProtobuf.proto
+$ ls
+PressProtobuf.pb.cc	PressProtobuf.pb.h
+[/code]
+
+压测代码：
+
+DirectStruct
+[code]
+$ cat test/test_serialize_compress_press.c
+...
 int test_serialize_compress_press( long count )
 {
-	AllTypes	st ;
-	char		buf[ DSCSERIALIZE_COMPRESS_BUFSIZE_AllTypes + 1 ] ;
+	AllTypes2	st ;
+	char		buf[ DSCSERIALIZE_COMPRESS_BUFSIZE_AllTypes2 + 1 ] ;
 	int		len ;
 	
 	long		c ;
@@ -581,24 +576,18 @@ int test_serialize_compress_press( long count )
 	
 	int		nret = 0 ;
 	
-	memset( & st , 0x00 , sizeof(AllTypes) );
+	memset( & st , 0x00 , sizeof(AllTypes2) );
 	
-	st.n1 = -0x11 ;
-	st.n2 = -0x1122 ;
 	st.n4 = -0x11223344 ;
 	st.n8 = LL(-0x1122334455667788) ;
-	st.u1 = 0x11 ;
-	st.u2 = 0x1122 ;
 	st.u4 = 0x11223344 ;
 	st.u8 = ULL(0x1122334455667788) ;
 	st.f4 = 100.00 ;
 	st.f8 = 10000.00 ;
-	st.ch = 'A' ;
-	st.uch = 'B' ;
 	strcpy( st.str32 , "calvin" );
 	strcpy( st.str1024 , "XXXXXXXXXXXXXXXX" );
 	
-	DSCLOG_AllTypes( & st );
+	DSCLOG_AllTypes2( & st );
 	
 	printf( "Press begin\n" );
 	time( & t1 );
@@ -606,18 +595,18 @@ int test_serialize_compress_press( long count )
 	for( c = 0 ; c < count ; c++ )
 	{
 		memset( buf , 0x00 , sizeof(buf) );
-		nret = DSCSERIALIZE_COMPRESS_AllTypes( & st , buf , & len ) ;
+		nret = DSCSERIALIZE_COMPRESS_AllTypes2( & st , buf , & len ) ;
 		if( nret )
 		{
-			printf( "DSCSERIALIZE_COMPRESS_AllTypes failed[%d]\n" , nret );
+			printf( "DSCSERIALIZE_COMPRESS_AllTypes2 failed[%d]\n" , nret );
 			return nret;
 		}
 		
-		memset( & st , 0x00 , sizeof(AllTypes) );
-		nret = DSCDESERIALIZE_COMPRESS_AllTypes( buf , & len , & st ) ;
+		memset( & st , 0x00 , sizeof(AllTypes2) );
+		nret = DSCDESERIALIZE_COMPRESS_AllTypes2( buf , & len , & st ) ;
 		if( nret )
 		{
-			printf( "DSCDESERIALIZE_COMPRESS_AllTypes failed[%d]\n" , nret );
+			printf( "DSCDESERIALIZE_COMPRESS_AllTypes2 failed[%d]\n" , nret );
 			return nret;
 		}
 	}
@@ -625,130 +614,157 @@ int test_serialize_compress_press( long count )
 	printf( "Press end\n" );
 	time( & t2 );
 	dt = t2 - t1 ;
-	printf( "data compress size[%d] - compact size[%d]\n" , len , DSCSERIALIZE_COMPACT_BUFSIZE_AllTypes );
+	printf( "data compress size[%d] - compact size[%d]\n" , len , DSCSERIALIZE_COMPACT_BUFSIZE_AllTypes2 );
 	printf( "Elapse %ld seconds\n" , dt );
 	
 	dump( buf , len );
 	
-	DSCLOG_AllTypes( & st );
+	DSCLOG_AllTypes2( & st );
 	
 	return 0;
 }
-
-void usage()
-{
-	printf( "USAGE : test_serialize_compress_press count\n" );
-	return;
-}
-
-int main( int argc , char *argv[] )
-{
-	if( argc == 1 + 1 )
-	{
-		return -test_serialize_compress_press( atol(argv[1]) );
-	}
-	else
-	{
-		usage();
-		exit(7);
-	}
-}
-$ make -f makefile.Linux
-gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c IDL_AllTypes.dsc.c
-gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c test_serialize_compress_press.c
-gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -o test_serialize_compress_press test_serialize_compress_press.o IDL_AllTypes.dsc.o -L.
-$ time ./test_serialize_compress_press 10000000
 ...
-AllTypes.n1[-17]
-AllTypes.n2[-4386]
-AllTypes.n4[-287454020]
-AllTypes.n8[-1234605616436508552]
-AllTypes.u1[17]
-AllTypes.u2[4386]
-AllTypes.u4[287454020]
-AllTypes.u8[1234605616436508552]
-AllTypes.f4[100.000000]
-AllTypes.f8[10000.000000]
-AllTypes.ch[A]
-AllTypes.uch[B]
-AllTypes.str32[calvin]
-AllTypes.str1024[XXXXXXXXXXXXXXXX]
-Press begin
-Press end
-data compress size[74] - compact size[1100]
-Elapse 1 seconds
-0x0000000000  ef ee de 04 11 22 33 44 08 11 22 33 44 55 66 77 ....."3D.."3DUfw
-0x0000000001  88 11 11 22 04 11 22 33 44 08 11 22 33 44 55 66 ...".."3D.."3DUf
-0x0000000002  77 88 00 00 c8 42 00 00 00 00 00 88 c3 40 41 42 w....B.......@AB
-0x0000000003  01 06 63 61 6c 76 69 6e 01 10 58 58 58 58 58 58 ..calvin..XXXXXX
-0x0000000004  58 58 58 58 58 58 58 58 58 58                   XXXXXXXXXX
-AllTypes.n1[-17]
-AllTypes.n2[-4386]
-AllTypes.n4[-287454020]
-AllTypes.n8[-1234605616436508552]
-AllTypes.u1[17]
-AllTypes.u2[4386]
-AllTypes.u4[287454020]
-AllTypes.u8[1234605616436508552]
-AllTypes.f4[100.000000]
-AllTypes.f8[10000.000000]
-AllTypes.ch[A]
-AllTypes.uch[B]
-AllTypes.str32[calvin]
-AllTypes.str1024[XXXXXXXXXXXXXXXX]
-
-real    0m1.002s
-user    0m0.993s
-sys     0m0.009s
+$ make -f makefile
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c IDL_AllTypes2.dsc.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c test_serialize_compress_press.c
+gcc -o test_serialize_compress_press test_serialize_compress_press.o IDL_AllTypes2.dsc.o -L.
 [/code]
 
-对AllTypesAllTypes.n1[-17]
-AllTypes.n2[-4386]
-AllTypes.n4[-287454020]
-AllTypes.n8[-1234605616436508552]
-AllTypes.u1[17]
-AllTypes.u2[4386]
-AllTypes.u4[287454020]
-AllTypes.u8[1234605616436508552]
-AllTypes.f4[100.000000]
-AllTypes.f8[10000.000000]
-AllTypes.ch[A]
-AllTypes.uch[B]
-AllTypes.str32[calvin]
-AllTypes.str1024[XXXXXXXXXXXXXXXX]
+Google Protocol Buffer
+[code]
+$ cat test_protobuf/test_protobuf_press.cc
+...
+int test_protobuf_press( int count )
+{
+	PressProtobuf	press ;
+	PressProtobuf	press2 ;
+	string		str ;
+	int		len ;
+	int		c ;
+	
+	press.set_n4( -0x11223344 );
+	press.set_n8( -0x1122334455667788LL );
+	press.set_un4( 0x11223344 );
+	press.set_un8( 0x1122334455667788LL );
+	press.set_f4( 100.00 );
+	press.set_f8( 10000.00 );
+	press.set_str32( "calvin" );
+	press.set_str1024( "XXXXXXXXXXXXXXXX" );
+	
+	printf( "[%d]\n" , press.n4() );
+	printf( "[%lld]\n" , press.n8() );
+	printf( "[%d]\n" , press.un4() );
+	printf( "[%lld]\n" , press.un8() );
+	printf( "[%f]\n" , press.f4() );
+	printf( "[%lf]\n" , press.f8() );
+	printf( "[%s]\n" , press.str32().c_str() );
+	printf( "[%s]\n" , press.str1024().c_str() );
+	
+	for( c = 0 ; c < count ; c++ )
+	{
+		str = press.SerializeAsString() ;
+		press2.ParseFromString( str );
+	}
+	
+	len = str.length() ;
+	printf( "[%d]\n" , len );
+	dump( (char*)str.c_str() , len );
+	
+	printf( "[%d]\n" , press2.n4() );
+	printf( "[%lld]\n" , press2.n8() );
+	printf( "[%d]\n" , press2.un4() );
+	printf( "[%lld]\n" , press2.un8() );
+	printf( "[%f]\n" , press2.f4() );
+	printf( "[%lf]\n" , press2.f8() );
+	printf( "[%s]\n" , press2.str32().c_str() );
+	printf( "[%s]\n" , press2.str1024().c_str() );
+	
+	return 0;
+}
+...
+make
+g++ -I. -c test_protobuf_press.cc
+g++ -o test_protobuf_press test_protobuf_press.o PressProtobuf.pb.cc -L/usr/local/lib -lprotobuf -lpthread
+[/code]
+
+压测输出：
+
+DirectStruct
+[code]
+time ./test_serialize_compress_press 10000000
+AllTypes2.n4[-287454020]
+AllTypes2.n8[-1234605616436508552]
+AllTypes2.u4[287454020]
+AllTypes2.u8[1234605616436508552]
+AllTypes2.f4[100.000000]
+AllTypes2.f8[10000.000000]
+AllTypes2.str32[calvin]
+AllTypes2.str1024[XXXXXXXXXXXXXXXX]
 Press begin
 Press end
-data compress size[74] - compact size[1100]
+data compress size[66] - compact size[1092]
 Elapse 1 seconds
-0x0000000000  ef ee de 04 11 22 33 44 08 11 22 33 44 55 66 77 ....."3D.."3DUfw
-0x0000000001  88 11 11 22 04 11 22 33 44 08 11 22 33 44 55 66 ...".."3D.."3DUf
-0x0000000002  77 88 00 00 c8 42 00 00 00 00 00 88 c3 40 41 42 w....B.......@AB
-0x0000000003  01 06 63 61 6c 76 69 6e 01 10 58 58 58 58 58 58 ..calvin..XXXXXX
-0x0000000004  58 58 58 58 58 58 58 58 58 58                   XXXXXXXXXX
-AllTypes.n1[-17]
-AllTypes.n2[-4386]
-AllTypes.n4[-287454020]
-AllTypes.n8[-1234605616436508552]
-AllTypes.u1[17]
-AllTypes.u2[4386]
-AllTypes.u4[287454020]
-AllTypes.u8[1234605616436508552]
-AllTypes.f4[100.000000]
-AllTypes.f8[10000.000000]
-AllTypes.ch[A]
-AllTypes.uch[B]
-AllTypes.str32[calvin]
-AllTypes.str1024[XXXXXXXXXXXXXXXX]
+0x0000000000  04 11 22 33 44 08 11 22 33 44 55 66 77 88 04 11 .."3D.."3DUfw...
+0x0000000001  22 33 44 08 11 22 33 44 55 66 77 88 00 00 c8 42 "3D.."3DUfw....B
+0x0000000002  00 00 00 00 00 88 c3 40 01 06 63 61 6c 76 69 6e .......@..calvin
+0x0000000003  01 10 58 58 58 58 58 58 58 58 58 58 58 58 58 58 ..XXXXXXXXXXXXXX
+0x0000000004  58 58                                           XX
+AllTypes2.n4[-287454020]
+AllTypes2.n8[-1234605616436508552]
+AllTypes2.u4[287454020]
+AllTypes2.u8[1234605616436508552]
+AllTypes2.f4[100.000000]
+AllTypes2.f8[10000.000000]
+AllTypes2.str32[calvin]
+AllTypes2.str1024[XXXXXXXXXXXXXXXX]
 
-real    0m1.002s
-user    0m0.993s
-sys     0m0.009s
+real    0m1.080s
+user    0m1.074s
+sys     0m0.007s
+[/code]
 
-对AllTypes结构所有字段进行填充，然后反复序列化/反序列化(带压缩)1000万次，整个过程总耗时大约1秒。
+Google Protocol Buffer
+[code]
+$ time ./test_protobuf_press 10000000
+[-287454020]
+[-1234605616436508552]
+[287454020]
+[1234605616436508552]
+[100.000000]
+[10000.000000]
+[calvin]
+[XXXXXXXXXXXXXXXX]
+[72]
+0x0000000000  10 87 cd 91 92 02 18 8f de b3 d6 8a d1 99 a2 22 ..............."
+0x0000000001  28 c4 e6 88 89 01 30 88 ef 99 ab c5 e8 8c 91 11 (.....0.........
+0x0000000002  3d 00 00 c8 42 41 00 00 00 00 00 88 c3 40 4a 06 =...BA.......@J.
+0x0000000003  63 61 6c 76 69 6e 52 10 58 58 58 58 58 58 58 58 calvinR.XXXXXXXX
+0x0000000004  58 58 58 58 58 58 58 58                         XXXXXXXX
+[-287454020]
+[-1234605616436508552]
+[287454020]
+[1234605616436508552]
+[100.000000]
+[10000.000000]
+[calvin]
+[XXXXXXXXXXXXXXXX]
+
+real    0m4.248s
+user    0m4.235s
+sys     0m0.011s
+[/code]
+
+压测结论：
+
+* DirectStruct序列化（带压缩）后的报文大小66字节，而Google Protocol Buffer为72字节，DirectStruct在序列化和压缩报文大小上险胜。
+* DirectStruct反复序列化/反序列化（带压缩）1000万次总耗时1.080s，而Google Protocol Buffer总耗时4.248s，DirectStruct在序列化性能上完胜。
+* DirectStruct编译客户应用代码时不需要额外的头文件和库文件，只需要工具dsc生成的IDL_AllTypes2.dsc.c、IDL_AllTypes2.dsc.h即可，而Google Protocol Buffer不仅需要PressProtobuf.pb.cc、PressProtobuf.pb.h，还需要/usr/local/include/google/protobuf下的一大堆头文件以及/usr/local/lib/libprotobuf.a(9MB)，还依赖于-lpthread，编译环境复杂。
+
+是不是越看越心动了？那就赶紧下载来玩玩吧
 
 6.最后
 
-欢迎使用，如果你使用中碰到了问题或者有更酷的想法请告诉我，谢谢 ^_^
+欢迎使用DirectStruct，如果你使用中碰到了问题或者有更酷的想法请告诉我，谢谢 ^_^
 
 首页传送门 : [url]http://git.oschina.net/calvinwilliams/DirectStruct[/url]
 作者邮箱   : calvinwilliams.c@gmail.com
