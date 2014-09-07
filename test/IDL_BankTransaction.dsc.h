@@ -308,7 +308,7 @@
 #endif
 
 #define DSCSERIALIZE_COMPACT_BUFSIZE_BankTransaction	2890
-#define DSCSERIALIZE_COMPRESS_BUFSIZE_BankTransaction	2891
+#define DSCSERIALIZE_COMPRESS_BUFSIZE_BankTransaction	2951
 
 typedef struct
 {

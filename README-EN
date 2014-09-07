@@ -302,6 +302,16 @@ AllTypes.str32[calvin]
 AllTypes.str1024[XXXXXXXXXXXXXXXX]
 [/code]
 
+COMPACT serialization is to put all fields values in the memory image to a large data block, end-to-end, without filling space, and the integer value do byte order processing. Such as
+STRUCT struct_name
+{
+	INT	4	n4
+	STRING	256	str256
+}
+The layout of the serialized
+n4(4bytes)+str256(256bytes)
+total 260 bytes
+
 Using serialization function with compressed make data block smaller.
 $ cat test_serialize_compress.c
 [code]
@@ -411,6 +421,30 @@ AllTypes.str1024[XXXXXXXXXXXXXXXX]
 
 This case with compression , data block is 74 bytes , without compression is 1100 bytes.
 
+The internal principle of COMPRESS serialization is on the basis of the compact serialization , and certain types of fields do compression transformation processing. 
+INT 4 types placed front header byte, left four bits, at present only is negative sign (positive for 0, negative for 1), four right bits for actual storage length, such as a value of network byte order is 0x00120034, actual storage of 0x1234, plus the front head, a total of 3 bytes 
+0x02 0x12 0x34
+Value -0x1234 is also expressed in 3 bytes 
+0x12 0x12 0x34
+INT 8 similar INT 4
+UINT similar INT
+STRING n type placed front UINT 4 field record , Such as "ABC", the actual length is 3 bytes, front UINT 4 fields 0x01 0x03, expressed in 5 bytes in total 
+0x01 0x03 0x61 0x62 0x63
+Other field type without compression
+
+For example
+STRUCT struct_name
+{
+	INT	4	n4
+	STRING	256	str256
+}
+for
+n4=0x3456
+str256="abc"
+Compression serialized data 
+0x02 0x34 0x56 0x01 0x05 0x61 0x62 0x63
+Total 8 bytes, is much shorter than compact serialization? this can save more traffic in the communication data exchange.
+
 4.DirectStruct struct definition syntax
 
 Each structure or embedded substructure definition format
@@ -477,7 +511,7 @@ $ cat IDL_ResponseHeader.dsc
 	}
 [/code]
 
-5.Performance pressure
+5.Performance
 
 Pressure environment :
 CPU    : Intel(R) Core(TM) i3-3240 CPU 3.4GHz/3.4GHz

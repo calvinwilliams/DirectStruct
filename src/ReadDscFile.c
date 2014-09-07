@@ -175,7 +175,10 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 					}
 					
 					pmsginfo->struct_length += struct_len ;
-					pmsginfo->field_count += pst->field_count * pst->array_size ;
+					if( pst->array_size == 0 )
+						pmsginfo->field_count += pst->field_count ;
+					else
+						pmsginfo->field_count += pst->field_count * pst->array_size ;
 					
 					continue;
 				}

@@ -58,7 +58,7 @@ int test()
 {
 	CommHead		head ;
 	BankTransaction		trans ;
-	char			buf[ DSCSERIALIZE_COMPRESS_BUFSIZE_CommHead + DSCSERIALIZE_COMPACT_BUFSIZE_BankTransaction + 1 ] ;
+	char			buf[ DSCSERIALIZE_COMPACT_BUFSIZE_CommHead + DSCSERIALIZE_COMPRESS_BUFSIZE_BankTransaction + 1 ] ;
 	int			len , total_len ;
 	
 	int			nret = 0 ;
