@@ -26,8 +26,8 @@ DirectStruct生成了哪些自动化代码？
 2.编译安装
 
 for Linux
-$ tar xvzf dsc-1.0.2.tar.gz
-$ cd dsc-1.0.0/src
+$ tar xvzf dsc-1.0.3.tar.gz
+$ cd dsc-1.0.3/src
 $ su
 # make -f makefile.Linux clean
 rm -f util.o

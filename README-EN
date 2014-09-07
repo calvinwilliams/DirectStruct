@@ -26,8 +26,8 @@ Why use DirectStruct ?
 2.Install with compiling
 
 for Linux
-$ tar xvzf dsc-1.0.2.tar.gz
-$ cd dsc-1.0.0/src
+$ tar xvzf dsc-1.0.3.tar.gz
+$ cd dsc-1.0.3/src
 $ su
 # make -f makefile.Linux clean
 rm -f util.o
