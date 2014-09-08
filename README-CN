@@ -70,9 +70,6 @@ STRUCT	AllTypes
 	STRING	32	str32
 	STRING	1024	str1024
 }
-[/code]
-
-[code]
 $ dsc -f IDL_AllTypes.dsc -c
 STRUCT AllTypes
         INT 1 n1
@@ -457,8 +454,10 @@ STRUCT	结构名	ARRAY	数组数量
 [/code]
 其中字段类型及长度目前支持
 INT 1,2,4,8 ( 8位至64位整型 )
+UINT 1,2,4,8
 FLOAT 4,8
 CHAR 1
+UCHAR 1
 STRING (N)
 DEFAULT及后是可选的
 
