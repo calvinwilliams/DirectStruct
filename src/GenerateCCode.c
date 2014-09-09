@@ -30,68 +30,66 @@ int GenerateCCode_h( struct CommandParameter *pcmdparam , int depth , struct Str
 		
 		for( pfldinfo = pmsginfo->field_list ; pfldinfo ; pfldinfo = pfldinfo->next_field )
 		{
-			fprintabs( fp_dsc_h , depth );
-			
 			if( STRCMP( pfldinfo->field_type , == , "INT" ) )
 			{
 				if( pfldinfo->field_len == 1 )
 				{
-					fprintf( fp_dsc_h , "	char	%s ;\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_h , depth ); fprintf( fp_dsc_h , "	char	%s ;\n" , pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 2 )
 				{
-					fprintf( fp_dsc_h , "	short	%s ;\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_h , depth ); fprintf( fp_dsc_h , "	short	%s ;\n" , pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_h , "	int	%s ;\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_h , depth ); fprintf( fp_dsc_h , "	int	%s ;\n" , pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_h , "	longlong %s ;\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_h , depth ); fprintf( fp_dsc_h , "	longlong %s ;\n" , pfldinfo->field_name );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "UINT" ) )
 			{
 				if( pfldinfo->field_len == 1 )
 				{
-					fprintf( fp_dsc_h , "	unsigned char	%s ;\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_h , depth ); fprintf( fp_dsc_h , "	unsigned char	%s ;\n" , pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 2 )
 				{
-					fprintf( fp_dsc_h , "	unsigned short	%s ;\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_h , depth ); fprintf( fp_dsc_h , "	unsigned short	%s ;\n" , pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_h , "	unsigned int	%s ;\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_h , depth ); fprintf( fp_dsc_h , "	unsigned int	%s ;\n" , pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_h , "	unsigned longlong %s ;\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_h , depth ); fprintf( fp_dsc_h , "	unsigned longlong %s ;\n" , pfldinfo->field_name );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "FLOAT" ) )
 			{
 				if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_h , "	float	%s ;\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_h , depth ); fprintf( fp_dsc_h , "	float	%s ;\n" , pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_h , "	double	%s ;\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_h , depth ); fprintf( fp_dsc_h , "	double	%s ;\n" , pfldinfo->field_name );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "CHAR" ) )
 			{
-				fprintf( fp_dsc_h , "	char	%s ;\n" , pfldinfo->field_name );
+				fprintabs( fp_dsc_h , depth ); fprintf( fp_dsc_h , "	char	%s ;\n" , pfldinfo->field_name );
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "UCHAR" ) )
 			{
-				fprintf( fp_dsc_h , "	unsigned char %s ;\n" , pfldinfo->field_name );
+				fprintabs( fp_dsc_h , depth ); fprintf( fp_dsc_h , "	unsigned char %s ;\n" , pfldinfo->field_name );
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "STRING" ) )
 			{
-				fprintf( fp_dsc_h , "	char	%s[ %d + 1 ] ;\n" , pfldinfo->field_name , pfldinfo->field_len );
+				fprintabs( fp_dsc_h , depth ); fprintf( fp_dsc_h , "	char	%s[ %d + 1 ] ;\n" , pfldinfo->field_name , pfldinfo->field_len );
 			}
 		}
 		
@@ -159,68 +157,66 @@ static int GenerateCCode_c_DSCINIT( struct CommandParameter *pcmdparam , int dep
 			if( STRCMP( pfldinfo->init_default , == , "" ) )
 				continue;
 			
-			fprintabs( fp_dsc_c , depth );
-			
 			if( STRCMP( pfldinfo->field_type , == , "INT" ) )
 			{
 				if( pfldinfo->field_len == 1 )
 				{
-					fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname , pfldinfo->field_name , pfldinfo->init_default );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname,pfldinfo->field_name , pfldinfo->init_default );
 				}
 				else if( pfldinfo->field_len == 2 )
 				{
-					fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname , pfldinfo->field_name , pfldinfo->init_default );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname,pfldinfo->field_name , pfldinfo->init_default );
 				}
 				else if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname , pfldinfo->field_name , pfldinfo->init_default );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname,pfldinfo->field_name , pfldinfo->init_default );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname , pfldinfo->field_name , pfldinfo->init_default );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname,pfldinfo->field_name , pfldinfo->init_default );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "INT" ) )
 			{
 				if( pfldinfo->field_len == 1 )
 				{
-					fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname , pfldinfo->field_name , pfldinfo->init_default );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname,pfldinfo->field_name , pfldinfo->init_default );
 				}
 				else if( pfldinfo->field_len == 2 )
 				{
-					fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname , pfldinfo->field_name , pfldinfo->init_default );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname,pfldinfo->field_name , pfldinfo->init_default );
 				}
 				else if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname , pfldinfo->field_name , pfldinfo->init_default );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname,pfldinfo->field_name , pfldinfo->init_default );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname , pfldinfo->field_name , pfldinfo->init_default );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname,pfldinfo->field_name , pfldinfo->init_default );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "FLOAT" ) )
 			{
 				if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname , pfldinfo->field_name , pfldinfo->init_default );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname,pfldinfo->field_name , pfldinfo->init_default );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname , pfldinfo->field_name , pfldinfo->init_default );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname,pfldinfo->field_name , pfldinfo->init_default );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "CHAR" ) )
 			{
-				fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname , pfldinfo->field_name , pfldinfo->init_default );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname,pfldinfo->field_name , pfldinfo->init_default );
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "UCHAR" ) )
 			{
-				fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname , pfldinfo->field_name , pfldinfo->init_default );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname,pfldinfo->field_name , pfldinfo->init_default );
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "STRING" ) )
 			{
-				fprintf( fp_dsc_c , "	strcpy( %s%s , %s );\n" , pathname , pfldinfo->field_name , pfldinfo->init_default );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	strcpy( %s%s , %s );\n" , pathname,pfldinfo->field_name , pfldinfo->init_default );
 			}
 		}
 		
@@ -274,36 +270,45 @@ static int GenerateCCode_c_DSCNETORDER( struct CommandParameter *pcmdparam , int
 		
 		for( pfldinfo = pmsginfo->field_list ; pfldinfo ; pfldinfo = pfldinfo->next_field )
 		{
-			fprintabs( fp_dsc_c , depth );
-			
 			if( STRCMP( pfldinfo->field_type , == , "INT" ) )
 			{
 				if( pfldinfo->field_len == 2 )
 				{
-					fprintf( fp_dsc_c , "	%s%s=(short)htons((unsigned short)(%s%s));\n" , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s=(short)htons((unsigned short)(%s%s));\n" , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_c , "	%s%s=(int)htonl((unsigned int)(%s%s));\n" , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s=(int)htonl((unsigned int)(%s%s));\n" , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_c , "	%s%s=(longlong)HTONLL((unsigned longlong)(%s%s));\n" , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	__HTONLL(%s%s);\n" , pathname,pfldinfo->field_name );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "UINT" ) )
 			{
 				if( pfldinfo->field_len == 2 )
 				{
-					fprintf( fp_dsc_c , "	%s%s=htons(%s%s);\n" , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s=htons(%s%s);\n" , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_c , "	%s%s=htonl(%s%s);\n" , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s=htonl(%s%s);\n" , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_c , "	%s%s=HTONLL(%s%s);\n" , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	__HTONLL(%s%s);\n" , pathname,pfldinfo->field_name );
+				}
+			}
+			else if( STRCMP( pfldinfo->field_type , == , "FLOAT" ) )
+			{
+				if( pfldinfo->field_len == 4 )
+				{
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	__HTONF(%s%s);\n" , pathname,pfldinfo->field_name );
+				}
+				else if( pfldinfo->field_len == 8 )
+				{
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	__HTONLF(%s%s);\n" , pathname,pfldinfo->field_name );
 				}
 			}
 		}
@@ -358,36 +363,45 @@ static int GenerateCCode_c_DSCHOSTORDER( struct CommandParameter *pcmdparam , in
 		
 		for( pfldinfo = pmsginfo->field_list ; pfldinfo ; pfldinfo = pfldinfo->next_field )
 		{
-			fprintabs( fp_dsc_c , depth );
-			
 			if( STRCMP( pfldinfo->field_type , == , "INT" ) )
 			{
 				if( pfldinfo->field_len == 2 )
 				{
-					fprintf( fp_dsc_c , "	%s%s=(short)ntohs((unsigned short)(%s%s));\n" , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s=(short)ntohs((unsigned short)(%s%s));\n" , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_c , "	%s%s=(int)ntohl((unsigned int)(%s%s));\n" , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s=(int)ntohl((unsigned int)(%s%s));\n" , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_c , "	%s%s=(longlong)NTOHLL((unsigned longlong)(%s%s));\n" , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	__NTOHLL(%s%s);\n" , pathname,pfldinfo->field_name );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "UINT" ) )
 			{
 				if( pfldinfo->field_len == 2 )
 				{
-					fprintf( fp_dsc_c , "	%s%s=ntohs(%s%s);\n" , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s=ntohs(%s%s);\n" , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_c , "	%s%s=ntohl(%s%s);\n" , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s=ntohl(%s%s);\n" , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_c , "	%s%s=NTOHLL(%s%s);\n" , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	__NTOHLL(%s%s);\n" , pathname,pfldinfo->field_name );
+				}
+			}
+			else if( STRCMP( pfldinfo->field_type , == , "FLOAT" ) )
+			{
+				if( pfldinfo->field_len == 4 )
+				{
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	__NTOHF(%s%s);\n" , pathname,pfldinfo->field_name );
+				}
+				else if( pfldinfo->field_len == 8 )
+				{
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	__NTOHLF(%s%s);\n" , pathname,pfldinfo->field_name );
 				}
 			}
 		}
@@ -442,113 +456,98 @@ static int GenerateCCode_c_DSCSERIALIZE_COMPACT( struct CommandParameter *pcmdpa
 		
 		for( pfldinfo = pmsginfo->field_list ; pfldinfo ; pfldinfo = pfldinfo->next_field )
 		{
-			fprintabs( fp_dsc_c , depth );
-			
 			if( STRCMP( pfldinfo->field_type , == , "INT" ) )
 			{
 				if( pfldinfo->field_len == 1 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	(*ptr) = %s%s ;\n" , pathname,pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len++; ptr++;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	(*ptr) = %s%s ;\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len++; ptr++;\n" );
 				}
 				else if( pfldinfo->field_len == 2 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	{ short s; s=(short)htons((unsigned short)(%s%s)); memcpy( ptr , (char*)&s , 2 ); }\n" , pathname,pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=2; ptr+=2;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{ short s; s=(short)htons((unsigned short)(%s%s)); memcpy( ptr , (char*)&s , 2 ); }\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=2; ptr+=2;\n" );
 				}
 				else if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	{ int i; i=(int)htonl((unsigned int)(%s%s)); memcpy( ptr , (char*)&i , 4 ); }\n" , pathname,pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=4; ptr+=4;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{ int i; i=(int)htonl((unsigned int)(%s%s)); memcpy( ptr , (char*)&i , 4 ); }\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=4; ptr+=4;\n" );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	{ longlong ll; ll=(longlong)HTONLL((unsigned longlong)(%s%s)); memcpy( ptr , (char*)&ll , 8 ); }\n" , pathname,pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{ longlong ll=%s%s; __HTONLL(ll); memcpy( ptr , (char*)&ll , 8 ); }\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "UINT" ) )
 			{
 				if( pfldinfo->field_len == 1 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	(*ptr) = (char)%s%s ;\n" , pathname,pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len++; ptr++;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	(*ptr) = (char)%s%s ;\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len++; ptr++;\n" );
 				}
 				else if( pfldinfo->field_len == 2 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	{ short s; s=htons(%s%s); memcpy( ptr , (char*)&s , 2 ); }\n" , pathname,pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=2; ptr+=2;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{ short s; s=htons(%s%s); memcpy( ptr , (char*)&s , 2 ); }\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=2; ptr+=2;\n" );
 				}
 				else if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	{ int i; i=htonl(%s%s); memcpy( ptr , (char*)&i , 4 ); }\n" , pathname,pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=4; ptr+=4;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{ int i; i=htonl(%s%s); memcpy( ptr , (char*)&i , 4 ); }\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=4; ptr+=4;\n" );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	{ longlong ll; ll=HTONLL(%s%s); memcpy( ptr , (char*)&ll , 8 ); }\n" , pathname,pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{ longlong ll=%s%s; __HTONLL(ll); memcpy( ptr , (char*)&ll , 8 ); }\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "FLOAT" ) )
 			{
 				if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	memcpy( ptr , (char*)&(%s%s) , 4 );\n" , pathname,pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=4; ptr+=4;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{ float f=%s%s; __HTONF(f); memcpy( ptr , (char*)&f , 4 ); }\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=4; ptr+=4;\n" );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	memcpy( ptr , (char*)&(%s%s) , 8 );\n" , pathname,pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{ double d=%s%s; __HTONLF(d); memcpy( ptr , (char*)&d , 8 ); }\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "CHAR" ) )
 			{
 				if( pfldinfo->field_len == 1 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	(*ptr) = %s%s ;\n" , pathname,pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len++; ptr++;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	(*ptr) = %s%s ;\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len++; ptr++;\n" );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "UCHAR" ) )
 			{
 				if( pfldinfo->field_len == 1 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	(*ptr) = (char)%s%s ;\n" , pathname,pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len++; ptr++;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	(*ptr) = (char)%s%s ;\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len++; ptr++;\n" );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "STRING" ) )
 			{
-				fprintf( fp_dsc_c , "	\n" );
-				fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-				fprintf( fp_dsc_c , "	memcpy( ptr , %s%s , %d );\n" , pathname,pfldinfo->field_name , pfldinfo->field_len );
-				fprintf( fp_dsc_c , "	len+=%d; ptr+=%d;\n" , pfldinfo->field_len , pfldinfo->field_len );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	memcpy( ptr , %s%s , %d );\n" , pathname,pfldinfo->field_name , pfldinfo->field_len );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=%d; ptr+=%d;\n" , pfldinfo->field_len , pfldinfo->field_len );
 			}
 		}
 		
@@ -602,113 +601,98 @@ static int GenerateCCode_c_DSCDESERIALIZE_COMPACT( struct CommandParameter *pcmd
 		
 		for( pfldinfo = pmsginfo->field_list ; pfldinfo ; pfldinfo = pfldinfo->next_field )
 		{
-			fprintabs( fp_dsc_c , depth );
-			
 			if( STRCMP( pfldinfo->field_type , == , "INT" ) )
 			{
 				if( pfldinfo->field_len == 1 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	%s%s = (*ptr) ;\n" , pathname , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len++; ptr++;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s = (*ptr) ;\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len++; ptr++;\n" );
 				}
 				else if( pfldinfo->field_len == 2 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 2 ); %s%s=(short)htons((unsigned short)(%s%s));\n" , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=2; ptr+=2;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 2 ); %s%s=(short)htons((unsigned short)(%s%s));\n" , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=2; ptr+=2;\n" );
 				}
 				else if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 4 ); %s%s=(int)htonl((unsigned int)(%s%s));\n" , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=4; ptr+=4;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 4 ); %s%s=(int)htonl((unsigned int)(%s%s));\n" , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=4; ptr+=4;\n" );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 8 ); %s%s=(longlong)HTONLL((unsigned longlong)(%s%s));\n" , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 8 ); __HTONLL(%s%s);\n" , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "UINT" ) )
 			{
 				if( pfldinfo->field_len == 1 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	%s%s = (unsigned char)(*ptr) ;\n" , pathname , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len++; ptr++;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s = (unsigned char)(*ptr) ;\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len++; ptr++;\n" );
 				}
 				else if( pfldinfo->field_len == 2 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 2 ); %s%s=htons(%s%s);\n" , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=2; ptr+=2;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 2 ); %s%s=htons(%s%s);\n" , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=2; ptr+=2;\n" );
 				}
 				else if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 4 ); %s%s=htonl(%s%s);\n" , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=4; ptr+=4;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 4 ); %s%s=htonl(%s%s);\n" , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=4; ptr+=4;\n" );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 8 ); %s%s=HTONLL(%s%s);\n" , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 8 ); __HTONLL(%s%s);\n" , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "FLOAT" ) )
 			{
 				if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 4 );\n" , pathname , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=4; ptr+=4;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 4 ); __NTOHF(%s%s);\n" , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=4; ptr+=4;\n" );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 8 );\n" , pathname , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 8 ); __NTOHLF(%s%s);\n" , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "CHAR" ) )
 			{
 				if( pfldinfo->field_len == 1 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	%s%s = (char)(*ptr) ;\n" , pathname , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len++; ptr++;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s = (char)(*ptr) ;\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len++; ptr++;\n" );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "UCHAR" ) )
 			{
 				if( pfldinfo->field_len == 1 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	%s%s = (unsigned char)(*ptr) ;\n" , pathname , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len++; ptr++;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s = (unsigned char)(*ptr) ;\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len++; ptr++;\n" );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "STRING" ) )
 			{
-				fprintf( fp_dsc_c , "	\n" );
-				fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-				fprintf( fp_dsc_c , "	memcpy( %s%s , ptr , %d );\n" , pathname , pfldinfo->field_name , pfldinfo->field_len );
-				fprintf( fp_dsc_c , "	len+=%d; ptr+=%d;\n" , pfldinfo->field_len , pfldinfo->field_len );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	memcpy( %s%s , ptr , %d );\n" , pathname,pfldinfo->field_name , pfldinfo->field_len );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=%d; ptr+=%d;\n" , pfldinfo->field_len , pfldinfo->field_len );
 			}
 		}
 		
@@ -762,113 +746,98 @@ static int GenerateCCode_c_DSCSERIALIZE_COMPRESS( struct CommandParameter *pcmdp
 		
 		for( pfldinfo = pmsginfo->field_list ; pfldinfo ; pfldinfo = pfldinfo->next_field )
 		{
-			fprintabs( fp_dsc_c , depth );
-			
 			if( STRCMP( pfldinfo->field_type , == , "INT" ) )
 			{
 				if( pfldinfo->field_len == 1 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	(*ptr) = %s%s ;\n" , pathname,pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len++; ptr++;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	(*ptr) = %s%s ;\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len++; ptr++;\n" );
 				}
 				else if( pfldinfo->field_len == 2 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	{ short s; s=(short)htons((unsigned short)(%s%s)); memcpy( ptr , (char*)&s , 2 ); }\n" , pathname,pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=2; ptr+=2;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{ short s; s=(short)htons((unsigned short)(%s%s)); memcpy( ptr , (char*)&s , 2 ); }\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=2; ptr+=2;\n" );
 				}
 				else if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	COMPRESS_INT4( %s%s , ptr , len )\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	COMPRESS_INT4( %s%s , ptr , len )\n" , pathname,pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	COMPRESS_INT8( %s%s , ptr , len )\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	COMPRESS_INT8( %s%s , ptr , len )\n" , pathname,pfldinfo->field_name );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "UINT" ) )
 			{
 				if( pfldinfo->field_len == 1 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	(*ptr) = (char)%s%s ;\n" , pathname,pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len++; ptr++;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	(*ptr) = (char)%s%s ;\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len++; ptr++;\n" );
 				}
 				else if( pfldinfo->field_len == 2 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	{ short s; s=htons(%s%s); memcpy( ptr , (char*)&s , 2 ); }\n" , pathname,pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=2; ptr+=2;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{ short s; s=htons(%s%s); memcpy( ptr , (char*)&s , 2 ); }\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=2; ptr+=2;\n" );
 				}
 				else if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	COMPRESS_UINT4( %s%s , ptr , len )\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	COMPRESS_UINT4( %s%s , ptr , len )\n" , pathname,pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	COMPRESS_UINT8( %s%s , ptr , len )\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	COMPRESS_UINT8( %s%s , ptr , len )\n" , pathname,pfldinfo->field_name );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "FLOAT" ) )
 			{
 				if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	memcpy( ptr , (char*)&(%s%s) , 4 );\n" , pathname,pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=4; ptr+=4;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{ float f=%s%s; __HTONF(f); memcpy( ptr , (char*)&f , 4 ); }\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=4; ptr+=4;\n" );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	memcpy( ptr , (char*)&(%s%s) , 8 );\n" , pathname,pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{ double d=%s%s; __HTONLF(d); memcpy( ptr , (char*)&d , 8 ); }\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "CHAR" ) )
 			{
 				if( pfldinfo->field_len == 1 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	(*ptr) = %s%s ;\n" , pathname,pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len++; ptr++;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	(*ptr) = %s%s ;\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len++; ptr++;\n" );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "UCHAR" ) )
 			{
 				if( pfldinfo->field_len == 1 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	(*ptr) = (char)%s%s ;\n" , pathname,pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len++; ptr++;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	(*ptr) = (char)%s%s ;\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len++; ptr++;\n" );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "STRING" ) )
 			{
-				fprintf( fp_dsc_c , "	\n" );
-				fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-				fprintf( fp_dsc_c , "	{\n" );
-				fprintf( fp_dsc_c , "	unsigned int size=strlen(%s%s);\n" , pathname,pfldinfo->field_name );
-				fprintf( fp_dsc_c , "	COMPRESS_UINT4( size , ptr , len )\n" );
-				fprintf( fp_dsc_c , "	memcpy( ptr , %s%s , size );\n" , pathname,pfldinfo->field_name );
-				fprintf( fp_dsc_c , "	len+=size; ptr+=size;\n" );
-				fprintf( fp_dsc_c , "	}\n" );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{\n" );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	unsigned int size=strlen(%s%s);\n" , pathname,pfldinfo->field_name );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	COMPRESS_UINT4( size , ptr , len )\n" );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	memcpy( ptr , %s%s , size );\n" , pathname,pfldinfo->field_name );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=size; ptr+=size;\n" );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	}\n" );
 			}
 		}
 		
@@ -922,113 +891,98 @@ static int GenerateCCode_c_DSCDESERIALIZE_COMPRESS( struct CommandParameter *pcm
 		
 		for( pfldinfo = pmsginfo->field_list ; pfldinfo ; pfldinfo = pfldinfo->next_field )
 		{
-			fprintabs( fp_dsc_c , depth );
-			
 			if( STRCMP( pfldinfo->field_type , == , "INT" ) )
 			{
 				if( pfldinfo->field_len == 1 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	%s%s = (*ptr) ;\n" , pathname , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len++; ptr++;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s = (*ptr) ;\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len++; ptr++;\n" );
 				}
 				else if( pfldinfo->field_len == 2 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 2 ); %s%s=(short)htons((unsigned short)(%s%s));\n" , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=2; ptr+=2;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 2 ); %s%s=(short)htons((unsigned short)(%s%s));\n" , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=2; ptr+=2;\n" );
 				}
 				else if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	UNCOMPRESS_INT4( ptr , len , %s%s )\n" , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	UNCOMPRESS_INT4( ptr , len , %s%s )\n" , pathname,pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	UNCOMPRESS_INT8( ptr , len , %s%s )\n" , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	UNCOMPRESS_INT8( ptr , len , %s%s )\n" , pathname,pfldinfo->field_name );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "UINT" ) )
 			{
 				if( pfldinfo->field_len == 1 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	%s%s = (unsigned char)(*ptr) ;\n" , pathname , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len++; ptr++;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s = (unsigned char)(*ptr) ;\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len++; ptr++;\n" );
 				}
 				else if( pfldinfo->field_len == 2 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 2 ); %s%s=htons(%s%s);\n" , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name , pathname , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=2; ptr+=2;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 2 ); %s%s=htons(%s%s);\n" , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=2; ptr+=2;\n" );
 				}
 				else if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	UNCOMPRESS_UINT4( ptr , len , %s%s )\n" , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	UNCOMPRESS_UINT4( ptr , len , %s%s )\n" , pathname,pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	UNCOMPRESS_UINT8( ptr , len , %s%s )\n" , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	UNCOMPRESS_UINT8( ptr , len , %s%s )\n" , pathname,pfldinfo->field_name );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "FLOAT" ) )
 			{
 				if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 4 );\n" , pathname , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=4; ptr+=4;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 4 ); __NTOHF(%s%s);\n" , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=4; ptr+=4;\n" );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 8 );\n" , pathname , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 8 ); __NTOHLF(%s%s);\n" , pathname,pfldinfo->field_name , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "CHAR" ) )
 			{
 				if( pfldinfo->field_len == 1 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	%s%s = (char)(*ptr) ;\n" , pathname , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len++; ptr++;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s = (char)(*ptr) ;\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len++; ptr++;\n" );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "UCHAR" ) )
 			{
 				if( pfldinfo->field_len == 1 )
 				{
-					fprintf( fp_dsc_c , "	\n" );
-					fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	%s%s = (unsigned char)(*ptr) ;\n" , pathname , pfldinfo->field_name );
-					fprintf( fp_dsc_c , "	len++; ptr++;\n" );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s = (unsigned char)(*ptr) ;\n" , pathname,pfldinfo->field_name );
+					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len++; ptr++;\n" );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "STRING" ) )
 			{
-				fprintf( fp_dsc_c , "	\n" );
-				fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
-				fprintf( fp_dsc_c , "	{\n" );
-				fprintf( fp_dsc_c , "	unsigned int size ;\n" );
-				fprintf( fp_dsc_c , "	UNCOMPRESS_UINT4( ptr , len , size )\n" );
-				fprintf( fp_dsc_c , "	memcpy( %s%s , ptr , size );\n" , pathname , pfldinfo->field_name );
-				fprintf( fp_dsc_c , "	len+=size; ptr+=size;\n" );
-				fprintf( fp_dsc_c , "	}\n" );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfldinfo->field_name );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{\n" );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	unsigned int size ;\n" );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	UNCOMPRESS_UINT4( ptr , len , size )\n" );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	memcpy( %s%s , ptr , size );\n" , pathname,pfldinfo->field_name );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=size; ptr+=size;\n" );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	}\n" );
 			}
 		}
 		
@@ -1086,68 +1040,66 @@ static int GenerateCCode_LOG_c( struct CommandParameter *pcmdparam , int depth ,
 		
 		for( pfldinfo = pmsginfo->field_list ; pfldinfo ; pfldinfo = pfldinfo->next_field )
 		{
-			fprintabs( fp_dsc_LOG_c , depth );
-			
 			if( STRCMP( pfldinfo->field_type , == , "INT" ) )
 			{
 				if( pfldinfo->field_len == 1 )
 				{
-					fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%d]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname , pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_LOG_c , depth ); fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%d]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname,pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname,pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 2 )
 				{
-					fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%hd]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname , pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_LOG_c , depth ); fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%hd]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname,pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname,pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%d]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname , pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_LOG_c , depth ); fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%d]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname,pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname,pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[\" LONGLONG_FORMAT_SPEC \"d]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname , pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_LOG_c , depth ); fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[\" LONGLONG_FORMAT_SPEC \"d]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname,pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname,pfldinfo->field_name );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "UINT" ) )
 			{
 				if( pfldinfo->field_len == 1 )
 				{
-					fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%u]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname , pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_LOG_c , depth ); fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%u]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname,pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname,pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 2 )
 				{
-					fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%hu]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname , pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_LOG_c , depth ); fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%hu]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname,pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname,pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%u]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname , pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_LOG_c , depth ); fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%u]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname,pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname,pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[\" LONGLONG_FORMAT_SPEC \"u]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname , pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_LOG_c , depth ); fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[\" LONGLONG_FORMAT_SPEC \"u]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname,pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname,pfldinfo->field_name );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "FLOAT" ) )
 			{
 				if( pfldinfo->field_len == 4 )
 				{
-					fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%f]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname , pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_LOG_c , depth ); fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%f]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname,pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname,pfldinfo->field_name );
 				}
 				else if( pfldinfo->field_len == 8 )
 				{
-					fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%lf]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname , pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname , pfldinfo->field_name );
+					fprintabs( fp_dsc_LOG_c , depth ); fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%lf]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname,pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname,pfldinfo->field_name );
 				}
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "CHAR" ) )
 			{
-				fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%c]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname , pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname , pfldinfo->field_name );
+				fprintabs( fp_dsc_LOG_c , depth ); fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%c]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname,pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname,pfldinfo->field_name );
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "UCHAR" ) )
 			{
-				fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%c]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname , pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname , pfldinfo->field_name );
+				fprintabs( fp_dsc_LOG_c , depth ); fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%c]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname,pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname,pfldinfo->field_name );
 			}
 			else if( STRCMP( pfldinfo->field_type , == , "STRING" ) )
 			{
-				fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%s]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname , pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname , pfldinfo->field_name );
+				fprintabs( fp_dsc_LOG_c , depth ); fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%s]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname,pfldinfo->field_name , grandfather_pmsginfo->struct_name , pathname,pfldinfo->field_name );
 			}
 		}
 		
@@ -1173,6 +1125,7 @@ int GenerateCCode( struct CommandParameter *pcmdparam , struct StructInfo *pmsgi
 	int		nret = 0 ;
 	
 	/* Generate *.dsc.h */
+	fprintf( fp_dsc_h , "/* It had generated by DirectStruct v%s */\n" , DIRECTSTRUCT_VERSION );
 	fprintf( fp_dsc_h , "#ifndef _H_%s_\n" , pmsginfo->next_struct->struct_name );
 	fprintf( fp_dsc_h , "#define _H_%s_\n" , pmsginfo->next_struct->struct_name );
 	fprintf( fp_dsc_h , "\n" );
@@ -1204,6 +1157,11 @@ int GenerateCCode( struct CommandParameter *pcmdparam , struct StructInfo *pmsgi
 	fprintf( fp_dsc_h , "#define ULL(_ll_)	_ll_##ULL\n" );
 	fprintf( fp_dsc_h , "#define LONGLONG_FORMAT_SPEC	\"%%ll\"\n" );
 	fprintf( fp_dsc_h , "#endif\n" );
+	fprintf( fp_dsc_h , "#if ( defined _AIX )\n" );
+	fprintf( fp_dsc_h , "#define __BIG_ENDIAN	BIG_ENDIAN\n" );
+	fprintf( fp_dsc_h , "#define __LITTLE_ENDIAN	LITTLE_ENDIAN\n" );
+	fprintf( fp_dsc_h , "#define __BYTE_ORDER	BYTE_ORDER\n" );
+	fprintf( fp_dsc_h , "#endif\n" );
 	fprintf( fp_dsc_h , "#elif ( defined _WIN32 )\n" );
 	fprintf( fp_dsc_h , "#ifndef longlong\n" );
 	fprintf( fp_dsc_h , "#define longlong	__int64\n" );
@@ -1217,9 +1175,19 @@ int GenerateCCode( struct CommandParameter *pcmdparam , struct StructInfo *pmsgi
 	fprintf( fp_dsc_h , "#endif\n" );
 	fprintf( fp_dsc_h , "#endif\n" );
 	fprintf( fp_dsc_h , "\n" );
-	fprintf( fp_dsc_h , "#ifndef HTONLL\n" );
-	fprintf( fp_dsc_h , "#define HTONLL(_ulonglong_)	(__BYTE_ORDER==__BIG_ENDIAN?(_ulonglong_):( (((ulonglong)htonl((unsigned int)(((_ulonglong_)<<32)>>32)))<<32) | ((ulonglong)htonl((unsigned int)((_ulonglong_)>>32))) ) )\n" );
-	fprintf( fp_dsc_h , "#define NTOHLL(_ulonglong_)	(__BYTE_ORDER==__BIG_ENDIAN?(_ulonglong_):( (((ulonglong)ntohl((unsigned int)(((_ulonglong_)<<32)>>32)))<<32) | ((ulonglong)ntohl((unsigned int)((_ulonglong_)>>32))) ) )\n" );
+	fprintf( fp_dsc_h , "#ifndef __HTONLL\n" );
+	fprintf( fp_dsc_h , "#define __HTONLL(_ulonglong_)	if(__BYTE_ORDER==__LITTLE_ENDIAN){_ulonglong_=( (((ulonglong)htonl((unsigned int)(((_ulonglong_)<<32)>>32)))<<32) | ((ulonglong)htonl((unsigned int)((_ulonglong_)>>32))) ) ; }\n" );
+	fprintf( fp_dsc_h , "#define __NTOHLL(_ulonglong_)	if(__BYTE_ORDER==__LITTLE_ENDIAN){_ulonglong_=( (ulonglong)( (((ulonglong)ntohl((unsigned int)(((_ulonglong_)<<32)>>32)))<<32) | ((ulonglong)ntohl((unsigned int)((_ulonglong_)>>32))) ) ) ; }\n" );
+	fprintf( fp_dsc_h , "#endif\n" );
+	fprintf( fp_dsc_h , "\n" );
+	fprintf( fp_dsc_h , "#ifndef __HTONF\n" );
+	fprintf( fp_dsc_h , "#define __HTONF(_float_)		if(__BYTE_ORDER==__LITTLE_ENDIAN){union{unsigned int ui;float f;}_ui_f_; _ui_f_.f=_float_; _ui_f_.ui=htonl(_ui_f_.ui); _float_=_ui_f_.f; }\n" );
+	fprintf( fp_dsc_h , "#define __NTOHF(_float_)		if(__BYTE_ORDER==__LITTLE_ENDIAN){union{unsigned int ui;float f;}_ui_f_; _ui_f_.f=_float_; _ui_f_.ui=ntohl(_ui_f_.ui); _float_=_ui_f_.f; }\n" );
+	fprintf( fp_dsc_h , "#endif\n" );
+	fprintf( fp_dsc_h , "\n" );
+	fprintf( fp_dsc_h , "#ifndef __HTONLF\n" );
+	fprintf( fp_dsc_h , "#define __HTONLF(_double_)		if(__BYTE_ORDER==__LITTLE_ENDIAN){union{ulonglong ull;double d;}_ull_d_; _ull_d_.d=_double_; __HTONLL(_ull_d_.ull); _double_=_ull_d_.d; }\n" );
+	fprintf( fp_dsc_h , "#define __NTOHLF(_double_)		if(__BYTE_ORDER==__LITTLE_ENDIAN){union{ulonglong ull;double d;}_ull_d_; _ull_d_.d=_double_; __NTOHLL(_ull_d_.ull); _double_=_ull_d_.d; }\n" );
 	fprintf( fp_dsc_h , "#endif\n" );
 	fprintf( fp_dsc_h , "\n" );
 	fprintf( fp_dsc_h , "#ifndef COMPRESS_INT4\n" );
@@ -1337,13 +1305,15 @@ int GenerateCCode( struct CommandParameter *pcmdparam , struct StructInfo *pmsgi
 	fprintf( fp_dsc_h , "		if( _int8_ < 0 )						\\\n" );
 	fprintf( fp_dsc_h , "		{								\\\n" );
 	fprintf( fp_dsc_h , "			_h_ = -_int8_ ;						\\\n" );
-	fprintf( fp_dsc_h , "			_n_ = HTONLL( _h_ ) ;					\\\n" );
+	fprintf( fp_dsc_h , "			_n_ = _h_ ;						\\\n" );
+	fprintf( fp_dsc_h , "			__HTONLL( _n_ );					\\\n" );
 	fprintf( fp_dsc_h , "			_flag_ |= 0x10 ;					\\\n" );
 	fprintf( fp_dsc_h , "		}								\\\n" );
 	fprintf( fp_dsc_h , "		else								\\\n" );
 	fprintf( fp_dsc_h , "		{								\\\n" );
 	fprintf( fp_dsc_h , "			_h_ = _int8_ ;						\\\n" );
-	fprintf( fp_dsc_h , "			_n_ = HTONLL( _h_ ) ;					\\\n" );
+	fprintf( fp_dsc_h , "			_n_ = _h_ ;						\\\n" );
+	fprintf( fp_dsc_h , "			__HTONLL( _n_ );					\\\n" );
 	fprintf( fp_dsc_h , "		}								\\\n" );
 	fprintf( fp_dsc_h , "		if( _h_ & ULL(0xFF00000000000000) )				\\\n" );
 	fprintf( fp_dsc_h , "		{								\\\n" );
@@ -1404,7 +1374,7 @@ int GenerateCCode( struct CommandParameter *pcmdparam , struct StructInfo *pmsgi
 	fprintf( fp_dsc_h , "		_flag_ = _buf_[0] & 0xF0 ;					\\\n" );
 	fprintf( fp_dsc_h , "		_buf_[0] &= 0x0F ;						\\\n" );
 	fprintf( fp_dsc_h , "		memcpy( ((unsigned char*)&_int8_) + (8-_buf_[0]) , _buf_+1 , _buf_[0] );\\\n" );
-	fprintf( fp_dsc_h , "		_int8_ = NTOHLL( _int8_ ) ;					\\\n" );
+	fprintf( fp_dsc_h , "		__NTOHLL( _int8_ );						\\\n" );
 	fprintf( fp_dsc_h , "		if( _flag_ & 0x10 )						\\\n" );
 	fprintf( fp_dsc_h , "		{								\\\n" );
 	fprintf( fp_dsc_h , "			_int8_ = -_int8_ ;					\\\n" );
@@ -1419,7 +1389,8 @@ int GenerateCCode( struct CommandParameter *pcmdparam , struct StructInfo *pmsgi
 	fprintf( fp_dsc_h , "		unsigned longlong	_h_ ;					\\\n" );
 	fprintf( fp_dsc_h , "		unsigned longlong	_n_ ;					\\\n" );
 	fprintf( fp_dsc_h , "		_h_ = _uint8_ ;							\\\n" );
-	fprintf( fp_dsc_h , "		_n_ = HTONLL( _h_ ) ;						\\\n" );
+	fprintf( fp_dsc_h , "		_n_ = _h_ ;							\\\n" );
+	fprintf( fp_dsc_h , "		__HTONLL( _n_ );						\\\n" );
 	fprintf( fp_dsc_h , "		if( _h_ & ULL(0xFF00000000000000) )				\\\n" );
 	fprintf( fp_dsc_h , "		{								\\\n" );
 	fprintf( fp_dsc_h , "			_buf_[0] = 8 ;						\\\n" );
@@ -1477,8 +1448,44 @@ int GenerateCCode( struct CommandParameter *pcmdparam , struct StructInfo *pmsgi
 	fprintf( fp_dsc_h , "		_uint8_ = 0 ;							\\\n" );
 	fprintf( fp_dsc_h , "		_buf_[0] &= 0x0F ;						\\\n" );
 	fprintf( fp_dsc_h , "		memcpy( ((unsigned char*)&_uint8_) + (8-_buf_[0]) , _buf_+1 , _buf_[0] );\\\n" );
-	fprintf( fp_dsc_h , "		_uint8_ = NTOHLL( _uint8_ ) ;					\\\n" );
+	fprintf( fp_dsc_h , "		__NTOHLL( _uint8_ );						\\\n" );
 	fprintf( fp_dsc_h , "		_bufoffset_+=1+_buf_[0]; _buf_+=1+_buf_[0];			\\\n" );
+	fprintf( fp_dsc_h , "	}\n" );
+	fprintf( fp_dsc_h , "#endif\n" );
+	fprintf( fp_dsc_h , "\n" );
+	fprintf( fp_dsc_h , "#ifndef COMPRESS_FLOAT4\n" );
+	fprintf( fp_dsc_h , "#define COMPRESS_FLOAT4(_float4_,_buf_,_bufoffset_)				\\\n" );
+	fprintf( fp_dsc_h , "	{									\\\n" );
+	fprintf( fp_dsc_h , "		__HTONF( _float4_ );						\\\n" );
+	fprintf( fp_dsc_h , "		memcpy( _buf_ , ((unsigned char *)&_n_) , 4 );			\\\n" );
+	fprintf( fp_dsc_h , "		_bufoffset_+=4; _buf_+=4 ;					\\\n" );
+	fprintf( fp_dsc_h , "	}\n" );
+	fprintf( fp_dsc_h , "#endif\n" );
+	fprintf( fp_dsc_h , "\n" );
+	fprintf( fp_dsc_h , "#ifndef UNCOMPRESS_FLOAT4\n" );
+	fprintf( fp_dsc_h , "#define UNCOMPRESS_FLOAT4(_buf_,_bufoffset_,_float4_)				\\\n" );
+	fprintf( fp_dsc_h , "	{									\\\n" );
+	fprintf( fp_dsc_h , "		memcpy( ((unsigned char*)&_float4_) , _buf_ , 4 );		\\\n" );
+	fprintf( fp_dsc_h , "		__NTOHF( _float4_ );						\\\n" );
+	fprintf( fp_dsc_h , "		_bufoffset_+=4; _buf_+=4;					\\\n" );
+	fprintf( fp_dsc_h , "	}\n" );
+	fprintf( fp_dsc_h , "#endif\n" );
+	fprintf( fp_dsc_h , "\n" );
+	fprintf( fp_dsc_h , "#ifndef COMPRESS_FLOAT8\n" );
+	fprintf( fp_dsc_h , "#define COMPRESS_FLOAT8(_float8_,_buf_,_bufoffset_)				\\\n" );
+	fprintf( fp_dsc_h , "	{									\\\n" );
+	fprintf( fp_dsc_h , "		__HTONLF( _float8_ );						\\\n" );
+	fprintf( fp_dsc_h , "		memcpy( _buf_ , ((unsigned char *)&_n_) , 8 );			\\\n" );
+	fprintf( fp_dsc_h , "		_bufoffset_+=8; _buf_+=8 ;					\\\n" );
+	fprintf( fp_dsc_h , "	}\n" );
+	fprintf( fp_dsc_h , "#endif\n" );
+	fprintf( fp_dsc_h , "\n" );
+	fprintf( fp_dsc_h , "#ifndef UNCOMPRESS_FLOAT8\n" );
+	fprintf( fp_dsc_h , "#define UNCOMPRESS_FLOAT8(_buf_,_bufoffset_,_float8_)				\\\n" );
+	fprintf( fp_dsc_h , "	{									\\\n" );
+	fprintf( fp_dsc_h , "		memcpy( ((unsigned char*)&_float8_) , _buf_ , 8 );		\\\n" );
+	fprintf( fp_dsc_h , "		__NTOHLF( _float8_ );						\\\n" );
+	fprintf( fp_dsc_h , "		_bufoffset_+=8; _buf_+=8;					\\\n" );
 	fprintf( fp_dsc_h , "	}\n" );
 	fprintf( fp_dsc_h , "#endif\n" );
 	fprintf( fp_dsc_h , "\n" );
@@ -1502,6 +1509,7 @@ int GenerateCCode( struct CommandParameter *pcmdparam , struct StructInfo *pmsgi
 	fprintf( fp_dsc_h , "#endif\n" );
 	
 	/* Generate *.dsc.c */
+	fprintf( fp_dsc_c , "/* It had generated by DirectStruct v%s */\n" , DIRECTSTRUCT_VERSION );
 	fprintf( fp_dsc_c , "#include \"%s.h\"\n" , pcmdparam->pathfilename );
 	
 	/* Generate DSCINIT_*() */
@@ -1605,6 +1613,7 @@ int GenerateCCode( struct CommandParameter *pcmdparam , struct StructInfo *pmsgi
 	fprintf( fp_dsc_c , "}\n" );
 	
 	/* Generate *.dsc.LOG.c */
+	fprintf( fp_dsc_LOG_c , "/* It had generated by DirectStruct v%s */\n" , DIRECTSTRUCT_VERSION );
 	fprintf( fp_dsc_LOG_c , "#include \"%s.h\"\n" , pcmdparam->pathfilename );
 	fprintf( fp_dsc_LOG_c , "\n" );
 	fprintf( fp_dsc_LOG_c , "#ifndef FUNCNAME_DSCLOG_%s\n" , pmsginfo->next_struct->struct_name );

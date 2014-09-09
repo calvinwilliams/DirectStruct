@@ -10,7 +10,7 @@
 
 static void version()
 {
-	printf( "dsc v1.0.2 - DirectSrtuct Compiler\n" );
+	printf( "dsc v%s - DirectSrtuct Compiler\n" , DIRECTSTRUCT_VERSION );
 	printf( "Copyright by calvin<calvinwilliams.c@gmail.com> 2014\n" );
 }
 

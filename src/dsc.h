@@ -5,7 +5,6 @@
  * dsc - DirectSrtuct compiler
  * author	: calvin
  * email	: calvinwilliams.c@gmail.com
- * LastVersion	: v1.0.2
  *
  * Licensed under the LGPL v2.1, see the file LICENSE in base directory.
  */
@@ -64,6 +63,8 @@ void fprintabs( FILE *fp , int depth );
 /*
  * main
  */
+
+extern char	*DIRECTSTRUCT_VERSION ;
 
 struct CommandParameter
 {

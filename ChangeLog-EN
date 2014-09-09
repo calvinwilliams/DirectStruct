@@ -1,4 +1,10 @@
-ver 2.0.0	2014-09-5	calvin
+ver 1.0.4	2014-09-09	calvin
+		* Fixed a problem on AIX
+		* Fixed a problem about float-number
+		* optimized generate automatically code layout
+		* generate code header ( dsc version )
+
+ver 1.0.3	2014-09-05	calvin
 		* add generate code automatically : compack/compress serialize/unserialize functions
 
 ver 1.0.1	2014-09-01	calvin

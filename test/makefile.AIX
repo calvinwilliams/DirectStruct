@@ -14,7 +14,7 @@ SOFLAGS		=	-G -bnoentry
 ESOFLAGS	=	-bdynamic -brtl -qcpluscm
 
 # c源代码文件宏及推导规则
-CC		=	xlc -q64 -O2 -qlanglvl=ansi -qsrcmsg -qinfo=dcl:eff:ini:par:pro:rea:ret
+CC		=	xlc -q64 -O2 -qlanglvl=ansi -qsrcmsg -qinfo=dcl:eff:ini:par:pro:rea:ret -D_AIX
 CC_NOWARN	=	xlc -q64 -O2
 
 c_FILE_o	=	$(c_FILE:.c=.o)
@@ -133,10 +133,8 @@ test_serialize_compress	:	test_serialize_compress.o IDL_AllTypes.dsc.o
 	$(CC) -o $@ test_serialize_compress.o IDL_AllTypes.dsc.o $(LFLAGS)
 
 test_serialize_compress_press	:	test_serialize_compress_press.o IDL_AllTypes2.dsc.o
-	# $(CC) -o $@ test_serialize_compress_press.o IDL_AllTypes2.dsc.o $(LFLAGS)
-	xlc -o $@ test_serialize_compress_press.o IDL_AllTypes2.dsc.o $(LFLAGS)
+	$(CC) -o $@ test_serialize_compress_press.o IDL_AllTypes2.dsc.o $(LFLAGS)
 
 test_trans	:	test_trans.o IDL_CommHead.dsc.o IDL_BankTransaction.dsc.o
 	$(CC) -o $@ test_trans.o IDL_CommHead.dsc.o IDL_BankTransaction.dsc.o $(LFLAGS)
-
 
