@@ -76,6 +76,8 @@ int test_serialize_compact()
 	strcpy( st.str32 , "calvin" );
 	strcpy( st.str1024 , "XXXXXXXXXXXXXXXX" );
 	
+	DSCLOG_AllTypes( & st );
+	
 	memset( buf , 0x00 , sizeof(buf) );
 	nret = DSCSERIALIZE_COMPACT_AllTypes( & st , buf , & len ) ;
 	if( nret )
