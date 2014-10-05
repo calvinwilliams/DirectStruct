@@ -71,24 +71,24 @@ int test()
 	trans.ResponseHeader.response_code = 0 ;
 	strcpy( trans.ResponseHeader.response_desc , "OK" );
 	
-	strcpy( trans.QueryTransactionDetails.AddonMessages[1].message_text , "Check channel passed" );
-	strcpy( trans.QueryTransactionDetails.AddonMessages[0].message_text , "Check account passed" );
+	strcpy( trans.QueryTransactionDetails.AddonMessages.AddonMessage[1].message_text , "Check channel passed" );
+	strcpy( trans.QueryTransactionDetails.AddonMessages.AddonMessage[0].message_text , "Check account passed" );
 	
 	strcpy( trans.QueryTransactionDetails.TransactionDetailTitle.title_text , "DETAIL TITLE" );
 	trans.QueryTransactionDetails.TransactionDetailTitle.page_no = 1 ;
 	trans.QueryTransactionDetails.TransactionDetailTitle.page_size = 2 ;
 	
-	strcpy( trans.QueryTransactionDetails.TransactionDetails[0].trans_date , "2014-01-01" );
-	strcpy( trans.QueryTransactionDetails.TransactionDetails[0].trans_time , "08:01:01" );
-	strcpy( trans.QueryTransactionDetails.TransactionDetails[0].outlet_id , "1001" );
-	strcpy( trans.QueryTransactionDetails.TransactionDetails[0].card_no , "603367123412341234" );
-	trans.QueryTransactionDetails.TransactionDetails[0].trans_amount = 100.00 ;
+	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[0].trans_date , "2014-01-01" );
+	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[0].trans_time , "08:01:01" );
+	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[0].outlet_id , "1001" );
+	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[0].card_no , "603367123412341234" );
+	trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[0].trans_amount = 100.00 ;
 	
-	strcpy( trans.QueryTransactionDetails.TransactionDetails[1].trans_date , "2014-02-02" );
-	strcpy( trans.QueryTransactionDetails.TransactionDetails[1].trans_time , "08:02:02" );
-	strcpy( trans.QueryTransactionDetails.TransactionDetails[1].outlet_id , "2002" );
-	strcpy( trans.QueryTransactionDetails.TransactionDetails[1].card_no , "603367123412341234" );
-	trans.QueryTransactionDetails.TransactionDetails[1].trans_amount = 200.00 ;
+	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[1].trans_date , "2014-02-02" );
+	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[1].trans_time , "08:02:02" );
+	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[1].outlet_id , "2002" );
+	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[1].card_no , "603367123412341234" );
+	trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[1].trans_amount = 200.00 ;
 	
 	DSCLOG_BankTransaction( & trans );
 	

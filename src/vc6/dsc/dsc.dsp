@@ -97,6 +97,14 @@ SOURCE=..\..\GenerateCCode.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\GenerateECCode.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\GenerateSqlCode.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\main.c
 # End Source File
 # Begin Source File

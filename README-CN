@@ -1,6 +1,21 @@
 DirectStruct - C结构体工具
 
 1.概述
+2.编译安装
+3.基本使用
+3.1.编写IDL定义文件，用自动化代码工具dsc处理之
+3.2.编写应用代码，调用网络/主机字节序化函数
+3.3.编写应用代码，调用二进制序列化/反序列化函数
+3.4.编写应用代码，调用XML序列化/反序列化函数
+3.5.编写应用代码，调用JSON序列化/反序列化函数
+3.6.编写应用代码，使用ESQL代码开发数据库应用
+N-2.DirectStruct报文定义文件语法
+N-1.性能压测
+N.最后
+
+------------------------------------------------------------
+
+1.概述
 
 DirectStruct是一个C结构体工具，命令行工具dsc读入IDL定义文件，自动生成C结构体定义及常用函数代码，在应用中直接使用自动化代码以提高开发效率，避免开发冗余和编码风险。
 
@@ -8,13 +23,17 @@ DirectStruct生成了哪些自动化代码？
 * C结构体定义
 * 批量初始化缺省值函数
 * 网络/主机字节序化函数
-* 序列化/反序列化函数（可带压缩）
+* 二进制序列化/反序列化函数（可带压缩）
+* XML序列化/反序列化函数
+* JSON序列化/反序列化函数
+* 嵌入式SQL代码
 * 打印结构体内所有字段值函数
 
 用DirectStruct自动生成的代码能干什么？
 
 * 直接C结构体通讯交换 : 在特定平台之间直接把C结构体变量通过TCP扔给对方是一个很诱人的想法，阻碍我们的主要是整型字段的字节序问题，手工编码是一件冗余的事情，DirectStruct可以帮助你自动化这一过程。解决了字节序问题后就可以直接交换报文，避免了通讯发送前的打包和通讯接收后的解包，所以速度非常快，是某些追求极端性能的场景中的首选报文格式。
-* 结构体序列化/反序列化 : 在跨平台中涉及到字段对齐情况就不适合直接扔TCP了，别烦恼，使用DirectStruct生成的序列化/反序列化函数吧，虽然多了打包解包，但是经过精心设计和算法优化，性能也是很诱人的。如果启用了压缩选项，压缩后的二进制数据块大幅缩小，便于通讯交换。
+* 结构体序列化/反序列化 : 使用DirectStruct自动生成的序列化/反序列化函数，可以将C结构体打包成二进制报文或XML报文或JSON报文等，以及反向解包，是的，打包解包函数自动生成，省却了你不少麻烦吧。二进制报文如果启用了压缩选项，压缩后的二进制数据块大幅缩小，更便于通讯高效交换。
+* 基于嵌入式SQL的数据库映射接口的代码自动化生成
 * 快速打印结构体内所有字段值 : 对于一个大结构，编写他的打印所有字段值的函数是一件很无聊的事情，你可以用DirectStruct帮助你自动生成日志函数，输出到屏幕，或你自己的日志流中。
 * ( 新主意增加中 ... 把你的需求告诉我吧 )
 
@@ -26,8 +45,8 @@ DirectStruct生成了哪些自动化代码？
 2.编译安装
 
 for Linux
-$ tar xvzf dsc-1.0.3.tar.gz
-$ cd dsc-1.0.3/src
+$ tar xvzf dsc-1.1.0.tar.gz
+$ cd dsc-1.1.0/src
 $ su
 # make -f makefile.Linux clean
 rm -f util.o
@@ -70,7 +89,7 @@ STRUCT	AllTypes
 	STRING	32	str32
 	STRING	1024	str1024
 }
-$ dsc -f IDL_AllTypes.dsc -c
+$ dsc -f IDL_AllTypes.dsc -c-ALL
 STRUCT AllTypes
         INT 1 n1
         INT 2 n2
@@ -97,6 +116,22 @@ IDL_AllTypes.dsc.LOG.c
 IDL_test.dsc.h包含了自动生成的一个C结构体定义。
 IDL_test.dsc.c包含了自动生成的初始化缺省函数、网络/主机字节序化、序列化/反序列化等代码。
 IDL_test.dsc.LOG.c包含了自动生成的一个日志函数用于快速打印报文所有字段到标准输出或你自己的日志流上便于调试。
+
+注意：IDL_test.dsc.h、IDL_test.dsc.c实际内容取决于参数"-c-*"
+
+[code]
+$ dsc
+dsc v1.1.0 - DirectSrtuct Compiler
+Copyright by calvin<calvinwilliams.c@gmail.com> 2014
+USAGE : dsc -f .dsc [ -c ] [ -c-order ] [ -c-compact ] [ -c-compress ] [ -c-xml ] [ -c-LOG ] [ -c-ALL ]
+[/code]
+-c		基本的c结构体定义
+-c-order	还包含主机/网络字节序化函数
+-c-compact	还包含二进制紧凑序列化/反序列化函数
+-c-compress	还包含二进制压缩序列化/反序列化函数
+-c-xml		还包含XML序列化/反序列化函数（依赖于开源库fastxml）
+-c-LOG		生成IDL_test.dsc.LOG.c
+-c-ALL		生成以上所有
 
 注意：test/makefile未包含处理.dsc定义文件的动作，如修改.dsc文件后需要手工处理之。
 
@@ -202,7 +237,7 @@ AllTypes.str32[calvin]
 AllTypes.str1024[XXXXXXXXXXXXXXXX]
 [/code]
 
-3.3.编写应用代码，调用序列化/反序列化函数
+3.3.编写应用代码，调用二进制序列化/反序列化函数
 
 [code]
 $ cat test_serialize_compact.c
@@ -305,8 +340,8 @@ n4(4字节)+str256(256字节)
 总共260字节
 
 使用带压缩的序列化函数可以使得最终二进制数据块更小
-$ cat test_serialize_compress.c
 [code]
+$ cat test_serialize_compress.c
 ...
 int test_serialize_compress()
 {
@@ -437,7 +472,1285 @@ str256="abc"
 0x02 0x34 0x56 0x01 0x05 0x61 0x62 0x63
 总共8字节，看，是不是比紧凑序列化要短的多呢，这在通讯数据交换中可以节省更多的流量。
 
-4.DirectStruct报文定义文件语法
+3.4.编写应用代码，调用XML序列化/反序列化函数
+
+XML序列化/反序列化函数依赖于开源库fasterxml。
+
+[code]
+$ cat test_serialize_xml.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#include "IDL_BankXmlTransaction.dsc.h"
+#include "IDL_BankXmlTransaction.dsc.LOG.c"
+
+int test_serialize_xml()
+{
+        BankXmlTransaction      trans ;
+        char            buf[ 40960 + 1 ] ;
+        int             len ;
+        int             nret = 0 ;
+
+        /* client code */
+        DSCINIT_BankXmlTransaction( & trans );
+
+        strcpy( trans.ResponseHeader.transaction_code , "P0101" );
+        trans.ResponseHeader.trans_jnlsno = 12345678 ;
+        trans.ResponseHeader.response_code = 0 ;
+        strcpy( trans.ResponseHeader.response_desc , "OK" );
+
+        strcpy( trans.QueryTransactionDetails.AddonMessages.AddonMessage[1].message_text , "Check channel passed" );
+        strcpy( trans.QueryTransactionDetails.AddonMessages.AddonMessage[0].message_text , "Check account passed" );
+
+        strcpy( trans.QueryTransactionDetails.TransactionDetailTitle.title_text , "DETAIL TITLE" );
+        trans.QueryTransactionDetails.TransactionDetailTitle.page_no = 1 ;
+        trans.QueryTransactionDetails.TransactionDetailTitle.page_size = 2 ;
+
+        strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[0].trans_date , "2014-01-01" );
+        strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[0].trans_time , "08:01:01" );
+        strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[0].outlet_id , "1001" );
+        strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[0].card_no , "603367123412341234" );
+        trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[0].trans_amount = 100.00 ;
+
+        strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[1].trans_date , "2014-02-02" );
+        strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[1].trans_time , "08:02:02" );
+        strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[1].outlet_id , "2002" );
+        strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[1].card_no , "603367123412341234" );
+        trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[1].trans_amount = 200.00 ;
+
+        strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[2].card_no , "<" );
+
+        strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[3].card_no , "&" );
+
+        strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[4].card_no , ">" );
+
+        strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[5].card_no , "<&>" );
+
+        strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[6].card_no , "<你&他>" );
+
+        strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[7].card_no , "我<你&他>她" );
+
+       DSCLOG_BankXmlTransaction( & trans );
+
+       memset( buf , 0x00 , sizeof(buf) );
+       len = sizeof(buf)-1 ;
+       nret = DSCSERIALIZE_XML_BankXmlTransaction( & trans , "GBK" , buf , & len ) ;
+       if( nret )
+       {
+               printf( "DSCSERIALIZE_XML_BankXmlTransaction failed[%d]\n" , nret );
+               return nret;
+       }
+       else
+       {
+               printf( "DSCSERIALIZE_XML_BankXmlTransaction ok , len[%d]\n" , len );
+       }
+
+       printf( "[%s]\n" , buf );
+
+       /* ... client send communication struct to server ... */
+
+       /* server code */
+       memset( & trans , 0x00 , sizeof(BankXmlTransaction) );
+       nret = DSCDESERIALIZE_XML_BankXmlTransaction( NULL , buf , & len , & trans ) ;
+       if( nret )
+       {
+               printf( "DSCDESERIALIZE_XML_BankXmlTransaction failed[%d]\n" , nret );
+               return nret;
+       }
+       else
+       {
+               printf( "DSCDESERIALIZE_XML_BankXmlTransaction ok\n" );
+       }
+
+       DSCLOG_BankXmlTransaction( & trans );
+
+       return 0;
+}
+
+int main()
+{
+       return -test_serialize_xml();
+}
+$ make
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c test_serialize_xml.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I/home/calvin/exinc/fastxml -I. -c IDL_BankXmlTransaction.dsc.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -o test_serialize_xml test_serialize_xml.o IDL_BankXmlTransaction.dsc.o -L.  -L/home/calvin/exlib -lfastxl
+$ ./test_serialize_xml
+BankXmlTransaction.version[1]
+BankXmlTransaction.ResponseHeader.transaction_code[P0101]
+BankXmlTransaction.ResponseHeader.trans_jnlsno[12345678]
+BankXmlTransaction.ResponseHeader.response_code[0]
+BankXmlTransaction.ResponseHeader.response_desc[OK]
+BankXmlTransaction.QueryTransactionDetails.AddonMessages.AddonMessage[index[3]].message_text[Check account passed]
+BankXmlTransaction.QueryTransactionDetails.AddonMessages.AddonMessage[index[3]].message_text[Check channel passed]
+BankXmlTransaction.QueryTransactionDetails.AddonMessages.AddonMessage[index[3]].message_text[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetailTitle.title_text[DETAIL TITLE]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetailTitle.page_no[1]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetailTitle.page_size[2]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[2014-01-01]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[08:01:01]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[1001]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[603367123412341234]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[100.000000]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[2014-02-02]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[08:02:02]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[2002]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[603367123412341234]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[200.000000]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[<]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[&]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[>]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[<&>]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[<你&他>]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[我<你&他>她]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+DSCSERIALIZE_XML_BankXmlTransaction ok , len[2734]
+[<?xml version="1.0" encoding="GBK"?>
+<BankXmlTransaction>
+        <version>1</version>
+        <ResponseHeader>
+                <transaction_code>P0101</transaction_code>
+                <trans_jnlsno>12345678</trans_jnlsno>
+                <response_code>0</response_code>
+                <response_desc>OK</response_desc>
+        </ResponseHeader>
+        <QueryTransactionDetails>
+                <AddonMessages>
+                        <AddonMessage>
+                                <message_text>Check account passed</message_text>
+                        </AddonMessage>
+                        <AddonMessage>
+                                <message_text>Check channel passed</message_text>
+                        </AddonMessage>
+                        <AddonMessage>
+                                <message_text></message_text>
+                        </AddonMessage>
+                </AddonMessages>
+                <TransactionDetailTitle>
+                        <title_text>DETAIL TITLE</title_text>
+                        <page_no>1</page_no>
+                        <page_size>2</page_size>
+                </TransactionDetailTitle>
+                <TransactionDetails>
+                        <TransactionDetail>
+                                <trans_date>2014-01-01</trans_date>
+                                <trans_time>08:01:01</trans_time>
+                                <outlet_id>1001</outlet_id>
+                                <card_no>603367123412341234</card_no>
+                                <trans_amount>100.000000</trans_amount>
+                        </TransactionDetail>
+                        <TransactionDetail>
+                                <trans_date>2014-02-02</trans_date>
+                                <trans_time>08:02:02</trans_time>
+                                <outlet_id>2002</outlet_id>
+                                <card_no>603367123412341234</card_no>
+                                <trans_amount>200.000000</trans_amount>
+                        </TransactionDetail>
+                        <TransactionDetail>
+                                <trans_date></trans_date>
+                                <trans_time></trans_time>
+                                <outlet_id></outlet_id>
+                                <card_no>&lt;</card_no>
+                                <trans_amount>0.000000</trans_amount>
+                        </TransactionDetail>
+                        <TransactionDetail>
+                                <trans_date></trans_date>
+                                <trans_time></trans_time>
+                                <outlet_id></outlet_id>
+                                <card_no>&amp;</card_no>
+                                <trans_amount>0.000000</trans_amount>
+                        </TransactionDetail>
+                        <TransactionDetail>
+                                <trans_date></trans_date>
+                                <trans_time></trans_time>
+                                <outlet_id></outlet_id>
+                                <card_no>&gt;</card_no>
+                                <trans_amount>0.000000</trans_amount>
+                        </TransactionDetail>
+                        <TransactionDetail>
+                                <trans_date></trans_date>
+                                <trans_time></trans_time>
+                                <outlet_id></outlet_id>
+                                <card_no>&lt;&amp;&gt;</card_no>
+                                <trans_amount>0.000000</trans_amount>
+                        </TransactionDetail>
+                        <TransactionDetail>
+                                <trans_date></trans_date>
+                                <trans_time></trans_time>
+                                <outlet_id></outlet_id>
+                                <card_no>&lt;你&amp;他&gt;</card_no>
+                                <trans_amount>0.000000</trans_amount>
+                        </TransactionDetail>
+                        <TransactionDetail>
+                                <trans_date></trans_date>
+                                <trans_time></trans_time>
+                                <outlet_id></outlet_id>
+                                <card_no>我&lt;你&amp;他&gt;她</card_no>
+                                <trans_amount>0.000000</trans_amount>
+                        </TransactionDetail>
+                        <TransactionDetail>
+                                <trans_date></trans_date>
+                                <trans_time></trans_time>
+                                <outlet_id></outlet_id>
+                                <card_no></card_no>
+                                <trans_amount>0.000000</trans_amount>
+                        </TransactionDetail>
+                        <TransactionDetail>
+                                <trans_date></trans_date>
+                                <trans_time></trans_time>
+                                <outlet_id></outlet_id>
+                                <card_no></card_no>
+                                <trans_amount>0.000000</trans_amount>
+                        </TransactionDetail>
+                </TransactionDetails>
+        </QueryTransactionDetails>
+</BankXmlTransaction>
+]
+DSCDESERIALIZE_XML_BankXmlTransaction ok
+BankXmlTransaction.version[1]
+BankXmlTransaction.ResponseHeader.transaction_code[P0101]
+BankXmlTransaction.ResponseHeader.trans_jnlsno[12345678]
+BankXmlTransaction.ResponseHeader.response_code[0]
+BankXmlTransaction.ResponseHeader.response_desc[OK]
+BankXmlTransaction.QueryTransactionDetails.AddonMessages.AddonMessage[index[3]].message_text[Check account passed]
+BankXmlTransaction.QueryTransactionDetails.AddonMessages.AddonMessage[index[3]].message_text[Check channel passed]
+BankXmlTransaction.QueryTransactionDetails.AddonMessages.AddonMessage[index[3]].message_text[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetailTitle.title_text[DETAIL TITLE]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetailTitle.page_no[1]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetailTitle.page_size[2]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[2014-01-01]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[08:01:01]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[1001]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[603367123412341234]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[100.000000]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[2014-02-02]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[08:02:02]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[2002]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[603367123412341234]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[200.000000]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[<]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[&]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[>]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[<&>]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[<你&他>]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[我<你&他>她]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
+BankXmlTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+[/code]
+
+3.5.编写应用代码，调用JSON序列化/反序列化函数
+
+JSON序列化/反序列化函数依赖于开源库fasterjson。
+
+[code]
+$ cat test_serialize_json.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#include "IDL_BankJsonTransaction.dsc.h"
+#include "IDL_BankJsonTransaction.dsc.LOG.c"
+
+int test_serialize_json()
+{
+	BankJsonTransaction	trans ;
+	char			buf[ 40960 + 1 ] ;
+	int			len ;
+	int			nret = 0 ;
+	
+	/* client code */
+	DSCINIT_BankJsonTransaction( & trans );
+	
+	strcpy( trans.ResponseHeader.transaction_code , "P0101" );
+	trans.ResponseHeader.trans_jnlsno = 12345678 ;
+	trans.ResponseHeader.response_code = 0 ;
+	strcpy( trans.ResponseHeader.response_desc , "OK" );
+	
+	strcpy( trans.QueryTransactionDetails.AddonMessages.AddonMessage[1].message_text , "Check channel passed" );
+	strcpy( trans.QueryTransactionDetails.AddonMessages.AddonMessage[0].message_text , "Check account passed" );
+	
+	strcpy( trans.QueryTransactionDetails.TransactionDetailTitle.title_text , "DETAIL TITLE" );
+	trans.QueryTransactionDetails.TransactionDetailTitle.page_no = 1 ;
+	trans.QueryTransactionDetails.TransactionDetailTitle.page_size = 2 ;
+	
+	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[0].trans_date , "2014-01-01" );
+	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[0].trans_time , "08:01:01" );
+	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[0].outlet_id , "1001" );
+	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[0].card_no , "603367123412341234" );
+	trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[0].trans_amount = 100.00 ;
+	
+	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[1].trans_date , "2014-02-02" );
+	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[1].trans_time , "08:02:02" );
+	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[1].outlet_id , "2002" );
+	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[1].card_no , "603367123412341234" );
+	trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[1].trans_amount = 200.00 ;
+
+	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[2].card_no , "\"" );
+	
+	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[3].card_no , "\"你\"他\"" );
+	
+	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[4].card_no , "我\"你\"他\"她" );
+	
+	DSCLOG_BankJsonTransaction( & trans );
+	
+	memset( buf , 0x00 , sizeof(buf) );
+	len = sizeof(buf)-1 ;
+	nret = DSCSERIALIZE_JSON_BankJsonTransaction( & trans , "GBK" , buf , & len ) ;
+	if( nret )
+	{
+		printf( "DSCSERIALIZE_JSON_BankJsonTransaction failed[%d]\n" , nret );
+		return nret;
+	}
+	else
+	{
+		printf( "DSCSERIALIZE_JSON_BankJsonTransaction ok , len[%d]\n" , len );
+	}
+	
+	printf( "[%s]\n" , buf );
+	
+	/* ... client send communication struct to server ... */
+	
+	/* server code */
+	memset( & trans , 0x00 , sizeof(BankJsonTransaction) );
+	nret = DSCDESERIALIZE_JSON_BankJsonTransaction( NULL , buf , & len , & trans ) ;
+	if( nret )
+	{
+		printf( "DSCDESERIALIZE_JSON_BankJsonTransaction failed[%d]\n" , nret );
+		return nret;
+	}
+	else
+	{
+		printf( "DSCDESERIALIZE_JSON_BankJsonTransaction ok\n" );
+	}
+	
+	DSCLOG_BankJsonTransaction( & trans );
+	
+	return 0;
+}
+
+int main()
+{
+	return -test_serialize_json();
+}
+$ make
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I. -I/home/calvin/exinc/fasterxml -I/home/calvin/exinc/fasterjson  -c test_serialize_json.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -o test_serialize_json test_serialize_json.o IDL_BankJsonTransaction.dsc.o -L.  -L/home/calvin/exlib -lfasterjson
+$ ./test_serialize_json
+BankJsonTransaction.version[1]
+BankJsonTransaction.ResponseHeader.transaction_code[P0101]
+BankJsonTransaction.ResponseHeader.trans_jnlsno[12345678]
+BankJsonTransaction.ResponseHeader.response_code[0]
+BankJsonTransaction.ResponseHeader.response_desc[OK]
+BankJsonTransaction.QueryTransactionDetails.AddonMessages.AddonMessage[index[3]].message_text[Check account passed]
+BankJsonTransaction.QueryTransactionDetails.AddonMessages.AddonMessage[index[3]].message_text[Check channel passed]
+BankJsonTransaction.QueryTransactionDetails.AddonMessages.AddonMessage[index[3]].message_text[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetailTitle.title_text[DETAIL TITLE]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetailTitle.page_no[1]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetailTitle.page_size[2]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[2014-01-01]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[08:01:01]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[1001]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[603367123412341234]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[100.000000]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[2014-02-02]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[08:02:02]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[2002]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[603367123412341234]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[200.000000]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no["]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no["你"他"]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[我"你"他"她]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionTailDetail[index[3]].message_text[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionTailDetail[index[3]].message_text[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionTailDetail[index[3]].message_text[]
+DSCSERIALIZE_JSON_BankJsonTransaction ok , len[1937]
+[{
+        BankJsonTransaction :
+        {
+                version : 1 ,
+                ResponseHeader :
+                {
+                        transaction_code : "P0101" ,
+                        trans_jnlsno : 12345678 ,
+                        response_code : 0 ,
+                        response_desc : "OK"
+                } ,
+                QueryTransactionDetails :
+                {
+                        AddonMessages :
+                        {
+                                AddonMessage :
+                                [
+                                {
+                                        message_text : "Check account passed"
+                                } ,
+                                {
+                                        message_text : "Check channel passed"
+                                } ,
+                                {
+                                        message_text : ""
+                                }
+                                ]
+                        } ,
+                        TransactionDetailTitle :
+                        {
+                                title_text : "DETAIL TITLE" ,
+                                page_no : 1 ,
+                                page_size : 2
+                        } ,
+                        TransactionDetails :
+                        {
+                                TransactionDetail :
+                                [
+                                {
+                                        trans_date : "2014-01-01" ,
+                                        trans_time : "08:01:01" ,
+                                        outlet_id : "1001" ,
+                                        card_no : "603367123412341234" ,
+                                        trans_amount : 100.000000
+                                } ,
+                                {
+                                        trans_date : "2014-02-02" ,
+                                        trans_time : "08:02:02" ,
+                                        outlet_id : "2002" ,
+                                        card_no : "603367123412341234" ,
+                                        trans_amount : 200.000000
+                                } ,
+                                {
+                                        trans_date : "" ,
+                                        trans_time : "" ,
+                                        outlet_id : "" ,
+                                        card_no : "\"" ,
+                                        trans_amount : 0.000000
+                                } ,
+                                {
+                                        trans_date : "" ,
+                                        trans_time : "" ,
+                                        outlet_id : "" ,
+                                        card_no : "\"你\"他\"" ,
+                                        trans_amount : 0.000000
+                                } ,
+                                {
+                                        trans_date : "" ,
+                                        trans_time : "" ,
+                                        outlet_id : "" ,
+                                        card_no : "我\"你\"他\"她" ,
+                                        trans_amount : 0.000000
+                                } ,
+                                {
+                                        trans_date : "" ,
+                                        trans_time : "" ,
+                                        outlet_id : "" ,
+                                        card_no : "" ,
+                                        trans_amount : 0.000000
+                                } ,
+                                {
+                                        trans_date : "" ,
+                                        trans_time : "" ,
+                                        outlet_id : "" ,
+                                        card_no : "" ,
+                                        trans_amount : 0.000000
+                                } ,
+                                {
+                                        trans_date : "" ,
+                                        trans_time : "" ,
+                                        outlet_id : "" ,
+                                        card_no : "" ,
+                                        trans_amount : 0.000000
+                                } ,
+                                {
+                                        trans_date : "" ,
+                                        trans_time : "" ,
+                                        outlet_id : "" ,
+                                        card_no : "" ,
+                                        trans_amount : 0.000000
+                                } ,
+                                {
+                                        trans_date : "" ,
+                                        trans_time : "" ,
+                                        outlet_id : "" ,
+                                        card_no : "" ,
+                                        trans_amount : 0.000000
+                                }
+                                ] ,
+                                TransactionTailDetail :
+                                [
+                                {
+                                        message_text : ""
+                                } ,
+                                {
+                                        message_text : ""
+                                } ,
+                                {
+                                        message_text : ""
+                                }
+                                ]
+                        }
+                }
+        }
+}
+]
+DSCDESERIALIZE_JSON_BankJsonTransaction ok
+BankJsonTransaction.version[0]
+BankJsonTransaction.ResponseHeader.transaction_code[]
+BankJsonTransaction.ResponseHeader.trans_jnlsno[0]
+BankJsonTransaction.ResponseHeader.response_code[0]
+BankJsonTransaction.ResponseHeader.response_desc[]
+BankJsonTransaction.QueryTransactionDetails.AddonMessages.AddonMessage[index[3]].message_text[]
+BankJsonTransaction.QueryTransactionDetails.AddonMessages.AddonMessage[index[3]].message_text[]
+BankJsonTransaction.QueryTransactionDetails.AddonMessages.AddonMessage[index[3]].message_text[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetailTitle.title_text[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetailTitle.page_no[0]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetailTitle.page_size[0]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionTailDetail[index[3]].message_text[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionTailDetail[index[3]].message_text[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionTailDetail[index[3]].message_text[]
+[/code]
+
+3.6.编写应用代码，使用ESQL代码开发数据库应用
+
+[code]
+$ cat IDL_testable.dsc
+STRUCT  testable
+{
+        INT     2       n2
+        INT     4       n4
+        FLOAT   4       f4
+        FLOAT   8       f8
+        STRING  32      str32
+        STRING  1024    str1024
+
+        CREATE_SQL      "CREATE INDEX testable_idx1 ON testable ( n2 ) ;"
+        CREATE_SQL      "CREATE UNIQUE INDEX testable_idx2 ON testable ( str32 , str1024 ) ;"
+        DROP_SQL        "DROP INDEX testable_idx1 ;"
+        DROP_SQL        "DROP INDEX testable_idx2 ;"
+}
+$ dsc -f IDL_testable.dsc -sql -ec-pqsql -c-LOG
+STRUCT testable
+        INT 2 n2
+        INT 4 n4
+        FLOAT 4 f4
+        FLOAT 8 f8
+        STRING 32 str32
+        STRING 1024 str1024
+ok!
+$ ls IDL_testable.dsc*
+IDL_testable.dsc         IDL_testable.dsc.ESQL.ec   IDL_testable.dsc.ESQL.eh  IDL_testable.dsc.LOG.c  IDL_testable.dsc.create.sql  IDL_testable.dsc.h
+IDL_testable.dsc.ESQL.c  IDL_testable.dsc.ESQL.ecE  IDL_testable.dsc.ESQL.o   IDL_testable.dsc.c      IDL_testable.dsc.drop.sql
+$ ... run IDL_testable.dsc.create.sql in your database ...
+$ cat test_testable.ec
+#include "IDL_testable.dsc.ESQL.eh"
+
+#include "IDL_testable.dsc.LOG.c"
+
+int test_delete()
+{
+        EXEC SQL
+                DELETE
+                FROM    testable
+                WHERE   n2 IN ( 100 , 101 , 102 ) ;
+        if( SQLCODE == 100 )
+        {
+                printf( "DELETE ok\n" );
+        }
+        else if( SQLCODE )
+        {
+                printf( "DELETE failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                return SQLCODE;
+        }
+        else
+        {
+                printf( "DELETE ok\n" );
+        }
+
+        return 0;
+}
+
+int test_insert()
+{
+        testable        t ;
+
+        memset( & t , 0x00 , sizeof(testable) );
+        t.n2 = 100 ;
+        t.n4 = 56789 ;
+        t.f4 = 1.2 ;
+        t.f8 = 456.789 ;
+        strcpy( t.str32 , "hi" );
+        strcpy( t.str1024 , "hello world" );
+
+        DSCINITV_testable();
+        DSCSTOV_testable( & t );
+
+        EXEC SQL
+                INSERT
+                INTO    testable
+                VALUES  ( DBVLIST_testable ) ;
+        if( SQLCODE )
+        {
+                printf( "INSERT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                return SQLCODE;
+        }
+        else
+        {
+                printf( "INSERT ok\n" );
+        }
+
+        memset( & t , 0x00 , sizeof(testable) );
+        t.n2 = 101 ;
+        t.n4 = 56789 ;
+        t.f4 = 1.2 ;
+        t.f8 = 456.789 ;
+        strcpy( t.str32 , "hi" );
+        strcpy( t.str1024 , "hello earth" );
+
+        DSCINITV_testable();
+        DSCSTOV_testable( & t );
+
+        EXEC SQL
+                INSERT
+                INTO    testable
+                VALUES  ( DBVLIST_testable ) ;
+        if( SQLCODE )
+        {
+                printf( "INSERT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                return SQLCODE;
+        }
+        else
+        {
+                printf( "INSERT ok\n" );
+        }
+
+        memset( & t , 0x00 , sizeof(testable) );
+        t.n2 = 102 ;
+        t.n4 = 56789 ;
+        t.f4 = 1.2 ;
+        t.f8 = 456.789 ;
+        strcpy( t.str32 , "hi" );
+        strcpy( t.str1024 , "hello march" );
+
+        DSCINITV_testable();
+        DSCSTOV_testable( & t );
+
+        EXEC SQL
+                INSERT
+                INTO    testable
+                VALUES  ( DBVLIST_testable ) ;
+        if( SQLCODE )
+        {
+                printf( "INSERT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                return SQLCODE;
+        }
+        else
+        {
+                printf( "INSERT ok\n" );
+        }
+
+        return 0;
+}
+
+int test_update()
+{
+        testable        t ;
+
+        memset( & t , 0x00 , sizeof(testable) );
+        t.n2 = 101 ;
+
+        DSCINITV_testable();
+        DSCSTOV_testable( & t );
+
+        EXEC SQL
+                SELECT  TFLIST_testable
+                INTO    DBVLLIST_testable
+                FROM    testable
+                WHERE   n2 = :testable_n2 ;
+        if( SQLCODE )
+        {
+                printf( "SELECT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                return SQLCODE;
+        }
+        else
+        {
+                printf( "SELECT ok\n" );
+        }
+
+        DSCVTOS_testable( & t );
+
+        strcpy( t.str1024 , "hello sun" );
+
+        DSCINITV_testable();
+        DSCSTOV_testable( & t );
+
+        EXEC SQL
+                UPDATE  testable
+                SET     str1024 = :testable_str1024
+                WHERE   n2 = :testable_n2 ;
+        if( SQLCODE )
+        {
+                printf( "UPDATE failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                return SQLCODE;
+        }
+        else
+        {
+                printf( "UPDATE ok\n" );
+        }
+
+        return 0;
+}
+
+int test_cursor()
+{
+        testable        t ;
+
+        int             nret = 0 ;
+
+        EXEC SQL
+                DECLARE         testable_cursor CURSOR FOR
+                SELECT          TFLIST_testable
+                FROM            testable
+                ORDER BY        n2 ASC ;
+        if( SQLCODE )
+        {
+                printf( "DECLARE failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                return SQLCODE;
+        }
+        else
+        {
+                printf( "DECLARE ok\n" );
+        }
+
+        EXEC SQL
+                OPEN    testable_cursor ;
+        if( SQLCODE )
+        {
+                printf( "OPEN failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                return SQLCODE;
+        }
+        else
+        {
+                printf( "OPEN ok\n" );
+        }
+
+        while(1)
+        {
+                EXEC SQL
+                        FETCH   testable_cursor
+                        INTO    DBVLLIST_testable ;
+                if( SQLCODE == 100 )
+                {
+                        break;
+                }
+                else if( SQLCODE )
+                {
+                        printf( "FETCH failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                        nret = SQLCODE ;
+                }
+                else
+                {
+                        printf( "FETCH ok\n" );
+                }
+
+                memset( & t , 0x00 , sizeof(testable) );
+                DSCVTOS_testable( & t );
+
+                DSCLOG_testable( & t );
+        }
+
+        EXEC SQL
+                CLOSE   testable_cursor ;
+        if( SQLCODE )
+        {
+                printf( "CLOSE failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                return SQLCODE;
+        }
+        else
+        {
+                printf( "CLOSE ok\n" );
+        }
+
+        if( nret )
+                return nret;
+
+        return 0;
+}
+
+EXEC SQL BEGIN DECLARE SECTION ;
+char    sql[] = "DELETE FROM testable WHERE n2 = 102 ;" ;
+EXEC SQL END DECLARE SECTION ;
+
+int test_immediate()
+{
+        EXEC SQL
+                EXECUTE IMMEDIATE :sql ;
+        if( SQLCODE )
+        {
+                printf( "EXECUTE failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                return SQLCODE;
+        }
+        else
+        {
+                printf( "EXECUTE ok\n" );
+        }
+
+        return 0;
+}
+
+EXEC SQL BEGIN DECLARE SECTION ;
+char    sql2[] = "SELECT * FROM testable WHERE n2 >= ? ;" ;
+EXEC SQL END DECLARE SECTION ;
+
+int test_prepare()
+{
+        testable        t ;
+
+        int             nret = 0 ;
+
+        EXEC SQL
+                PREPARE prepare FROM :sql2 ;
+        if( SQLCODE )
+        {
+                printf( "PREPARE failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                return SQLCODE;
+        }
+        else
+        {
+                printf( "PREPARE ok\n" );
+        }
+
+        testable_n2 = 101 ;
+
+        EXEC SQL
+                EXECUTE         prepare
+                INTO            DBVLLIST_testable
+                USING           :testable_n2 ;
+        if( SQLCODE )
+        {
+                printf( "EXECUTE failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                return SQLCODE;
+        }
+        else
+        {
+                printf( "EXECUTE ok\n" );
+        }
+
+        memset( & t , 0x00 , sizeof(testable) );
+        DSCVTOS_testable( & t );
+
+        DSCLOG_testable( & t );
+
+        testable_n2 = 100 ;
+
+        EXEC SQL
+                DECLARE testable_cursor2 CURSOR FOR prepare ;
+        if( SQLCODE )
+        {
+                printf( "DECLARE failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                return SQLCODE;
+        }
+        else
+        {
+                printf( "DECLARE ok\n" );
+        }
+
+        EXEC SQL
+                OPEN    testable_cursor2
+                USING   :testable_n2 ;
+        if( SQLCODE )
+        {
+                printf( "OPEN failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                return SQLCODE;
+        }
+        else
+        {
+                printf( "OPEN ok\n" );
+        }
+
+        while(1)
+        {
+                EXEC SQL
+                        FETCH   testable_cursor2
+                        INTO    DBVLLIST_testable ;
+                if( SQLCODE == 100 )
+                {
+                        break;
+                }
+                else if( SQLCODE )
+                {
+                        printf( "FETCH failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                        nret = SQLCODE ;
+                }
+                else
+                {
+                        printf( "FETCH ok\n" );
+                }
+
+                memset( & t , 0x00 , sizeof(testable) );
+                DSCVTOS_testable( & t );
+
+                DSCLOG_testable( & t );
+        }
+
+        EXEC SQL
+                CLOSE   testable_cursor2 ;
+        if( SQLCODE )
+        {
+                printf( "CLOSE failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                return SQLCODE;
+        }
+        else
+        {
+                printf( "CLOSE ok\n" );
+        }
+
+        if( nret )
+                return nret;
+
+        EXEC SQL
+                DEALLOCATE PREPARE prepare ;
+
+        return 0;
+}
+
+int main()
+{
+        int             nret = 0 ;
+
+        EXEC SQL
+                CONNECT TO      'calvin@127.0.0.1:18432'
+                USER            'calvin'
+                IDENTIFIED BY   'calvin' ;
+        if( SQLCODE )
+        {
+                printf( "CONNECT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                return 1;
+        }
+        else
+        {
+                printf( "CONNECT ok\n" );
+        }
+
+        EXEC SQL
+                BEGIN WORK ;
+        if( SQLCODE )
+        {
+                printf( "BEGIN WORK failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                return 1;
+        }
+        else
+        {
+                printf( "BEGIN WORK ok\n" );
+        }
+
+        do
+        {
+                printf( "--- delete ---------\n" );
+                nret = test_delete() ;
+                if( nret )
+                        break;
+
+                printf( "--- insert ---------\n" );
+                nret = test_insert() ;
+                if( nret )
+                        break;
+
+                printf( "--- update ---------\n" );
+                nret = test_update() ;
+                if( nret )
+                        break;
+
+                printf( "--- cursor ---------\n" );
+                nret = test_cursor() ;
+                if( nret )
+                        break;
+
+                printf( "--- immediate ---------\n" );
+                nret = test_immediate() ;
+                if( nret )
+                        break;
+
+                printf( "--- prepare ---------\n" );
+                nret = test_prepare() ;
+                if( nret )
+                        break;
+        }
+        while(0);
+        if( nret )
+        {
+                EXEC SQL
+                        ROLLBACK WORK ;
+                if( SQLCODE )
+                {
+                        printf( "ROLLBACK WORK failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                        return 1;
+                }
+                else
+                {
+                        printf( "ROLLBACK WORK ok\n" );
+                }
+        }
+        else
+        {
+                EXEC SQL
+                        COMMIT WORK ;
+                if( SQLCODE )
+                {
+                        printf( "COMMIT WORK failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                        return 1;
+                }
+                else
+                {
+                        printf( "COMMIT WORK ok\n" );
+                }
+        }
+
+        EXEC SQL
+                DISCONNECT ;
+        if( SQLCODE )
+        {
+                printf( "DISCONNECT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                return 1;
+        }
+        else
+        {
+                printf( "DISCONNECT ok\n" );
+        }
+
+        return 0;
+}
+$ make
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I/root/local/postgresql/include -E -x c IDL_testable.dsc.ESQL.ec > IDL_testable.dsc.ESQL.ecE # c预处理
+ecpg -h IDL_testable.dsc.ESQL.ecE -o IDL_testable.dsc.ESQL.c # postgresql esql预处理器处理之
+sed -i 's/NULL/0/g' IDL_testable.dsc.ESQL.c # 去掉ecpg加上的pqsql头文件，防止重复包含错误
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I/root/local/postgresql/include -c IDL_testable.dsc.ESQL.c # 最后的编译
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I/root/local/postgresql/include -E -x c test_testable.ec > test_testable.ecE
+ecpg -h test_testable.ecE -o test_testable.c
+sed -i 's/NULL/0/g' test_testable.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I/root/local/postgresql/include -c test_testable.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -o test_testable IDL_testable.dsc.ESQL.o test_testable.o -L.  -L/root/local/postgresql/lib -lecpg
+$ ./test_testable
+CONNECT ok
+BEGIN WORK ok
+--- delete ---------
+DELETE ok
+--- insert ---------
+INSERT ok
+INSERT ok
+INSERT ok
+--- update ---------
+SELECT ok
+UPDATE ok
+--- cursor ---------
+DECLARE ok
+OPEN ok
+FETCH ok
+testable.n2[100]
+testable.n4[56789]
+testable.f4[1.200000]
+testable.f8[456.789000]
+testable.str32[hi]
+testable.str1024[hello world]
+FETCH ok
+testable.n2[101]
+testable.n4[56789]
+testable.f4[1.200000]
+testable.f8[456.789000]
+testable.str32[hi]
+testable.str1024[hello sun]
+FETCH ok
+testable.n2[102]
+testable.n4[56789]
+testable.f4[1.200000]
+testable.f8[456.789000]
+testable.str32[hi]
+testable.str1024[hello march]
+CLOSE ok
+--- immediate ---------
+EXECUTE ok
+--- prepare ---------
+PREPARE ok
+EXECUTE ok
+testable.n2[101]
+testable.n4[56789]
+testable.f4[1.200000]
+testable.f8[456.789000]
+testable.str32[hi]
+testable.str1024[hello sun]
+DECLARE ok
+OPEN ok
+FETCH ok
+testable.n2[100]
+testable.n4[56789]
+testable.f4[1.200000]
+testable.f8[456.789000]
+testable.str32[hi]
+testable.str1024[hello world]
+FETCH ok
+testable.n2[101]
+testable.n4[56789]
+testable.f4[1.200000]
+testable.f8[456.789000]
+testable.str32[hi]
+testable.str1024[hello sun]
+CLOSE ok
+COMMIT WORK ok
+DISCONNECT ok
+[/code]
+
+N-2.DirectStruct报文定义文件语法
 
 每个结构或内嵌子结构定义格式都以
 [code]
@@ -505,9 +1818,9 @@ $ cat IDL_ResponseHeader.dsc
 		STRING	1024	response_desc		DEFAULT		"OK"
 	}
 [/code]
-附加说明：DEFAULT后面的缺省值，由自动化生成的函数FMCINIT_BankTransaction批量初始化。
+附加说明：DEFAULT后面的缺省值，由自动化生成的函数DSCINIT_BankTransaction批量初始化。
 
-5.性能压测
+N-1.性能压测
 
 在高性能场合中，数据序列化和反序列化效率很关键，其中主要考察最终报文大小和序列化速度。
 同时，我们还拿了Google公司大名鼎鼎的Protocol Buffer来做对比实验。
@@ -766,7 +2079,9 @@ sys     0m0.011s
 
 是不是越看越心动了？那就赶紧下载来玩玩吧
 
-6.最后
+N.最后
+
+最近我正在开发一个应用平台，利用tcpdaemon做TCP服务器，利用DirectStruct+fasterxml自动生成的代码轻松解包XML到C结构体，再调用DirectStruct自动生成的ESQL代码INSERT到数据库表里，十几行代码搞定，看，自由组合DirectStruct自动生成的代码能给你带来巨大的便捷性。有了DirectStruct，以后谁还会老老实实的写大量XML转换和ESQL代码呢？
 
 欢迎使用DirectStruct，如果你使用中碰到了问题或者有更酷的想法请告诉我，谢谢 ^_^
 

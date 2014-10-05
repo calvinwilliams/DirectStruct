@@ -13,21 +13,30 @@ c_FILE		=	\
 			IDL_CommHead.dsc.c		\
 			IDL_ResponseHeader.dsc.c	\
 			IDL_BankTransaction.dsc.c	\
+			IDL_BankXmlTransaction.dsc.c	\
 			test_netorder.c			\
 			test_serialize_compact.c	\
 			test_serialize_compress.c	\
 			test_serialize_compress_press.c	\
 			test_trans.c			\
+			test_serialize_xml.c		\
+			test_serialize_json.c		\
 
 ###### 目标文件、安装目录配置区
 BIN		=	test_netorder			\
 			test_serialize_compact		\
 			test_serialize_compress		\
 			test_serialize_compress_press	\
-			test_trans
+			test_trans			\
+
+#			test_serialize_xml		\
+#			test_serialize_json		\
+#			test_testable			\
 
 ###### 编译选项
 CFLAGS		=	-I. \
+			-I$(HOME)/exinc/fasterxml	\
+			-I$(HOME)/exinc/fasterjson	\
 
 ###### 链接选项
 LFLAGS		=	-L. \
@@ -56,9 +65,37 @@ test_serialize_compress	:	test_serialize_compress.o IDL_AllTypes.dsc.o
 	$(CC) -o $@ test_serialize_compress.o IDL_AllTypes.dsc.o $(LFLAGS)
 
 test_serialize_compress_press	:	test_serialize_compress_press.o IDL_AllTypes2.dsc.o
-	# $(CC) -o $@ test_serialize_compress_press.o IDL_AllTypes2.dsc.o $(LFLAGS)
-	gcc -o $@ test_serialize_compress_press.o IDL_AllTypes2.dsc.o $(LFLAGS)
+	$(CC) -o $@ test_serialize_compress_press.o IDL_AllTypes2.dsc.o $(LFLAGS)
 
 test_trans	:	test_trans.o IDL_CommHead.dsc.o IDL_BankTransaction.dsc.o
 	$(CC) -o $@ test_trans.o IDL_CommHead.dsc.o IDL_BankTransaction.dsc.o $(LFLAGS)
+
+IDL_BankXmlTransaction.dsc.o	:	IDL_BankXmlTransaction.dsc.c
+	$(CC) -I$(HOME)/exinc/fasterxml -I. -c IDL_BankXmlTransaction.dsc.c
+
+test_serialize_xml	:	test_serialize_xml.o IDL_BankXmlTransaction.dsc.o
+	$(CC) -o $@ test_serialize_xml.o IDL_BankXmlTransaction.dsc.o $(LFLAGS) -L$(HOME)/exlib -lfasterxml
+
+test_serialize_json	:	test_serialize_json.o IDL_BankJsonTransaction.dsc.o
+	$(CC) -o $@ test_serialize_json.o IDL_BankJsonTransaction.dsc.o $(LFLAGS) -L$(HOME)/exlib -lfasterjson
+
+ECP	=	ecpg
+
+test_testable.o	:	test_testable.ec
+	$(CC) -I/root/local/postgresql/include -E -x c test_testable.ec > test_testable.ecE
+	$(ECP) -h test_testable.ecE -o test_testable.c
+	sed -i 's/NULL/0/g' test_testable.c
+	$(CC) -I/root/local/postgresql/include -c test_testable.c
+
+IDL_testable.dsc.ESQL.o	:	IDL_testable.dsc.ESQL.ec
+	$(CC) -I/root/local/postgresql/include -E -x c IDL_testable.dsc.ESQL.ec > IDL_testable.dsc.ESQL.ecE
+	$(ECP) -h IDL_testable.dsc.ESQL.ecE -o IDL_testable.dsc.ESQL.c
+	sed -i 's/NULL/0/g' IDL_testable.dsc.ESQL.c
+	$(CC) -I/root/local/postgresql/include -c IDL_testable.dsc.ESQL.c
+
+test_testable	:	IDL_testable.dsc.ESQL.o test_testable.o
+	$(CC) -o $@ IDL_testable.dsc.ESQL.o test_testable.o $(LFLAGS) -L/root/local/postgresql/lib -lecpg
+
+CLEAN_ADDITION	=	test_testable.ecE test_testable.c test_testable.o \
+			IDL_testable.dsc.ESQL.ecE IDL_testable.dsc.ESQL.c IDL_testable.dsc.ESQL.o \
 

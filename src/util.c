@@ -8,6 +8,61 @@
  * Licensed under the LGPL v2.1, see the file LICENSE in base directory.
  */
 
+char *strtok2( char **base )
+{
+	char	*begin = NULL ;
+	
+	if( base == NULL || (*base) == NULL )
+		return NULL;
+	
+	for( ; (**base) ; (*base)++ )
+	{
+		if( ! strchr( " \t\r\n" , (**base) ) )
+			break;
+	}
+	if( (**base) == '\0' )
+		return NULL;
+	
+	if( (**base) == '\"' )
+	{
+		(*base)++;
+		begin = (*base) ;
+		
+		for( ; (**base) ; (*base)++ )
+		{
+			if( (**base) == '\"' )
+				break;
+		}
+		if( (**base) == '\0' )
+			return NULL;
+		
+		(**base) = '\0' ;
+		(*base)++;
+	}
+	else
+	{
+		begin = (*base) ;
+		
+		for( ; (**base) ; (*base)++ )
+		{
+			if( strchr( " \t\r\n" , (**base) ) )
+				break;
+		}
+		if( (**base) == '\0' )
+		{
+			(**base) = '\0' ;
+			(*base) = NULL ;
+		}
+		else
+		{
+			(**base) = '\0' ;
+			(*base)++;
+		}
+	}
+	
+	return begin;
+}
+
 int ClearLeft( char *str )
 {
 	char *pc = NULL ;

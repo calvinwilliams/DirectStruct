@@ -39,16 +39,23 @@ c_FILE		=	\
 			test_serialize_compress.c	\
 			test_serialize_compress_press.c	\
 			test_trans.c			\
+			test_serialize_xml.c		\
+			test_serialize_json.c		\
 
 ###### 目标文件、安装目录配置区
 BIN		=	test_netorder			\
 			test_serialize_compact		\
 			test_serialize_compress		\
 			test_serialize_compress_press	\
-			test_trans
+			test_trans			\
+
+#			test_serialize_xml		\
+#			test_serialize_json		\
 
 ###### 编译选项
 CFLAGS		=	-I. \
+			-I/usr/include/fasterxml	\
+			-I/usr/include/fasterjson	\
 
 ###### 链接选项
 LFLAGS		=	-L. \
@@ -141,9 +148,14 @@ test_serialize_compress	:	test_serialize_compress.o IDL_AllTypes.dsc.o
 	$(CC) -o $@ test_serialize_compress.o IDL_AllTypes.dsc.o $(LFLAGS)
 
 test_serialize_compress_press	:	test_serialize_compress_press.o IDL_AllTypes2.dsc.o
-	# $(CC) -o $@ test_serialize_compress_press.o IDL_AllTypes2.dsc.o $(LFLAGS)
-	gcc -o $@ test_serialize_compress_press.o IDL_AllTypes2.dsc.o $(LFLAGS)
+	$(CC) -o $@ test_serialize_compress_press.o IDL_AllTypes2.dsc.o $(LFLAGS)
 
 test_trans	:	test_trans.o IDL_CommHead.dsc.o IDL_BankTransaction.dsc.o
 	$(CC) -o $@ test_trans.o IDL_CommHead.dsc.o IDL_BankTransaction.dsc.o $(LFLAGS)
+
+test_serialize_xml	:	test_serialize_xml.o IDL_BankXmlTransaction.dsc.o
+	$(CC) -o $@ test_serialize_xml.o IDL_BankXmlTransaction.dsc.o $(LFLAGS)
+
+test_serialize_json	:	test_serialize_json.o IDL_BankJsonTransaction.dsc.o
+	$(CC) -o $@ test_serialize_json.o IDL_BankJsonTransaction.dsc.o $(LFLAGS)
 

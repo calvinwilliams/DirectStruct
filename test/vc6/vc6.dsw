@@ -51,6 +51,30 @@ Package=<4>
 
 ###############################################################################
 
+Project: "test_serialize_json"=".\test_serialize_json\test_serialize_json.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "test_serialize_xml"=".\test_serialize_xml\test_serialize_xml.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "test_trans"=".\test_trans\test_trans.dsp" - Package Owner=<4>
 
 Package=<5>

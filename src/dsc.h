@@ -55,6 +55,7 @@
  * util
  */
 
+char *strtok2( char **base );
 int ClearLeft( char *str );
 int ClearRight( char *str );
 char *StringNoEnter( char *str );
@@ -70,6 +71,14 @@ struct CommandParameter
 {
 	char	*pathfilename ;
 	int	output_c_flag ;
+	int	output_c_order_flag ;
+	int	output_c_compact_flag ;
+	int	output_c_compress_flag ;
+	int	output_c_xml_flag ;
+	int	output_c_json_flag ;
+	int	output_c_LOG_flag ;
+	int	output_sql_flag ;
+	int	output_ec_pqsql_flag ;
 } ;
 
 /*
@@ -89,8 +98,8 @@ struct StructInfo ;
 struct FieldInfo
 {
 	char			field_type[ 10 + 1 ] ;
-	unsigned int		field_len ;
-	unsigned int		field_offset ;
+	int			field_len ;
+	int			field_offset ;
 	char			field_name[ 64 + 1 ] ;
 	
 	char			init_default[ 1024 + 1 ] ;
@@ -103,9 +112,14 @@ struct FieldInfo
 struct StructInfo
 {
 	char			struct_name[ 64 + 1 ] ;
-	unsigned int		struct_length ;
-	unsigned int		field_count ;
-	unsigned int		array_size ;
+	int			struct_length ;
+	int			field_count ;
+	int			array_size ;
+	
+	char			create_sql[10][ 1024 + 1 ] ;
+	int			create_sql_count ;
+	char			drop_sql[10][ 1024 + 1 ] ;
+	int			drop_sql_count ;
 	
 	struct FieldInfo	*field_list ;
 	struct FieldInfo	*last_field ;
@@ -145,5 +159,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
  */
 
 int GenerateCCode( struct CommandParameter *pcmdparam , struct StructInfo *pmsginfo , FILE *fp_dsc_h , FILE *fp_dsc_c , FILE *fp_dsc_LOG_c );
+int GenerateSqlCode( struct CommandParameter *pcp , struct StructInfo *psi , FILE *fp_dsc_create_sql , FILE *fp_dsc_drop_sql );
+int GenerateECCode_PQSQL( struct CommandParameter *pcp , struct StructInfo *psi , FILE *fp_dsc_ESQL_eh , FILE *fp_dsc_ESQL_ec );
 
 #endif

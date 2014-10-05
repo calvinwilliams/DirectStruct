@@ -1,3 +1,8 @@
+ver 1.1.0	2014-09-20	calvin
+		* add generate code automatically : XML serialize/unserialize functions
+		* add generate code automatically : JSON serialize/unserialize functions
+		* add generate code automatically : ESQL code
+
 ver 1.0.4	2014-09-09	calvin
 		* Fixed a problem on AIX
 		* Fixed a problem about float-number
