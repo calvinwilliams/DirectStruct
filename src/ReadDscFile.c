@@ -8,18 +8,19 @@
  * Licensed under the LGPL v2.1, see the file LICENSE in base directory.
  */
 
-int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset , char *dsc_pathfilename , int flag , FILE *fp_dsc , long lineno , struct StructInfo *pmsginfo )
+int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset , char *dsc_pathfilename , int flag , FILE *fp_dsc , long lineno , struct StructInfo *psi )
 {
 	char			filebuffer[ 4096 + 1 ] ;
-	char			tmp[ 64 + 1 ] ;
-	char			tmp2[ 64 + 1 ] ;
-	int			count ;
+	char			filebuffer_bak[ 4096 + 1 ] ;
+	char			*base = NULL ;
+	char			*ptr = NULL ;
+	char			*ptr2 = NULL ;
+	char			*ptr3 = NULL ;
 	int			struct_len ;
 	
-	char			include_pathfilename[ 256 + 1 ] ;
-	
 	struct FieldInfo	*pfld = NULL ;
-	struct StructInfo	*pst = NULL ;
+	struct StructInfo	*psi_sub = NULL ;
+	struct StructInfo	*psi_next = NULL ;
 	
 	if( depth > DSC_MAXDEPTH - 1 )
 	{
@@ -41,51 +42,77 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 		if( STRCMP( filebuffer , == , "" ) )
 			continue;
 		
+		strcpy( filebuffer_bak , filebuffer );
+		
 		switch( flag )
 		{
 			case 0 :
-				memset( tmp , 0x00 , sizeof(tmp) );
-				count = sscanf( filebuffer , "%s" , tmp ) ;
-				if( STRCMP( tmp , == , "STRUCT" ) )
+				base = filebuffer ;
+				ptr = strtok2( & base ) ;
+				if( STRCMP( ptr , == , "STRUCT" ) )
 				{
-					pst = (struct StructInfo *)malloc( sizeof(struct StructInfo) ) ;
-					if( pst == NULL )
+					psi_next = (struct StructInfo *)malloc( sizeof(struct StructInfo) ) ;
+					if( psi_next == NULL )
 					{
-						fprintf( stderr , "*** ERROR : : alloc failed , errno[%d]\n" , errno );
+						fprintf( stderr , "*** ERROR : alloc failed , errno[%d]\n" , errno );
 						return -1;
 					}
+					memset( psi_next , 0x00 , sizeof(struct StructInfo) );
 					
-					memset( tmp , 0x00 , sizeof(tmp) );
-					memset( tmp2 , 0x00 , sizeof(tmp2) );
-					memset( pst , 0x00 , sizeof(struct StructInfo) );
-					count = sscanf( filebuffer , "%s %s %s %d" , tmp , pst->struct_name , tmp2 , & (pst->array_size) ) ;
-					if( count == 2 && STRCMP( tmp , == , "STRUCT" ) )
+					ptr = strtok2( & base ) ;
+					if( ptr == NULL )
 					{
-						fprintabs( stdout , depth ); printf( "STRUCT %s\n" , pst->struct_name );
+						fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+						return -1;
 					}
-					else if( count == 4 && STRCMP( tmp , == , "STRUCT" ) && STRCMP( tmp2 , == , "ARRAY" ) )
+					strncpy( psi_next->struct_name , ptr , sizeof(psi_next->struct_name)-1 );
+					
+					while(1)
 					{
-						fprintabs( stdout , depth ); printf( "STRUCT %s ARRAY %d\n" , pst->struct_name , pst->array_size );
+						ptr = strtok2( & base ) ;
+						if( ptr == NULL )
+							break;
+						
+						ptr2 = strtok2( & base ) ;
+						if( ptr2 == NULL )
+						{
+							fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+							return -1;
+						}
+						
+						if( STRCMP( ptr , == , "ARRAY" ) )
+						{
+							psi_next->array_size = atoi(ptr2) ;
+						}
+						else
+						{
+							fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+							return -1;
+						}
+					}
+					
+					if( psi_next->array_size > 0 )
+					{
+						fprintabs( stdout , depth ); printf( "STRUCT %s ARRAY %d\n" , psi_next->struct_name , psi_next->array_size );
 					}
 					else
 					{
-						fprintf( stderr , "*** ERROR : %s:%ld : line [%s] invalid\n" , dsc_pathfilename , lineno , filebuffer );
-						return -1;
+						fprintabs( stdout , depth ); printf( "STRUCT %s\n" , psi_next->struct_name );
 					}
 					
-					struct_len = ReadDscFile( pcmdparam , depth , p_offset , dsc_pathfilename , 1 , fp_dsc , lineno , pst ) ;
+					struct_len = ReadDscFile( pcmdparam , depth , p_offset , dsc_pathfilename , 1 , fp_dsc , lineno , psi_next ) ;
 					if( struct_len < 0 )
 						return struct_len;
 					
 					(*p_offset) += struct_len ;
-					pmsginfo->next_struct = pst ;
-					pmsginfo->struct_length += struct_len ;
+					psi->next_struct = psi_next ;
+					psi->struct_length += struct_len ;
 					
 					continue;
 				}
 				else
 				{
-					fprintf( stderr , "*** ERROR : %s:%ld : head line [%s] invalid\n" , dsc_pathfilename , lineno , filebuffer );
+					fprintf( stderr , "*** ERROR : %s:%ld : invalid keyword [%s]\n" , dsc_pathfilename , lineno , ptr );
 					return -1;
 				}
 				
@@ -94,7 +121,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 			case 1 :
 				if( STRCMP( filebuffer , != , "{" ) )
 				{
-					fprintf( stderr , "*** ERROR : %s:%ld : second line [%s] invalid\n" , dsc_pathfilename , lineno , filebuffer );
+					fprintf( stderr , "*** ERROR : %s:%ld : invalid keyword [%s]\n" , dsc_pathfilename , lineno , filebuffer );
 					return -1;
 				}
 				
@@ -106,79 +133,155 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 				
 				if( STRCMP( filebuffer , == , "}" ) )
 				{
-					if( pmsginfo->array_size == 0 )
-						return pmsginfo->struct_length;
+					if( psi->array_size == 0 )
+						return psi->struct_length;
 					else
-						return pmsginfo->struct_length * pmsginfo->array_size ;
+						return psi->struct_length * psi->array_size ;
 				}
 				
-				memset( tmp , 0x00 , sizeof(tmp) );
-				memset( include_pathfilename , 0x00 , sizeof(include_pathfilename) );
-				sscanf( filebuffer , "%s %s" , tmp , include_pathfilename );
-				if( STRCMP( tmp , == , "INCLUDE" ) )
+				base = filebuffer ;
+				ptr = strtok2( & base ) ;
+				if( ptr == NULL )
+				{
+					fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+					return -1;
+				}
+				
+				if( STRCMP( ptr , == , "INCLUDE" ) )
 				{
 					FILE	*include_fp_dsc = NULL ;
-					include_fp_dsc = fopen( include_pathfilename , "r" ) ;
-					if( include_fp_dsc == NULL )
+					
+					ptr = strtok2( & base ) ;
+					if( ptr == NULL )
 					{
-						fprintf( stderr , "*** ERROR : %s:%ld : file[%s] can't read\n" , dsc_pathfilename , lineno , include_pathfilename );
+						fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
 						return -1;
 					}
-					struct_len = ReadDscFile( pcmdparam , depth , p_offset , include_pathfilename , 2 , include_fp_dsc , 0 , pmsginfo ) ;
+					
+					include_fp_dsc = fopen( ptr , "r" ) ;
+					if( include_fp_dsc == NULL )
+					{
+						fprintf( stderr , "*** ERROR : %s:%ld : file[%s] can't read\n" , dsc_pathfilename , lineno , ptr );
+						return -1;
+					}
+					struct_len = ReadDscFile( pcmdparam , depth , p_offset , ptr , 2 , include_fp_dsc , 0 , psi ) ;
 					fclose( include_fp_dsc );
 					if( struct_len < 0 )
 						return struct_len;
-					pmsginfo->struct_length += struct_len ;
+					psi->struct_length += struct_len ;
 					
 					continue;
 				}
-				if( STRCMP( tmp , == , "STRUCT" ) )
+				if( STRCMP( ptr , == , "STRUCT" ) )
 				{
-					pst = (struct StructInfo *)malloc( sizeof(struct StructInfo) ) ;
-					if( pst == NULL )
+					psi_sub = (struct StructInfo *)malloc( sizeof(struct StructInfo) ) ;
+					if( psi_sub == NULL )
 					{
 						fprintf( stderr , "*** ERROR : : alloc failed , errno[%d]\n" , errno );
 						return -1;
 					}
+					memset( psi_sub , 0x00 , sizeof(struct StructInfo) );
 					
-					memset( tmp , 0x00 , sizeof(tmp) );
-					memset( tmp2 , 0x00 , sizeof(tmp2) );
-					memset( pst , 0x00 , sizeof(struct StructInfo) );
-					count = sscanf( filebuffer , "%s %s %s %d" , tmp , pst->struct_name , tmp2 , & (pst->array_size) ) ;
-					if( count == 2 && STRCMP( tmp , == , "STRUCT" ) )
+					ptr = strtok2( & base ) ;
+					if( ptr == NULL )
 					{
-						fprintabs( stdout , depth + 1 ); printf( "STRUCT %s\n" , pst->struct_name );
+						fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+						return -1;
 					}
-					else if( count == 4 && STRCMP( tmp , == , "STRUCT" ) && STRCMP( tmp2 , == , "ARRAY" ) )
+					strncpy( psi_sub->struct_name , ptr , sizeof(psi_sub->struct_name)-1 );
+					
+					while(1)
 					{
-						fprintabs( stdout , depth + 1 ); printf( "STRUCT %s ARRAY %d\n" , pst->struct_name , pst->array_size );
+						ptr = strtok2( & base ) ;
+						if( ptr == NULL )
+							break;
+						
+						ptr2 = strtok2( & base ) ;
+						if( ptr2 == NULL )
+						{
+							fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+							return -1;
+						}
+						
+						if( STRCMP( ptr , == , "ARRAY" ) )
+						{
+							psi_sub->array_size = atoi(ptr2) ;
+						}
+						else
+						{
+							fprintf( stderr , "*** ERROR : %s:%ld : invalid keyword [%s]\n" , dsc_pathfilename , lineno , ptr );
+							return -1;
+						}
+					}
+					
+					if( psi_sub->array_size > 0 )
+					{
+						fprintabs( stdout , depth ); printf( "STRUCT %s ARRAY %d\n" , psi_sub->struct_name , psi_sub->array_size );
 					}
 					else
 					{
-						fprintf( stderr , "*** ERROR : %s:%ld : line [%s] invalid\n" , dsc_pathfilename , lineno , filebuffer );
-						return -1;
+						fprintabs( stdout , depth ); printf( "STRUCT %s\n" , psi_sub->struct_name );
 					}
 					
-					struct_len = ReadDscFile( pcmdparam , depth + 1 , p_offset , dsc_pathfilename , 1 , fp_dsc , lineno , pst ) ;
+					struct_len = ReadDscFile( pcmdparam , depth + 1 , p_offset , dsc_pathfilename , 1 , fp_dsc , lineno , psi_sub ) ;
 					if( struct_len < 0 )
 						return struct_len;
 					
-					if( pmsginfo->sub_struct_list == NULL )
+					if( psi->sub_struct_list == NULL )
 					{
-						pmsginfo->sub_struct_list = pst ;
-						pmsginfo->last_sub_struct = pst ;
+						psi->sub_struct_list = psi_sub ;
+						psi->last_sub_struct = psi_sub ;
 					}
 					else
 					{
-						pmsginfo->last_sub_struct->next_struct = pst ;
-						pmsginfo->last_sub_struct = pst ;
+						psi->last_sub_struct->next_struct = psi_sub ;
+						psi->last_sub_struct = psi_sub ;
 					}
 					
-					pmsginfo->struct_length += struct_len ;
-					if( pst->array_size == 0 )
-						pmsginfo->field_count += pst->field_count ;
+					psi->struct_length += struct_len ;
+					if( psi_sub->array_size == 0 )
+						psi->field_count += psi_sub->field_count ;
 					else
-						pmsginfo->field_count += pst->field_count * pst->array_size ;
+						psi->field_count += psi_sub->field_count * psi_sub->array_size ;
+					
+					continue;
+				}
+				
+				if( STRCMP( ptr , == , "CREATE_SQL" ) )
+				{
+					if( psi->create_sql_count >= sizeof(psi->create_sql) / sizeof(psi->create_sql[psi->create_sql_count]) )
+					{
+						fprintf( stderr , "*** ERROR : %s:%ld : too many create sql\n" , dsc_pathfilename , lineno );
+						return -1;
+					}
+					
+					ptr2 = strtok2( & base ) ;
+					if( ptr2 == NULL )
+					{
+						fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+						return -1;
+					}
+					strncpy( psi->create_sql[psi->create_sql_count] , ptr2 , sizeof(psi->create_sql[psi->create_sql_count])-1 );
+					psi->create_sql_count++;
+					
+					continue;
+				}
+				else if( STRCMP( ptr , == , "DROP_SQL" ) )
+				{
+					if( psi->drop_sql_count >= sizeof(psi->drop_sql) / sizeof(psi->drop_sql[psi->drop_sql_count]) )
+					{
+						fprintf( stderr , "*** ERROR : %s:%ld : too many drop sql\n" , dsc_pathfilename , lineno );
+						return -1;
+					}
+					
+					ptr2 = strtok2( & base ) ;
+					if( ptr2 == NULL )
+					{
+						fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+						return -1;
+					}
+					strncpy( psi->drop_sql[psi->drop_sql_count] , ptr2 , sizeof(psi->drop_sql[psi->drop_sql_count])-1 );
+					psi->drop_sql_count++;
 					
 					continue;
 				}
@@ -191,8 +294,17 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 				}
 				memset( pfld , 0x00 , sizeof(struct FieldInfo) );
 				
-				memset( tmp , 0x00 , sizeof(tmp) );
-				count = sscanf( filebuffer , "%s %d %s %s %[^\n]" , pfld->field_type , & (pfld->field_len) , pfld->field_name , tmp , pfld->init_default ) ;
+				ptr2 = strtok2( & base ) ;
+				ptr3 = strtok2( & base ) ;
+				if( ptr2 == NULL || ptr3 == NULL )
+				{
+					fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+					return -1;
+				}
+				strncpy( pfld->field_type , ptr , sizeof(pfld->field_type)-1 );
+				pfld->field_len = atoi(ptr2) ;
+				strncpy( pfld->field_name , ptr3 , sizeof(pfld->field_name)-1 );
+				
 				if(	(
 						( STRCMP( pfld->field_type , == , "INT" ) || STRCMP( pfld->field_type , == , "UINT" ) )
 						&&
@@ -222,52 +334,57 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 				}
 				else
 				{
-					fprintf( stderr , "*** ERROR : %s:%ld : line [%s] invalid\n" , dsc_pathfilename , lineno , filebuffer );
+					fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
 					return -1;
 				}
 				
-				if( STRCMP( tmp , == , "" ) )
+				while(1)
 				{
-				}
-				else if( STRCMP( tmp , == , "DEFAULT" ) )
-				{
-				}
-				else
-				{
-					fprintf( stderr , "*** ERROR : %s:%ld : line [%s] invalid\n" , dsc_pathfilename , lineno , filebuffer );
-					return -1;
+					ptr = strtok2( & base ) ;
+					if( ptr == NULL )
+						break;
+					
+					ptr2 = strtok2( & base ) ;
+					if( ptr2 == NULL )
+					{
+						fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+						return -1;
+					}
+					
+					if( STRCMP( ptr , == , "DEFAULT" ) )
+					{
+						strncpy( pfld->init_default , ptr2 , sizeof(pfld->init_default)-1 );
+					}
+					else
+					{
+						fprintf( stderr , "*** ERROR : invalid keyword [%s]\n" , ptr );
+						return -1;
+					}
 				}
 				
 				pfld->field_offset = (*p_offset) ;
 				
 				fprintabs( stdout , depth ); printf( "	%s %d %s\n" , pfld->field_type , pfld->field_len , pfld->field_name );
 				
-				pmsginfo->struct_length += pfld->field_len ;
-				pmsginfo->field_count++;
+				psi->struct_length += pfld->field_len ;
+				psi->field_count++;
 				(*p_offset) += pfld->field_len ;
-				/*
-				if( STRCMP( pfld->field_type , == , "STRING" ) )
+				if( psi->field_list == NULL )
 				{
-					pmsginfo->struct_length++;
-					(*p_offset)++;
-				}
-				*/
-				if( pmsginfo->field_list == NULL )
-				{
-					pmsginfo->field_list = pfld ;
+					psi->field_list = pfld ;
 				}
 				else
 				{
-					pmsginfo->last_field->next_field = pfld ;
+					psi->last_field->next_field = pfld ;
 				}
-				pmsginfo->last_field = pfld ;
+				psi->last_field = pfld ;
 				
 				break;
 		}
 	}
 	
-	if( pmsginfo->array_size == 0 )
-		return pmsginfo->struct_length;
+	if( psi->array_size == 0 )
+		return psi->struct_length;
 	else
-		return pmsginfo->struct_length * pmsginfo->array_size ;
+		return psi->struct_length * psi->array_size ;
 }

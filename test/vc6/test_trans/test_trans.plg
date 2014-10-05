@@ -3,146 +3,18 @@
 <pre>
 <h1>Build Log</h1>
 <h3>
---------------------Configuration: test_netorder - Win32 Debug--------------------
-</h3>
-<h3>Command Lines</h3>
-Creating temporary file "C:\DOCUME~1\hzbank\LOCALS~1\Temp\RSP275.tmp" with contents
-[
-/nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/test_netorder.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
-"D:\Work\C Projects\DirectStruct-1.0.3\test\IDL_AllTypes.dsc.c"
-"D:\Work\C Projects\DirectStruct-1.0.3\test\test_netorder.c"
-]
-Creating command line "cl.exe @C:\DOCUME~1\hzbank\LOCALS~1\Temp\RSP275.tmp" 
-Creating temporary file "C:\DOCUME~1\hzbank\LOCALS~1\Temp\RSP276.tmp" with contents
-[
-kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/test_netorder.pdb" /debug /machine:I386 /out:"Debug/test_netorder.exe" /pdbtype:sept 
-".\Debug\IDL_AllTypes.dsc.obj"
-".\Debug\test_netorder.obj"
-]
-Creating command line "link.exe @C:\DOCUME~1\hzbank\LOCALS~1\Temp\RSP276.tmp"
-<h3>Output Window</h3>
-Compiling...
-IDL_AllTypes.dsc.c
-test_netorder.c
-Linking...
-   Creating library Debug/test_netorder.lib and object Debug/test_netorder.exp
-
-
-
-<h3>Results</h3>
-test_netorder.exe - 0 error(s), 0 warning(s)
-<h3>
---------------------Configuration: test_serialize_compact - Win32 Debug--------------------
-</h3>
-<h3>Command Lines</h3>
-Creating temporary file "C:\DOCUME~1\hzbank\LOCALS~1\Temp\RSP27A.tmp" with contents
-[
-/nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/test_serialize_compact.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
-"D:\Work\C Projects\DirectStruct-1.0.3\test\IDL_AllTypes.dsc.c"
-"D:\Work\C Projects\DirectStruct-1.0.3\test\test_serialize_compact.c"
-]
-Creating command line "cl.exe @C:\DOCUME~1\hzbank\LOCALS~1\Temp\RSP27A.tmp" 
-Creating temporary file "C:\DOCUME~1\hzbank\LOCALS~1\Temp\RSP27B.tmp" with contents
-[
-kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/test_serialize_compact.pdb" /debug /machine:I386 /out:"Debug/test_serialize_compact.exe" /pdbtype:sept 
-".\Debug\IDL_AllTypes.dsc.obj"
-".\Debug\test_serialize_compact.obj"
-]
-Creating command line "link.exe @C:\DOCUME~1\hzbank\LOCALS~1\Temp\RSP27B.tmp"
-<h3>Output Window</h3>
-Compiling...
-IDL_AllTypes.dsc.c
-test_serialize_compact.c
-Linking...
-   Creating library Debug/test_serialize_compact.lib and object Debug/test_serialize_compact.exp
-
-
-
-<h3>Results</h3>
-test_serialize_compact.exe - 0 error(s), 0 warning(s)
-<h3>
---------------------Configuration: test_serialize_compress - Win32 Debug--------------------
-</h3>
-<h3>Command Lines</h3>
-Creating temporary file "C:\DOCUME~1\hzbank\LOCALS~1\Temp\RSP27F.tmp" with contents
-[
-/nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/test_serialize_compress.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
-"D:\Work\C Projects\DirectStruct-1.0.3\test\IDL_AllTypes.dsc.c"
-"D:\Work\C Projects\DirectStruct-1.0.3\test\test_serialize_compress.c"
-]
-Creating command line "cl.exe @C:\DOCUME~1\hzbank\LOCALS~1\Temp\RSP27F.tmp" 
-Creating temporary file "C:\DOCUME~1\hzbank\LOCALS~1\Temp\RSP280.tmp" with contents
-[
-kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/test_serialize_compress.pdb" /debug /machine:I386 /out:"Debug/test_serialize_compress.exe" /pdbtype:sept 
-".\Debug\IDL_AllTypes.dsc.obj"
-".\Debug\test_serialize_compress.obj"
-]
-Creating command line "link.exe @C:\DOCUME~1\hzbank\LOCALS~1\Temp\RSP280.tmp"
-<h3>Output Window</h3>
-Compiling...
-IDL_AllTypes.dsc.c
-test_serialize_compress.c
-Linking...
-   Creating library Debug/test_serialize_compress.lib and object Debug/test_serialize_compress.exp
-
-
-
-<h3>Results</h3>
-test_serialize_compress.exe - 0 error(s), 0 warning(s)
-<h3>
---------------------Configuration: test_serialize_compress_press - Win32 Debug--------------------
-</h3>
-<h3>Command Lines</h3>
-Creating temporary file "C:\DOCUME~1\hzbank\LOCALS~1\Temp\RSP284.tmp" with contents
-[
-/nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/test_serialize_compress_press.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
-"D:\Work\C Projects\DirectStruct-1.0.3\test\test_serialize_compress_press.c"
-"D:\Work\C Projects\DirectStruct-1.0.3\test\IDL_AllTypes2.dsc.c"
-]
-Creating command line "cl.exe @C:\DOCUME~1\hzbank\LOCALS~1\Temp\RSP284.tmp" 
-Creating temporary file "C:\DOCUME~1\hzbank\LOCALS~1\Temp\RSP285.tmp" with contents
-[
-kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/test_serialize_compress_press.pdb" /debug /machine:I386 /out:"Debug/test_serialize_compress_press.exe" /pdbtype:sept 
-".\Debug\test_serialize_compress_press.obj"
-".\Debug\IDL_AllTypes2.dsc.obj"
-]
-Creating command line "link.exe @C:\DOCUME~1\hzbank\LOCALS~1\Temp\RSP285.tmp"
-<h3>Output Window</h3>
-Compiling...
-test_serialize_compress_press.c
-IDL_AllTypes2.dsc.c
-Linking...
-   Creating library Debug/test_serialize_compress_press.lib and object Debug/test_serialize_compress_press.exp
-
-
-
-<h3>Results</h3>
-test_serialize_compress_press.exe - 0 error(s), 0 warning(s)
-<h3>
 --------------------Configuration: test_trans - Win32 Debug--------------------
 </h3>
 <h3>Command Lines</h3>
-Creating temporary file "C:\DOCUME~1\hzbank\LOCALS~1\Temp\RSP289.tmp" with contents
+Creating temporary file "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP1D2.tmp" with contents
 [
-/nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/test_trans.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
-"D:\Work\C Projects\DirectStruct-1.0.3\test\IDL_BankTransaction.dsc.c"
-"D:\Work\C Projects\DirectStruct-1.0.3\test\IDL_CommHead.dsc.c"
-"D:\Work\C Projects\DirectStruct-1.0.3\test\test_trans.c"
-]
-Creating command line "cl.exe @C:\DOCUME~1\hzbank\LOCALS~1\Temp\RSP289.tmp" 
-Creating temporary file "C:\DOCUME~1\hzbank\LOCALS~1\Temp\RSP28A.tmp" with contents
-[
-kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/test_trans.pdb" /debug /machine:I386 /out:"Debug/test_trans.exe" /pdbtype:sept 
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib fastxml.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/test_trans.pdb" /debug /machine:I386 /out:"Debug/test_trans.exe" /pdbtype:sept 
 ".\Debug\IDL_BankTransaction.dsc.obj"
-".\Debug\IDL_CommHead.dsc.obj"
 ".\Debug\test_trans.obj"
+".\Debug\IDL_CommHead.dsc.obj"
 ]
-Creating command line "link.exe @C:\DOCUME~1\hzbank\LOCALS~1\Temp\RSP28A.tmp"
+Creating command line "link.exe @C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP1D2.tmp"
 <h3>Output Window</h3>
-Compiling...
-IDL_BankTransaction.dsc.c
-IDL_CommHead.dsc.c
-test_trans.c
 Linking...
    Creating library Debug/test_trans.lib and object Debug/test_trans.exp
 

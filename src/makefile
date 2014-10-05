@@ -13,6 +13,8 @@ c_FILE		=	\
 			dsc.c \
 			ReadDscFile.c \
 			GenerateCCode.c \
+			GenerateSqlCode.c \
+			GenerateECCode.c \
 
 ###### 目标文件、安装目录配置区
 BIN		=	dsc
