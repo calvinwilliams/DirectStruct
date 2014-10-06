@@ -1,0 +1,379 @@
+C结构体工具DirectStruct（综合示例一）
+
+1.编写定义文件，用工具dsc处理之，自动生成XML转换代码和ESQL代码片段
+2.编写客户端代码
+3.编写服务端代码
+4.编译运行
+
+------------------------------------------------------------
+
+C结构体工具DirectStruct是一个强有力的代码自动生成工具，它可以自动生成C结构体与XML、JSON、二进制（带压缩）报文之间的转换代码，还能自动生成ESQL代码片段，提高开发效率，避免手工编码风险。
+
+综合示例一演示了客户端把一个C结构体变量打包成XML报文，通过TCP发送给服务端，服务端解包XML报文成C结构体变量，然后通过ESQL方式登记到数据库表中。通过示例，你可以看到中间的绝大多数令人头痛的代码都可以通过DirectStruct自动生成，这使得实际要编写的应用代码变得简洁和高效。
+本示例因为涉及到XML，DirectStruct的XML处理依赖于开源库fasterxml。
+完整示例代码放在test2目录里，你也可以自己运行观察。
+
+1.编写定义文件，用工具dsc处理之，自动生成XML转换代码和ESQL代码片段
+[code]
+$ cat IDL_userinfo.dsc
+STRUCT  userinfo
+{
+       INT     4       user_id
+       STRING  16      user_name
+       STRING  128     email
+
+       CREATE_SQL      "CREATE UNIQUE INDEX userinfo_idx1 ON userinfo ( user_id ) ;"
+       DROP_SQL        "DROP INDEX testable_idx1 ;"
+}
+$ dsc -f IDL_userinfo.dsc -c-xml -sql -ec-pqsql -c-LOG
+STRUCT userinfo
+       INT 4 user_id
+       STRING 16 user_name
+       STRING 128 email
+ok!
+$ ls -1 IDL_userinfo.*
+IDL_userinfo.dsc
+IDL_userinfo.dsc.ESQL.ec
+IDL_userinfo.dsc.ESQL.eh
+IDL_userinfo.dsc.LOG.c
+IDL_userinfo.dsc.c
+IDL_userinfo.dsc.create.sql
+IDL_userinfo.dsc.drop.sql
+IDL_userinfo.dsc.h
+[/code]
+
+IDL_userinfo.dsc.h里有userinfo结构定义。
+XML转换函数定义在IDL_userinfo.dsc.c，声明在IDL_userinfo.dsc.h。
+ESQL代码片段定义在IDL_userinfo.dsc.ESQL.ec，声明在IDL_userinfo.dsc.ESQL.eh。
+IDL_userinfo.dsc.LOG.c里有把userinfo结构体变量所有字段值输出到标准输出函数。
+IDL_userinfo.dsc.create.sql为表userinfo建表SQL脚本，IDL_userinfo.dsc.drop.sql为销毁表SQL脚本。
+
+
+2.编写客户端代码
+[code]
+$ cat test_client.c
+...
+int test_client()
+{
+        userinfo                u ;
+        char                    xml_buffer[ 1024 + 1 ] ;
+        int                     xml_len ;
+
+        int                     connect_sock ;
+        struct sockaddr_in      connect_addr ;
+
+        char                    commheader_buffer[ 4 + 1 ] ;
+        int                     commheader_len ;
+
+        int                     nret ;
+
+        memset( & u , 0x00 , sizeof(userinfo) );
+        u.user_id = 101 ;
+        strcpy( u.user_name , "calvin" );
+        strcpy( u.email , "calvinwilliams.c@gmail.com" );
+
+        DSCLOG_userinfo( & u );
+
+        memset( xml_buffer , 0x00 , sizeof(xml_buffer) );
+        xml_len = sizeof(xml_buffer) ;
+        nret = DSCSERIALIZE_XML_userinfo( & u , "GBK" , xml_buffer , & xml_len ) ;
+        if( nret )
+        {
+                printf( "DSCSERIALIZE_XML_userinfo failed[%d] , errno[%d]\n" , nret , errno );
+                return -1;
+        }
+
+        printf( "send[%d][%.*s]\n" , xml_len , xml_len , xml_buffer );
+
+        connect_sock = socket( AF_INET , SOCK_STREAM , IPPROTO_TCP ) ;
+        if( connect_sock == -1 )
+        {
+                printf( "socket failed[%d] , errno[%d]\n" , connect_sock , errno );
+               return -1;
+       }
+
+       memset( & connect_addr , 0x00 , sizeof(struct sockaddr_in) );
+       connect_addr.sin_family = AF_INET;
+       connect_addr.sin_addr.s_addr = inet_addr( "127.0.0.1" );
+       connect_addr.sin_port = htons( (unsigned short)7878 );
+
+       nret = connect( connect_sock , (struct sockaddr *) & connect_addr, sizeof(struct sockaddr) );
+       if( nret == -1 )
+       {
+               printf( "connect failed[%d] , errno[%d]\n" , nret , errno );
+               return -1;
+       }
+
+       sprintf( commheader_buffer , "%04d" , xml_len );
+       commheader_len = 4 ;
+       nret = sendn( connect_sock , commheader_buffer , commheader_len ) ;
+       if( nret < 0 )
+       {
+               printf( "sendn failed[%d] , errno[%d]\n" , nret , errno );
+               return -1;
+       }
+
+       nret = sendn( connect_sock , xml_buffer , xml_len ) ;
+       if( nret < 0 )
+       {
+               printf( "sendn failed[%d] , errno[%d]\n" , nret , errno );
+               return -1;
+       }
+
+       close( connect_sock );
+
+       return 0;
+}
+...
+[/code]
+代码说明：
+首先填充userinfo结构体userinfo变量u，用自动生成的函数DSCLOG_userinfo打印整个结构到屏幕上。
+然后用自动生成的函数DSCSERIALIZE_XML_userinfo转换C结构体userinfo变量u到XML报文。
+最后通过TCP发送给服务端（通讯头(4字节)+通讯体(XML报文)）。
+
+3.编写服务端代码
+[code]
+$ cat test_server.ec
+...
+int test_server()
+{
+        int                     listen_sock ;
+        struct sockaddr_in      listen_addr ;
+        int                     on ;
+        int                     accept_sock ;
+        struct sockaddr_in      accept_addr ;
+        socklen_t               addrlen ;
+
+        char                    commheader_buffer[ 4 + 1 ] ;
+        int                     commheader_len ;
+        char                    xml_buffer[ 1024 + 1 ] ;
+        int                     xml_len ;
+        userinfo                u ;
+
+        int                     nret ;
+
+        listen_sock = socket( AF_INET , SOCK_STREAM , IPPROTO_TCP ) ;
+        if( listen_sock == -1 )
+        {
+                printf( "socket failed[%d] , errno[%d]\n" , listen_sock , errno );
+                return -1;
+        }
+
+        on = 1 ;
+        setsockopt( listen_sock , SOL_SOCKET , SO_REUSEADDR , (void *) & on , sizeof(on) );
+
+        memset( & listen_addr , 0x00 , sizeof(struct sockaddr_in) );
+        listen_addr.sin_family = AF_INET;
+        listen_addr.sin_addr.s_addr = inet_addr( "127.0.0.1" );
+        listen_addr.sin_port = htons( (unsigned short)7878 );
+
+        nret = bind( listen_sock , (struct sockaddr *) & listen_addr, sizeof(struct sockaddr) ) ;
+        if( nret == -1 )
+        {
+                printf( "bind failed[%d] , errno[%d]\n" , nret , errno );
+                return -1;
+        }
+
+        nret = listen( listen_sock , 1024 ) ;
+        if( nret == -1 )
+        {
+                printf( "listen failed[%d] , errno[%d]\n" , nret , errno );
+                return -1;
+        }
+
+        addrlen = sizeof(struct sockaddr) ;
+        accept_sock = accept( listen_sock , (struct sockaddr *) & accept_addr, & addrlen );
+        if( accept_sock == -1 )
+        {
+                printf( "accept failed[%d] , errno[%d]\n" , accept_sock , errno );
+                return -1;
+        }
+
+        memset( commheader_buffer , 0x00 , sizeof(commheader_buffer) );
+        commheader_len = 4 ;
+        nret = recvn( accept_sock , commheader_buffer , & commheader_len ) ;
+        if( nret == -1 )
+        {
+                printf( "recvn failed[%d] , errno[%d]\n" , nret , errno );
+                return -1;
+        }
+
+        xml_len = atoi(commheader_buffer) ;
+        memset( xml_buffer , 0x00 , sizeof(xml_buffer) );
+        nret = recvn( accept_sock , xml_buffer , & xml_len ) ;
+        if( nret == -1 )
+        {
+                printf( "recvn failed[%d] , errno[%d]\n" , nret , errno );
+                return -1;
+        }
+
+        close( accept_sock );
+        close( listen_sock );
+
+        printf( "recv[%d][%.*s]\n" , xml_len , xml_len , xml_buffer );
+
+        memset( & u , 0x00 , sizeof(userinfo) );
+        nret = DSCDESERIALIZE_XML_userinfo( "GBK" , xml_buffer , & xml_len , & u ) ;
+        if( nret )
+        {
+                printf( "DSCDESERIALIZE_XML_userinfo failed[%d] , errno[%d]\n" , nret , errno );
+                return -1;
+        }
+
+        DSCLOG_userinfo( & u );
+
+        EXEC SQL
+                CONNECT TO      'calvin@127.0.0.1:18432'
+                USER            'calvin'
+                IDENTIFIED BY   'calvin' ;
+        if( SQLCODE )
+        {
+                printf( "CONNECT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                return 1;
+        }
+        else
+        {
+                printf( "CONNECT ok\n" );
+        }
+
+        EXEC SQL
+                BEGIN WORK ;
+        if( SQLCODE )
+        {
+                printf( "BEGIN WORK failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                return 1;
+        }
+        else
+        {
+                printf( "BEGIN WORK ok\n" );
+        }
+
+        DSCINITV_userinfo();
+        DSCSTOV_userinfo( & u );
+
+        EXEC SQL
+                INSERT
+                INTO    userinfo
+                VALUES  ( DBVLIST_userinfo ) ;
+        if( SQLCODE )
+        {
+                printf( "INSERT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+        }
+        else
+        {
+                printf( "INSERT ok\n" );
+        }
+
+        if( nret )
+        {
+                EXEC SQL
+                        ROLLBACK WORK ;
+                if( SQLCODE )
+                {
+                        printf( "ROLLBACK WORK failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+               }
+               else
+               {
+                       printf( "ROLLBACK WORK ok\n" );
+               }
+       }
+       else
+       {
+               EXEC SQL
+                       COMMIT WORK ;
+               if( SQLCODE )
+               {
+                       printf( "COMMIT WORK failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+               }
+               else
+               {
+                       printf( "COMMIT WORK ok\n" );
+               }
+       }
+
+       EXEC SQL
+               DISCONNECT ;
+       if( SQLCODE )
+       {
+               printf( "DISCONNECT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+               return 1;
+       }
+       else
+       {
+               printf( "DISCONNECT ok\n" );
+       }
+
+       return 0;
+}
+...
+[/code]
+代码说明：
+首先创建TCP服务端接收数据（通讯头(4字节)+通讯体(XML报文)）。
+然后用自动生成的函数DSCDESERIALIZE_XML_userinfo解包XML到C结构体userinfo变量u，用自动生成的函数DSCLOG_userinfo打印整个结构到屏幕上。
+最后连接数据库，用自动生成的ESQL代码片段直接登记C结构体userinfo变量u到表userinfo中。
+
+即 XML报文 -> C结构体userinfo变量u -> 表userinfo，其中的数据结构都是从IDL_userinfo.dsc自动生成，无需手工编码。
+
+4.编译运行
+[code]
+$ # 执行建表SQL脚本IDL_userinfo.dsc.create.sql
+$ ...
+$ make
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I. -I/root/local/postgresql/include -I/home/calvin/exinc/fasterxml  -c IDL_userinfo.dsc.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I. -I/root/local/postgresql/include -I/home/calvin/exinc/fasterxml  -c test_client.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -o test_client IDL_userinfo.dsc.o test_client.o -L. -L/root/local/postgresql/lib -lecpg -L/home/calvin/exlib -lfasterxml
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I. -I/root/local/postgresql/include -I/home/calvin/exinc/fasterxml  -E -x c test_server.ec > test_server.ecE
+ecpg -h test_server.ecE -o test_server.c
+sed -i 's/NULL/0/g' test_server.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I. -I/root/local/postgresql/include -I/home/calvin/exinc/fasterxml  -c test_server.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -o test_server IDL_userinfo.dsc.o IDL_userinfo.dsc.ESQL.o test_server.o -L. -L/root/local/postgresql/lib -lecpg -L/home/calvin/exlib -lfasterxml
+[/code]
+
+执行test_server，在另一终端执行test_client，分别显示如下
+[code]
+$ ./test_client
+userinfo.user_id[101]
+userinfo.user_name[calvin]
+userinfo.email[calvinwilliams.c@gmail.com]
+send[158][<?xml version="1.0" encoding="GBK"?>
+<userinfo>
+       <user_id>101</user_id>
+       <user_name>calvin</user_name>
+       <email>calvinwilliams.c@gmail.com</email>
+</userinfo>
+]
+[/code]
+
+[code]
+$ ./test_server
+recv[158][<?xml version="1.0" encoding="GBK"?>
+<userinfo>
+       <user_id>101</user_id>
+       <user_name>calvin</user_name>
+       <email>calvinwilliams.c@gmail.com</email>
+</userinfo>
+]
+userinfo.user_id[101]
+userinfo.user_name[calvin]
+userinfo.email[calvinwilliams.c@gmail.com]
+CONNECT ok
+BEGIN WORK ok
+INSERT ok
+COMMIT WORK ok
+DISCONNECT ok
+$ psql -h 127.0.0.1 -p 18432 -U calvin
+Password for user calvin:
+psql (9.0.3)
+Type "help" for help.
+
+calvin=# select * from userinfo;
+user_id | user_name |           email
+---------+-----------+----------------------------
+    101 | calvin    | calvinwilliams.c@gmail.com
+(1 row)
+[/code]
+
+是不是很方便？欢迎使用DirectStruct，如果你使用中碰到了问题或者有更酷的想法请告诉我，谢谢 ^_^
+
+首页传送门 : [url]http://git.oschina.net/calvinwilliams/DirectStruct[/url]
+作者邮箱   : calvinwilliams.c@gmail.com
