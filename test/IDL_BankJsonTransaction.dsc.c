@@ -34,40 +34,40 @@ int DSCSERIALIZE_JSON_BankJsonTransaction( BankJsonTransaction *pst , char *enco
 	remain_len = (*p_len) - 1 ;
 	memset( tabs , '\t' , 10 );
 	len=SNPRINTF(buf,remain_len,"{\n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"	BankJsonTransaction : \n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"	\"BankJsonTransaction\" : \n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"	{\n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"		version : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"		\"version\" : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"%d",pst->version); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;
 	len=SNPRINTF(buf,remain_len," ,\n"); if( len < 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"		ResponseHeader : \n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"		\"ResponseHeader\" : \n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"		{\n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"			transaction_code : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"			\"transaction_code\" : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"\""); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"%s",pst->ResponseHeader.transaction_code); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;
 	len=SNPRINTF(buf,remain_len,"\""); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len," ,\n"); if( len < 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"			trans_jnlsno : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"			\"trans_jnlsno\" : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"%d",pst->ResponseHeader.trans_jnlsno); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;
 	len=SNPRINTF(buf,remain_len," ,\n"); if( len < 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"			response_code : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"			\"response_code\" : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"%d",pst->ResponseHeader.response_code); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;
 	len=SNPRINTF(buf,remain_len," ,\n"); if( len < 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"			response_desc : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"			\"response_desc\" : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"\""); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"%s",pst->ResponseHeader.response_desc); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;
 	len=SNPRINTF(buf,remain_len,"\""); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"\n"); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"		} ,\n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"		QueryTransactionDetails : \n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"		\"QueryTransactionDetails\" : \n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"		{\n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"			AddonMessages : \n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"			\"AddonMessages\" : \n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"			{\n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"				AddonMessage : \n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"				\"AddonMessage\" : \n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"				[\n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
 						for( index[3] = 0 ; index[3] < 3 ; index[3]++ )
 						{
 	len=SNPRINTF(buf,remain_len,"				{\n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"					message_text : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"					\"message_text\" : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"\""); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"%s",pst->QueryTransactionDetails.AddonMessages.AddonMessage[index[3]].message_text); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;
 	len=SNPRINTF(buf,remain_len,"\""); if( len < 0 ) return -1; buf+=len; remain_len-=len;
@@ -79,48 +79,48 @@ int DSCSERIALIZE_JSON_BankJsonTransaction( BankJsonTransaction *pst , char *enco
 						}
 	len=SNPRINTF(buf,remain_len,"				]\n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"			} ,\n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"			TransactionDetailTitle : \n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"			\"TransactionDetailTitle\" : \n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"			{\n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"				title_text : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"				\"title_text\" : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"\""); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"%s",pst->QueryTransactionDetails.TransactionDetailTitle.title_text); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;
 	len=SNPRINTF(buf,remain_len,"\""); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len," ,\n"); if( len < 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"				page_no : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"				\"page_no\" : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"%hd",pst->QueryTransactionDetails.TransactionDetailTitle.page_no); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;
 	len=SNPRINTF(buf,remain_len," ,\n"); if( len < 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"				page_size : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"				\"page_size\" : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"%hd",pst->QueryTransactionDetails.TransactionDetailTitle.page_size); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;
 	len=SNPRINTF(buf,remain_len,"\n"); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"			} ,\n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"			TransactionDetails : \n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"			\"TransactionDetails\" : \n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"			{\n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"				TransactionDetail : \n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"				\"TransactionDetail\" : \n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"				[\n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
 						for( index[3] = 0 ; index[3] < 10 ; index[3]++ )
 						{
 	len=SNPRINTF(buf,remain_len,"				{\n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"					trans_date : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"					\"trans_date\" : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"\""); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"%s",pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;
 	len=SNPRINTF(buf,remain_len,"\""); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len," ,\n"); if( len < 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"					trans_time : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"					\"trans_time\" : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"\""); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"%s",pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;
 	len=SNPRINTF(buf,remain_len,"\""); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len," ,\n"); if( len < 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"					outlet_id : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"					\"outlet_id\" : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"\""); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"%s",pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;
 	len=SNPRINTF(buf,remain_len,"\""); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len," ,\n"); if( len < 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"					card_no : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"					\"card_no\" : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"\""); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"%s",pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;
 	len=SNPRINTF(buf,remain_len,"\""); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len," ,\n"); if( len < 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"					trans_amount : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"					\"trans_amount\" : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"%f",pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;
 	len=SNPRINTF(buf,remain_len,"\n"); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 						if(index[3]<10-1)
@@ -129,12 +129,12 @@ int DSCSERIALIZE_JSON_BankJsonTransaction( BankJsonTransaction *pst , char *enco
 						{ len=SNPRINTF(buf,remain_len,"				}\n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len; }
 						}
 	len=SNPRINTF(buf,remain_len,"				] ,\n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"				TransactionTailDetail : \n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"				\"TransactionTailDetail\" : \n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"				[\n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
 						for( index[3] = 0 ; index[3] < 3 ; index[3]++ )
 						{
 	len=SNPRINTF(buf,remain_len,"				{\n"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;
-	len=SNPRINTF(buf,remain_len,"					message_text : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"					\"message_text\" : "); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"\""); if( len < 0 ) return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"%s",pst->QueryTransactionDetails.TransactionDetails.TransactionTailDetail[index[3]].message_text); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;
 	len=SNPRINTF(buf,remain_len,"\""); if( len < 0 ) return -1; buf+=len; remain_len-=len;
