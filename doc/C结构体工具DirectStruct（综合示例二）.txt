@@ -1,0 +1,173 @@
+C结构体工具DirectStruct（综合示例二）
+
+1.编写定义文件，用工具dsc处理之，自动生成XML转换代码和ESQL代码片段
+2.编写应用代码
+3.编译运行
+
+------------------------------------------------------------
+
+DirectStruct是一个强有力的代码自动生成工具，它可以自动生成C结构体与XML、JSON、二进制（带压缩）等报文之间的转换代码，还能自动生成ESQL代码片段，在应用中直接使用自动化代码以提高开发效率，避免开发冗余和手工编码风险。
+
+综合示例二演示了应用从数据库表里读出一条记录，用DirectStruct自动生成的JSON转换函数打包成JSON报文，写入磁盘文件。通过示例，你可以看到中间的绝大多数令人头痛的代码都可以通过DirectStruct自动生成，这使得实际要编写的应用代码变得简洁和高效。
+本示例因为涉及到JSON，DirectStruct的XML处理依赖于开源库fasterjson。
+完整示例代码放在test_demo目录里，你也可以自己运行观察。
+
+1.编写定义文件，用工具dsc处理之，自动生成JSON转换代码和ESQL代码片段
+[code]
+$ cat IDL_userinfo.dsc
+STRUCT  userinfo
+{
+       INT     4       user_id
+       STRING  16      user_name
+       STRING  128     email
+
+       CREATE_SQL      "CREATE UNIQUE INDEX userinfo_idx1 ON userinfo ( user_id ) ;"
+       DROP_SQL        "DROP INDEX testable_idx1 ;"
+}
+$ dsc -f IDL_userinfo.dsc -c-xml -sql -ec-pqsql -c-LOG
+STRUCT userinfo
+       INT 4 user_id
+       STRING 16 user_name
+       STRING 128 email
+ok!
+$ ls -1 IDL_userinfo.*
+IDL_userinfo.dsc
+IDL_userinfo.dsc.ESQL.ec
+IDL_userinfo.dsc.ESQL.eh
+IDL_userinfo.dsc.LOG.c
+IDL_userinfo.dsc.c
+IDL_userinfo.dsc.create.sql
+IDL_userinfo.dsc.drop.sql
+IDL_userinfo.dsc.h
+[/code]
+
+IDL_userinfo.dsc.h里有userinfo结构定义。
+JSON转换函数定义在IDL_userinfo.dsc.c，声明在IDL_userinfo.dsc.h。
+ESQL代码片段定义在IDL_userinfo.dsc.ESQL.ec，声明在IDL_userinfo.dsc.ESQL.eh。
+IDL_userinfo.dsc.LOG.c里有把userinfo结构体变量所有字段值输出到标准输出函数。
+IDL_userinfo.dsc.create.sql为表userinfo建表SQL脚本，IDL_userinfo.dsc.drop.sql为销毁表SQL脚本。
+
+2.编写应用代码
+[code]
+$ cat test_db2json.c
+...
+int test_client()
+{
+        userinfo                u ;
+
+        char                    json_buffer[ 1024 + 1 ] ;
+        int                     json_len ;
+
+        FILE                    *fp = NULL ;
+
+        int                     nret ;
+
+        EXEC SQL
+                CONNECT TO      'calvin@127.0.0.1:18432'
+                USER            'calvin'
+                IDENTIFIED BY   'calvin' ;
+        if( SQLCODE )
+        {
+                printf( "CONNECT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                return 1;
+        }
+        else
+        {
+                printf( "CONNECT ok\n" );
+        }
+
+        DSCINITV_userinfo();
+
+        EXEC SQL
+                SELECT  *
+                INTO    DBVLLIST_userinfo
+                FROM    userinfo
+                WHERE   user_id = 101 ;
+        if( SQLCODE )
+        {
+                printf( "SELECT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+                EXEC SQL
+                        DISCONNECT ;
+                return 1;
+        }
+        else
+        {
+                printf( "SELECT ok\n" );
+        }
+
+       EXEC SQL
+               DISCONNECT ;
+       if( SQLCODE )
+       {
+               printf( "DISCONNECT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+               return 1;
+       }
+       else
+       {
+               printf( "DISCONNECT ok\n" );
+       }
+
+       DSCVTOS_userinfo( & u );
+
+       memset( json_buffer , 0x00 , sizeof(json_buffer) );
+       nret = DSCSERIALIZE_JSON_userinfo( & u , "GBK" , json_buffer , & json_len ) ;
+       if( nret )
+       {
+               printf( "DSCSERIALIZE_JSON_userinfo failed[%d] , errno[%d]\n" , nret , errno );
+               return -1;
+       }
+
+       fp = fopen( "test_db2json.json" , "w" ) ;
+       if( fp == NULL )
+       {
+               printf( "fopen failed , errno[%d]\n" , errno );
+               return -1;
+       }
+
+       fwrite( json_buffer , 1 , json_len , fp );
+
+       fclose( fp );
+
+       return 0;
+}
+...
+[/code]
+代码说明：
+首先用ESQL读出userinfo表中的一条记录（综合示例一产生的）到C结构体userinfo变量u，用到了大量DirectStruct自动生成的ESQL代码片段，用自动生成的函数DSCLOG_userinfo打印整个结构到屏幕上。
+然后用自动生成的函数DSCSERIALIZE_JSON_userinfo转换C结构体userinfo变量u到JSON报文。
+最后把JSON报文写入磁盘文件。
+
+3.编译运行
+[code]
+$ # 执行综合示例一，在表userinfo中产生一条记录
+$ ...
+$ make
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I. -I/root/local/postgresql/include -I/home/calvin/exinc/fasterxml -I/home/calvin/exinc/fasterjson -c IDL_userinfo.dsc.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I. -I/root/local/postgresql/include -I/home/calvin/exinc/fasterxml -I/home/calvin/exinc/fasterjson -E -x c test_db2json.ec > test_db2json.ecE
+ecpg -h test_db2json.ecE -o test_db2json.c
+sed -i 's/NULL/0/g' test_db2json.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I. -I/root/local/postgresql/include -I/home/calvin/exinc/fasterxml -I/home/calvin/exinc/fasterjson -c test_db2json.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -o test_db2json IDL_userinfo.dsc.o IDL_userinfo.dsc.ESQL.o test_db2json.o -L. -L/root/local/postgresql/lib-lecpg -L/home/calvin/exlib -lfasterxml -lfasterjson
+[/code]
+
+执行test_db2json，显示如下
+[code]
+$ ./test_db2json
+CONNECT ok
+SELECT ok
+DISCONNECT ok
+$ cat test_db2json.json
+{
+       "userinfo" :
+       {
+               "user_id" : 101 ,
+               "user_name" : "calvin" ,
+               "email" : "calvinwilliams.c@gmail.com"
+       }
+}
+[/code]
+
+是不是很方便？欢迎使用DirectStruct，如果你使用中碰到了问题或者有更酷的想法请告诉我，谢谢 ^_^
+
+首页传送门 : [url]http://git.oschina.net/calvinwilliams/DirectStruct[/url]
+作者邮箱   : calvinwilliams.c@gmail.com
