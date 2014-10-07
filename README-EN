@@ -17,15 +17,15 @@ N.Finally
 
 1.Overview
 
-DirectStruct is a C struct tool, command-line tool 'dsc' based on IDL definition file, generate the C structure definition and the corresponding code automatically, use directly in order to improve the development efficiency in applications, avoid the risk of development of redundancy and coding.
+DirectStruct is a powerful code automatic generation tool, it can automatically generate C structure and XML, JSON, binary (or with compression) message serialize/deserilize code, can automatically generate the ESQL code piece, used directly in the application in order to improve the development efficiency, avoid the risk from the development of redundancy and manual coding. 
 
 What automation code DirectStruct generated ?
 * C structure definition
 * Default batch Initialize function
 * Network/host byte ordering functions
 * Binary Serialization/deserialization functions ( without or with compression )
-* XML Serialization/deserialization functions
-* JSON Serialization/deserialization functions
+* XML Serialization/deserialization functions ( depand on fasterxml )
+* JSON Serialization/deserialization functions ( depand on fasterjson )
 * ESQL code
 * Print all field value functions in structure or output to your own log stream
 
