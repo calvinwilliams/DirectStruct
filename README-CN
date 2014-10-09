@@ -24,8 +24,8 @@ DirectStruct生成了哪些自动化代码？
 * 批量初始化缺省值函数
 * 网络/主机字节序化函数
 * 二进制序列化/反序列化函数（可带压缩）
-* XML序列化/反序列化函数（依赖开源库fasterxml）
-* JSON序列化/反序列化函数（依赖开源库fasterjson）
+* XML序列化/反序列化函数（依赖开源库fasterxml[url]http://git.oschina.net/calvinwilliams/fasterxml[/url]）
+* JSON序列化/反序列化函数（依赖开源库fasterjson[url]http://git.oschina.net/calvinwilliams/fasterjson[/url]）
 * 嵌入式SQL代码
 * 打印结构体内所有字段值函数
 

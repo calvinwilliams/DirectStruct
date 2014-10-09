@@ -24,8 +24,8 @@ What automation code DirectStruct generated ?
 * Default batch Initialize function
 * Network/host byte ordering functions
 * Binary Serialization/deserialization functions ( without or with compression )
-* XML Serialization/deserialization functions ( depand on fasterxml )
-* JSON Serialization/deserialization functions ( depand on fasterjson )
+* XML Serialization/deserialization functions ( depand on fasterxml[url]https://github.com/calvinwilliams/fasterxml[/url] )
+* JSON Serialization/deserialization functions ( depand on fasterjson[url]https://github.com/calvinwilliams/fasterjson[/url] )
 * ESQL code
 * Print all field value functions in structure or output to your own log stream
 
