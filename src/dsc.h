@@ -55,6 +55,10 @@
  * util
  */
 
+#if ( defined _WIN32 )
+char *strtok_r (char *s, const char *delim, char **save_ptr);
+#endif
+
 char *strtok2( char **base );
 int ClearLeft( char *str );
 int ClearRight( char *str );
@@ -95,6 +99,9 @@ int dsc( struct CommandParameter *pcmdparam );
 
 struct StructInfo ;
 
+#define DSC_FIELD_NULL		1
+#define DSC_FIELD_NOTNULL	2
+
 struct FieldInfo
 {
 	char			field_type[ 10 + 1 ] ;
@@ -103,6 +110,7 @@ struct FieldInfo
 	char			field_name[ 64 + 1 ] ;
 	
 	char			init_default[ 1024 + 1 ] ;
+	int			null_or_notnull ;
 	
 	struct FieldInfo	*next_field ;
 	
@@ -120,6 +128,9 @@ struct StructInfo
 	int			create_sql_count ;
 	char			drop_sql[10][ 1024 + 1 ] ;
 	int			drop_sql_count ;
+	char			sqlaction[50][ 1024 + 1 ] ;
+	char			sqlaction_funcname[50][ 1024 + 1 ] ;
+	int			sqlaction_count ;
 	
 	struct FieldInfo	*field_list ;
 	struct FieldInfo	*last_field ;
@@ -159,7 +170,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
  */
 
 int GenerateCCode( struct CommandParameter *pcmdparam , struct StructInfo *pmsginfo , FILE *fp_dsc_h , FILE *fp_dsc_c , FILE *fp_dsc_LOG_c );
-int GenerateSqlCode( struct CommandParameter *pcp , struct StructInfo *psi , FILE *fp_dsc_create_sql , FILE *fp_dsc_drop_sql );
-int GenerateECCode_PQSQL( struct CommandParameter *pcp , struct StructInfo *psi , FILE *fp_dsc_ESQL_eh , FILE *fp_dsc_ESQL_ec );
+int GenerateSqlCode( struct CommandParameter *pcp , struct StructInfo *pstruct , FILE *fp_dsc_create_sql , FILE *fp_dsc_drop_sql );
+int GenerateECCode_PQSQL( struct CommandParameter *pcp , struct StructInfo *pstruct , FILE *fp_dsc_ESQL_eh , FILE *fp_dsc_ESQL_ec );
 
 #endif
