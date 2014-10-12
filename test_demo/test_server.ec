@@ -167,7 +167,7 @@ int test_server()
 		printf( "INSERT ok\n" );
 	}
 	
-	if( nret )
+	if( SQLCODE )
 	{
 		EXEC SQL
 			ROLLBACK WORK ;
