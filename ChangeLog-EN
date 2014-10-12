@@ -1,3 +1,7 @@
+ver 1.1.2	2014-10-10	calvin
+		* ESQL add generate SQLACTION code
+		* Fixed bug in XML,JSON serialize/unserialize functions
+
 ver 1.1.1	2014-10-07	calvin
 		* add demo test_client,test_server
 		* add demo test_db2json

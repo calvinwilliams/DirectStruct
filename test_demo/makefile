@@ -12,11 +12,13 @@ c_FILE		=	\
 			test_client.c			\
 			test_server.c			\
 			test_db2json.c			\
+			test_sqlaction.c		\
 
 ###### 目标文件、安装目录配置区
 BIN		=	test_client			\
 			test_server			\
 			test_db2json			\
+			test_sqlaction			\
 
 ###### 编译选项
 CFLAGS		=	-I. \
@@ -75,7 +77,17 @@ test_db2json.o	:	test_db2json.ec
 test_db2json	:	IDL_userinfo.dsc.o IDL_userinfo.dsc.ESQL.o test_db2json.o
 	$(CC) -o $@ IDL_userinfo.dsc.o IDL_userinfo.dsc.ESQL.o test_db2json.o $(LFLAGS)
 
-CLEAN_ADDITION	=	IDL_userinfo.dsc.ESQL.ecE IDL_userinfo.dsc.ESQL.c	\
-			test_server.ecE test_server.c				\
-			test_db2json.ecE test_db2json.c				\
+test_sqlaction.o	:	test_sqlaction.ec
+	$(CC) $(CFLAGS) -E -x c test_sqlaction.ec > test_sqlaction.ecE
+	$(ECP) -h test_sqlaction.ecE -o test_sqlaction.c
+	sed -i 's/NULL/0/g' test_sqlaction.c
+	$(CC) $(CFLAGS) -c test_sqlaction.c
+
+test_sqlaction	:	IDL_userinfo.dsc.o IDL_userinfo.dsc.ESQL.o test_sqlaction.o
+	$(CC) -o $@ IDL_userinfo.dsc.o IDL_userinfo.dsc.ESQL.o test_sqlaction.o $(LFLAGS)
+
+CLEAN_ADDITION	=	IDL_userinfo.dsc.ESQL.ecE IDL_userinfo.dsc.ESQL.c IDL_userinfo.dsc.ESQL.o	\
+			test_server.ecE test_server.c test_server.o		\
+			test_db2json.ecE test_db2json.c test_db2json.o		\
+			test_sqlaction.ecE test_sqlaction.c test_sqlaction.o	\
 

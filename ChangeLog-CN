@@ -1,3 +1,7 @@
+ver 1.1.2	2014-10-10	calvin
+		* ESQL新增自动生成SQLACTION代码
+		* 修正了XML、JSON序列化/反序列化函数中的一个BUG
+
 ver 1.1.1	2014-10-07	calvin
 		* 新增综合示例 test_client,test_server
 		* 新增综合示例 test_db2json
