@@ -1,6 +1,7 @@
 ver 1.1.2	2014-10-10	calvin
 		* ESQL add generate SQLACTION code
 		* Fixed bug in XML,JSON serialize/unserialize functions
+		* support ORACLE
 
 ver 1.1.1	2014-10-07	calvin
 		* add demo test_client,test_server
@@ -10,6 +11,7 @@ ver 1.1.0	2014-09-20	calvin
 		* add generate code automatically : XML serialize/unserialize functions
 		* add generate code automatically : JSON serialize/unserialize functions
 		* add generate code automatically : ESQL code
+		* support PQSQL
 
 ver 1.0.4	2014-09-09	calvin
 		* Fixed a problem on AIX

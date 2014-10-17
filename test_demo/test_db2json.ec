@@ -7,6 +7,13 @@
 #include "IDL_userinfo.dsc.ESQL.eh"
 #include "IDL_userinfo.dsc.LOG.c"
 
+#if ( defined _ORACLE )
+EXEC SQL BEGIN DECLARE SECTION ;
+	char	DBUSER[ 128 + 1 ] ;
+	char	DBPASS[ 128 + 1 ] ;
+EXEC SQL END DECLARE SECTION ;
+#endif
+
 int test_client()
 {
 	userinfo		u ;
@@ -18,13 +25,21 @@ int test_client()
 	
 	int			nret ;
 	
+#if ( defined _PQSQL )
 	EXEC SQL
 		CONNECT TO	'calvin@127.0.0.1:18432'
 		USER		'calvin'
 		IDENTIFIED BY	'calvin' ;
+#elif ( defined _ORACLE )
+	strcpy( DBUSER , "hzbsbdb" );
+	strcpy( DBPASS , "hzbsbdb" );
+	EXEC SQL
+		CONNECT 	:DBUSER
+		IDENTIFIED BY	:DBPASS ;
+#endif
 	if( SQLCODE )
 	{
-		printf( "CONNECT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "CONNECT failed[%d][%s]\n" , SQLCODE , SQLSTATE );
 		return 1;
 	}
 	else
@@ -41,9 +56,7 @@ int test_client()
 		WHERE	user_id = 101 ;
 	if( SQLCODE )
 	{
-		printf( "SELECT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
-		EXEC SQL
-			DISCONNECT ;
+		printf( "SELECT failed[%d][%s]\n" , SQLCODE , SQLSTATE );
 		return 1;
 	}
 	else
@@ -51,17 +64,19 @@ int test_client()
 		printf( "SELECT ok\n" );
 	}
 	
+#if ( defined _PQSQL )
 	EXEC SQL
 		DISCONNECT ;
 	if( SQLCODE )
 	{
-		printf( "DISCONNECT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "DISCONNECT failed[%d][%s]\n" , SQLCODE , SQLSTATE );
 		return 1;
 	}
 	else
 	{
 		printf( "DISCONNECT ok\n" );
 	}
+#endif
 	
 	DSCVTOS_userinfo( & u );
 	

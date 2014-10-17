@@ -140,6 +140,36 @@ int dsc( struct CommandParameter *pcmdparam )
 		fclose( fp_dsc_ESQL_eh );
 		fclose( fp_dsc_ESQL_ec );
 	}
+	else if( pcmdparam->output_ec_oracle_flag == 1 )
+	{
+		FILE	*fp_dsc_ESQL_eh = NULL ;
+		FILE	*fp_dsc_ESQL_ec = NULL ;
+		
+		memset( output_pathfilename , 0x00 , sizeof(output_pathfilename) );
+		SNPRINTF( output_pathfilename , sizeof(output_pathfilename)-1 , "%s.ESQL.eh" , pcmdparam->pathfilename );
+		fp_dsc_ESQL_eh = fopen( output_pathfilename , "w" ) ;
+		if( fp_dsc_ESQL_eh == NULL )
+		{
+			fprintf( stderr , "file[%s] can't write\n" , output_pathfilename );
+			return -1;
+		}
+		
+		memset( output_pathfilename , 0x00 , sizeof(output_pathfilename) );
+		SNPRINTF( output_pathfilename , sizeof(output_pathfilename)-1 , "%s.ESQL.ec" , pcmdparam->pathfilename );
+		fp_dsc_ESQL_ec = fopen( output_pathfilename , "w" ) ;
+		if( fp_dsc_ESQL_ec == NULL )
+		{
+			fprintf( stderr , "file[%s] can't write\n" , output_pathfilename );
+			return -1;
+		}
+		
+		nret = GenerateECCode_ORACLE( pcmdparam , & si , fp_dsc_ESQL_eh , fp_dsc_ESQL_ec ) ;
+		if( nret )
+			return -nret;
+		
+		fclose( fp_dsc_ESQL_eh );
+		fclose( fp_dsc_ESQL_ec );
+	}
 	
 	return 0;
 }

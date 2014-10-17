@@ -99,7 +99,7 @@ void DSCSQLACTION_UPDATE_userinfo_SET_A_WHERE_user_id_E( userinfo *pst )
 	
 	EXEC SQL
 		UPDATE	userinfo
-		SET	( TFLIST_userinfo ) = ( DBVLIST_userinfo )
+		SET	user_id = :userinfo_user_id , user_name = :userinfo_user_name , email = :userinfo_email 
 		WHERE	user_id = :userinfo_user_id
 		;
 	return;

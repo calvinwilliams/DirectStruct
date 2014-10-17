@@ -21,7 +21,7 @@ static void usage()
 	printf( "                    [ -c-compact ] [ -c-compress ]\n" );
 	printf( "                    [ -c-xml ]\n" );
 	printf( "                    [ -c-json ]\n" );
-	printf( "                    [ -sql-pqsql ] [ -c-pqsql ]\n" );
+	printf( "                    [ -sql-pqsql ] [ -ec-pqsql | -ec-oracle ]\n" );
 	printf( "                    [ -c-ALL ]\n" );
 }
 
@@ -94,6 +94,11 @@ int main( int argc , char *argv[] )
 		{
 			cp.output_c_flag = 1 ;
 			cp.output_ec_pqsql_flag = 1 ;
+		}
+		else if( strcmp( argv[c] , "-ec-oracle" ) == 0 )
+		{
+			cp.output_c_flag = 1 ;
+			cp.output_ec_oracle_flag = 1 ;
 		}
 		else if( strcmp( argv[c] , "-c-ALL" ) == 0 )
 		{

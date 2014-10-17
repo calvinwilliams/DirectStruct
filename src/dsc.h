@@ -83,6 +83,7 @@ struct CommandParameter
 	int	output_c_LOG_flag ;
 	int	output_sql_flag ;
 	int	output_ec_pqsql_flag ;
+	int	output_ec_oracle_flag ;
 } ;
 
 /*
@@ -172,5 +173,6 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 int GenerateCCode( struct CommandParameter *pcmdparam , struct StructInfo *pmsginfo , FILE *fp_dsc_h , FILE *fp_dsc_c , FILE *fp_dsc_LOG_c );
 int GenerateSqlCode( struct CommandParameter *pcp , struct StructInfo *pstruct , FILE *fp_dsc_create_sql , FILE *fp_dsc_drop_sql );
 int GenerateECCode_PQSQL( struct CommandParameter *pcp , struct StructInfo *pstruct , FILE *fp_dsc_ESQL_eh , FILE *fp_dsc_ESQL_ec );
+int GenerateECCode_ORACLE( struct CommandParameter *pcp , struct StructInfo *pstruct , FILE *fp_dsc_ESQL_eh , FILE *fp_dsc_ESQL_ec );
 
 #endif

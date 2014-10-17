@@ -1,6 +1,7 @@
 ver 1.1.2	2014-10-10	calvin
 		* ESQL新增自动生成SQLACTION代码
 		* 修正了XML、JSON序列化/反序列化函数中的一个BUG
+		* 支持ORACLE了
 
 ver 1.1.1	2014-10-07	calvin
 		* 新增综合示例 test_client,test_server
@@ -10,6 +11,7 @@ ver 1.1.0	2014-09-20	calvin
 		* 新增自动生成代码 : XML序列化/反序列化函数
 		* 新增自动生成代码 : JSON序列化/反序列化函数
 		* 新增自动生成代码 : ESQL代码
+		* 支持PQSQL了
 
 ver 1.0.4	2014-09-09	calvin
 		* 修正了AIX上的编译问题

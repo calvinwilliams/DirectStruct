@@ -8,6 +8,13 @@
 #include "IDL_userinfo.dsc.ESQL.eh"
 #include "IDL_userinfo.dsc.LOG.c"
 
+#if ( defined _ORACLE )
+EXEC SQL BEGIN DECLARE SECTION ;
+	char	DBUSER[ 128 + 1 ] ;
+	char	DBPASS[ 128 + 1 ] ;
+EXEC SQL END DECLARE SECTION ;
+#endif
+
 int recvn( int sock , char *recvbuffer , int *p_recvlen )
 {
 	int		l , needlen , readedlen ;
@@ -125,13 +132,21 @@ int test_server()
 	
 	DSCLOG_userinfo( & u );
 	
+#if ( defined _PQSQL )
 	EXEC SQL
 		CONNECT TO	'calvin@127.0.0.1:18432'
 		USER		'calvin'
 		IDENTIFIED BY	'calvin' ;
+#elif ( defined _ORACLE )
+	strcpy( DBUSER , "hzbsbdb" );
+	strcpy( DBPASS , "hzbsbdb" );
+	EXEC SQL
+		CONNECT 	:DBUSER
+		IDENTIFIED BY	:DBPASS ;
+#endif
 	if( SQLCODE )
 	{
-		printf( "CONNECT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "CONNECT failed[%d][%s]\n" , SQLCODE , SQLSTATE );
 		return 1;
 	}
 	else
@@ -139,17 +154,19 @@ int test_server()
 		printf( "CONNECT ok\n" );
 	}
 	
+#if ( defined _PQSQL )
 	EXEC SQL
 		BEGIN WORK ;
 	if( SQLCODE )
 	{
-		printf( "BEGIN WORK failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "BEGIN WORK failed[%d][%s]\n" , SQLCODE , SQLSTATE );
 		return 1;
 	}
 	else
 	{
 		printf( "BEGIN WORK ok\n" );
 	}
+#endif
 	
 	DSCINITV_userinfo();
 	DSCSTOV_userinfo( & u );
@@ -160,7 +177,7 @@ int test_server()
 		VALUES	( DBVLIST_userinfo ) ;
 	if( SQLCODE )
 	{
-		printf( "INSERT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "INSERT failed[%d][%s]\n" , SQLCODE , SQLSTATE );
 	}
 	else
 	{
@@ -173,7 +190,7 @@ int test_server()
 			ROLLBACK WORK ;
 		if( SQLCODE )
 		{
-			printf( "ROLLBACK WORK failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+			printf( "ROLLBACK WORK failed[%d][%s]\n" , SQLCODE , SQLSTATE );
 		}
 		else
 		{
@@ -186,7 +203,7 @@ int test_server()
 			COMMIT WORK ;
 		if( SQLCODE )
 		{
-			printf( "COMMIT WORK failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+			printf( "COMMIT WORK failed[%d][%s]\n" , SQLCODE , SQLSTATE );
 		}
 		else
 		{
@@ -194,17 +211,19 @@ int test_server()
 		}
 	}
 	
+#if ( defined _PQSQL )
 	EXEC SQL
 		DISCONNECT ;
 	if( SQLCODE )
 	{
-		printf( "DISCONNECT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "DISCONNECT failed[%d][%s]\n" , SQLCODE , SQLSTATE );
 		return 1;
 	}
 	else
 	{
 		printf( "DISCONNECT ok\n" );
 	}
+#endif
 	
 	return 0;
 }
