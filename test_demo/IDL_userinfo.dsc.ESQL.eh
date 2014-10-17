@@ -2,18 +2,18 @@
 #ifndef _H_userinfo_ESQL_
 #define _H_userinfo_ESQL_
 
-#include <ecpglib.h>
-#include <ecpgerrno.h>
-#include <sqlca.h>
-
 #include "IDL_userinfo.dsc.h"
 
+#define _ORACLE
+
+#include <sqlca.h>
+
 #ifndef SQLCODE
-#define SQLCODE		sqlca.sqlcode
-#define SQLSTATE	sqlca.sqlstate
+#define SQLCODE		(int)(sqlca.sqlcode)
+#define SQLSTATE	""
 #endif
 
-#define SQLNOTFOUND	100
+#define SQLNOTFOUND	1403
 
 
 EXEC SQL BEGIN DECLARE SECTION ;
