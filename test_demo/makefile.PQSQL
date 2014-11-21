@@ -23,22 +23,19 @@ BIN		=					\
 
 ###### 编译选项
 CFLAGS		=	-I. 				\
-			-I$(ORACLE_HOME)/precomp/public	\
+			-I$(PQSQL_HOME)/include		\
 			-I$(HOME)/exinc/fasterxml	\
 			-I$(HOME)/exinc/fasterjson	\
 
-#			-I/root/local/postgresql/include\
-
 ###### 链接选项
 LFLAGS		=	-L. 				\
-			-L$(ORACLE_HOME)/lib		\
-			-lclntsh			\
+			-L$(PQSQL_HOME)/lib		\
+			-lecpg				\
 			-L$(HOME)/exlib			\
 			-lfasterxml			\
 			-lfasterjson			\
 
 #			-L/root/local/postgresql/lib	\
-			-lecpg				\
 
 ###### 额外宏定义区
 CLEAN_ADDITION	=
@@ -57,18 +54,17 @@ include $(MKTPLDIR)/makeobj_$(MKTPLOS).inc
 test_client	:	IDL_userinfo.dsc.o test_client.o
 	$(CC) -o $@ IDL_userinfo.dsc.o test_client.o $(LFLAGS)
 
-# ECP	=	ecpg
-ECP	=	proc parse=none
+ECP	=	ecpg -h -D_PQSQL
 
 IDL_userinfo.dsc.ESQL.o	:	IDL_userinfo.dsc.ESQL.ec
 	$(CC) $(CFLAGS) -E -x c IDL_userinfo.dsc.ESQL.ec > IDL_userinfo.dsc.ESQL.ecE
-	$(ECP) -h IDL_userinfo.dsc.ESQL.ecE -o IDL_userinfo.dsc.ESQL.c
+	$(ECP) IDL_userinfo.dsc.ESQL.ecE -o IDL_userinfo.dsc.ESQL.c
 	sed -i 's/NULL/0/g' IDL_userinfo.dsc.ESQL.c
 	$(CC) $(CFLAGS) -c IDL_userinfo.dsc.ESQL.c
 
 test_server.o	:	test_server.ec
 	$(CC) $(CFLAGS) -E -x c test_server.ec > test_server.ecE
-	$(ECP) -h test_server.ecE -o test_server.c
+	$(ECP) test_server.ecE -o test_server.c
 	sed -i 's/NULL/0/g' test_server.c
 	$(CC) $(CFLAGS) -c test_server.c
 
@@ -77,7 +73,7 @@ test_server	:	IDL_userinfo.dsc.o IDL_userinfo.dsc.ESQL.o test_server.o
 
 test_db2json.o	:	test_db2json.ec
 	$(CC) $(CFLAGS) -E -x c test_db2json.ec > test_db2json.ecE
-	$(ECP) -h test_db2json.ecE -o test_db2json.c
+	$(ECP) test_db2json.ecE -o test_db2json.c
 	sed -i 's/NULL/0/g' test_db2json.c
 	$(CC) $(CFLAGS) -c test_db2json.c
 
@@ -86,7 +82,7 @@ test_db2json	:	IDL_userinfo.dsc.o IDL_userinfo.dsc.ESQL.o test_db2json.o
 
 test_sqlaction.o	:	test_sqlaction.ec
 	$(CC) $(CFLAGS) -E -x c test_sqlaction.ec > test_sqlaction.ecE
-	$(ECP) -h test_sqlaction.ecE -o test_sqlaction.c
+	$(ECP) test_sqlaction.ecE -o test_sqlaction.c
 	sed -i 's/NULL/0/g' test_sqlaction.c
 	$(CC) $(CFLAGS) -c test_sqlaction.c
 
