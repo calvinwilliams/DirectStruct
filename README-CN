@@ -2060,6 +2060,8 @@ void DSCSQLACTION_CLOSE_CURSOR_mycursor3()
 [/code]
 可以在你的代码中直接调用这些函数，而不用手工编码了。
 
+还能根据不同数据库自动生成各自的连接数据库、断开数据库、事务开始、事务提交、事务回滚等函数，只要加上SQLCONN指令即可
+
 N-2.DirectStruct报文定义文件语法
 
 每个结构或内嵌子结构定义格式都以

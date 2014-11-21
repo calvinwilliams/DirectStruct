@@ -57,8 +57,7 @@ include $(MKTPLDIR)/makeobj_$(MKTPLOS).inc
 test_client	:	IDL_userinfo.dsc.o test_client.o
 	$(CC) -o $@ IDL_userinfo.dsc.o test_client.o $(LFLAGS)
 
-# ECP	=	ecpg
-ECP	=	proc parse=none
+ECP	=	proc parse=none -D_ORACLE
 
 IDL_userinfo.dsc.ESQL.o	:	IDL_userinfo.dsc.ESQL.ec
 	$(CC) $(CFLAGS) -E -x c IDL_userinfo.dsc.ESQL.ec > IDL_userinfo.dsc.ESQL.ecE

@@ -69,7 +69,7 @@ void fprintabs( FILE *fp , int depth );
  * main
  */
 
-extern char	*DIRECTSTRUCT_VERSION ;
+extern char	*__DIRECTSTRUCT_VERSION ;
 
 struct CommandParameter
 {
@@ -132,6 +132,7 @@ struct StructInfo
 	char			sqlaction[50][ 1024 + 1 ] ;
 	char			sqlaction_funcname[50][ 1024 + 1 ] ;
 	int			sqlaction_count ;
+	int			sqlconn ;
 	
 	struct FieldInfo	*field_list ;
 	struct FieldInfo	*last_field ;

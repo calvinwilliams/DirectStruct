@@ -8,13 +8,6 @@
 #include "IDL_userinfo.dsc.ESQL.eh"
 #include "IDL_userinfo.dsc.LOG.c"
 
-#if ( defined _ORACLE )
-EXEC SQL BEGIN DECLARE SECTION ;
-	char	DBUSER[ 128 + 1 ] ;
-	char	DBPASS[ 128 + 1 ] ;
-EXEC SQL END DECLARE SECTION ;
-#endif
-
 int recvn( int sock , char *recvbuffer , int *p_recvlen )
 {
 	int		l , needlen , readedlen ;
@@ -132,18 +125,7 @@ int test_server()
 	
 	DSCLOG_userinfo( & u );
 	
-#if ( defined _PQSQL )
-	EXEC SQL
-		CONNECT TO	'calvin@127.0.0.1:18432'
-		USER		'calvin'
-		IDENTIFIED BY	'calvin' ;
-#elif ( defined _ORACLE )
-	strcpy( DBUSER , "hzbsbdb" );
-	strcpy( DBPASS , "hzbsbdb" );
-	EXEC SQL
-		CONNECT 	:DBUSER
-		IDENTIFIED BY	:DBPASS ;
-#endif
+	DSCDBCONN( "127.0.0.1" , 15432 , "calvin" , "calvin" , "calvinn" );
 	if( SQLCODE )
 	{
 		printf( "CONNECT failed[%d][%s]\n" , SQLCODE , SQLSTATE );
@@ -154,19 +136,7 @@ int test_server()
 		printf( "CONNECT ok\n" );
 	}
 	
-#if ( defined _PQSQL )
-	EXEC SQL
-		BEGIN WORK ;
-	if( SQLCODE )
-	{
-		printf( "BEGIN WORK failed[%d][%s]\n" , SQLCODE , SQLSTATE );
-		return 1;
-	}
-	else
-	{
-		printf( "BEGIN WORK ok\n" );
-	}
-#endif
+	DSCDBBEGINWORK();
 	
 	DSCINITV_userinfo();
 	DSCSTOV_userinfo( & u );
@@ -186,8 +156,7 @@ int test_server()
 	
 	if( SQLCODE )
 	{
-		EXEC SQL
-			ROLLBACK WORK ;
+		DSCDBROLLBACK();
 		if( SQLCODE )
 		{
 			printf( "ROLLBACK WORK failed[%d][%s]\n" , SQLCODE , SQLSTATE );
@@ -199,8 +168,7 @@ int test_server()
 	}
 	else
 	{
-		EXEC SQL
-			COMMIT WORK ;
+		DSCDBCOMMIT();
 		if( SQLCODE )
 		{
 			printf( "COMMIT WORK failed[%d][%s]\n" , SQLCODE , SQLSTATE );
@@ -211,19 +179,7 @@ int test_server()
 		}
 	}
 	
-#if ( defined _PQSQL )
-	EXEC SQL
-		DISCONNECT ;
-	if( SQLCODE )
-	{
-		printf( "DISCONNECT failed[%d][%s]\n" , SQLCODE , SQLSTATE );
-		return 1;
-	}
-	else
-	{
-		printf( "DISCONNECT ok\n" );
-	}
-#endif
+	DSCDBDISCONN();
 	
 	return 0;
 }

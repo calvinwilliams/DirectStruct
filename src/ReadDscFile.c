@@ -353,6 +353,11 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 					pstruct->sqlaction_count++;
 					continue;
 				}
+				else if( STRCMP( ptr , == , "SQLCONN" ) )
+				{
+					pstruct->sqlconn = 1 ;
+					continue;
+				}
 				
 				pfld = (struct FieldInfo *)malloc( sizeof(struct FieldInfo) ) ;
 				if( pfld == NULL )

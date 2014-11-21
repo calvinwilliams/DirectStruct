@@ -2,18 +2,21 @@
 #ifndef _H_userinfo_ESQL_
 #define _H_userinfo_ESQL_
 
-#include "IDL_userinfo.dsc.h"
+#define _PQSQL
 
-#define _ORACLE
-
+#include <ecpglib.h>
+#include <ecpgerrno.h>
 #include <sqlca.h>
 
-#ifndef SQLCODE
-#define SQLCODE		(int)(sqlca.sqlcode)
-#define SQLSTATE	""
-#endif
+#include "IDL_userinfo.dsc.h"
 
-#define SQLNOTFOUND	1403
+#undef SQLCODE
+#define SQLCODE		(int)(sqlca.sqlcode)
+
+#undef SQLSTATE
+#define SQLSTATE	sqlca.sqlstate
+
+#define SQLNOTFOUND	100
 
 
 EXEC SQL BEGIN DECLARE SECTION ;
@@ -61,5 +64,10 @@ void DSCSQLACTION_CLOSE_CURSOR_mycursor2();
 void DSCSQLACTION_OPEN_CURSOR_mycursor3_SELECT_A_FROM_userinfo_WHERE_user_id_GE_ORDER_BY_user_id_ASC( userinfo *pst );
 void DSCSQLACTION_FETCH_CURSOR_mycursor3( userinfo *pst );
 void DSCSQLACTION_CLOSE_CURSOR_mycursor3();
+void DSCDBCONN( char *host , int port , char *dbname , char *user , char *pass );
+void DSCDBDISCONN();
+void DSCDBBEGINWORK();
+void DSCDBCOMMIT();
+void DSCDBROLLBACK();
 
 #endif

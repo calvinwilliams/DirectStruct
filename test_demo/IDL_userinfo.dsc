@@ -18,4 +18,6 @@ STRUCT	userinfo
 	SQLACTION	"CURSOR mycursor1 SELECT user_name FROM userinfo WHERE user_id >="
 	SQLACTION	"CURSOR mycursor2 SELECT user_name,email FROM userinfo ORDER BY user_id ASC"
 	SQLACTION	"CURSOR mycursor3 SELECT * FROM userinfo WHERE user_id >= ORDER BY user_id ASC"
+	
+	SQLCONN
 }

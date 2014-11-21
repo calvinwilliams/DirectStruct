@@ -2066,6 +2066,8 @@ void DSCSQLACTION_CLOSE_CURSOR_mycursor3()
 [/code]
 You Can directly call these functions in code, without manual coding.
 
+You can use SQLCONN instruction automatically generated ESQL functions include connect,disconnect,begin work,commit,rollback etc.
+
 N-2.DirectStruct struct definition syntax
 
 Each structure or embedded substructure definition format

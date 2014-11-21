@@ -302,3 +302,61 @@ void DSCSQLACTION_CLOSE_CURSOR_mycursor3()
 		;
 	return;
 }
+
+EXEC SQL BEGIN DECLARE SECTION ;
+	char    DBNAME[ 1024 + 1 ] ;
+	char    DBUSER[ 128 + 1 ] ;
+	char    DBPASS[ 128 + 1 ] ;
+EXEC SQL END DECLARE SECTION ;
+
+void DSCDBCONN( char *host , int port , char *dbname , char *user , char *pass )
+{
+	strcpy( DBNAME , dbname );
+	if( host )
+	{
+		strcat( DBNAME , "@" );
+		strcat( DBNAME , host );
+	}
+	if( port )
+	{
+		strcat( DBNAME , ":" );
+		sprintf( DBNAME + strlen(DBNAME) , "%d" , port );
+	}
+	strcpy( DBUSER , user );
+	strcpy( DBPASS , pass );
+	
+	EXEC SQL
+		CONNECT TO	:DBNAME
+		USER		:DBUSER
+		IDENTIFIED BY	:DBPASS ;
+	
+	return;
+}
+void DSCDBDISCONN()
+{
+	EXEC SQL
+		DISCONNECT ;
+	
+	return;
+}
+void DSCDBBEGINWORK()
+{
+	EXEC SQL
+		BEGIN WORK ;
+	
+	return;
+}
+void DSCDBCOMMIT()
+{
+	EXEC SQL
+		COMMIT WORK ;
+	
+	return;
+}
+void DSCDBROLLBACK()
+{
+	EXEC SQL
+		ROLLBACK WORK ;
+	
+	return;
+}
