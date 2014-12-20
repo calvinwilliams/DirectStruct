@@ -86,7 +86,7 @@ int main( int argc , char *argv[] )
 			cp.output_c_flag = 1 ;
 			cp.output_c_LOG_flag = 1 ;
 		}
-		else if( strcmp( argv[c] , "-sql" ) == 0 )
+		else if( strcmp( argv[c] , "-sql-pqsql" ) == 0 )
 		{
 			cp.output_sql_flag = 1 ;
 		}
