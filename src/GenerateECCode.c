@@ -605,6 +605,8 @@ static int GenerateECCode_ec_SQL_ACTION_CURSOR( struct StructInfo *pstruct , cha
 	fprintf( fp_dsc_ESQL_ec , "\n" );
 	fprintf( fp_dsc_ESQL_ec , "void DSCSQLACTION_OPEN_%s( %s *pst )\n" , sqlaction_funcname , pstruct->struct_name );
 	fprintf( fp_dsc_ESQL_ec , "{\n" );
+	fprintf( fp_dsc_ESQL_ec , "	DSCSTOV_%s( pst );\n" , pstruct->struct_name );
+	fprintf( fp_dsc_ESQL_ec , "	\n" );
 	fprintf( fp_dsc_ESQL_ec , "	EXEC SQL\n" );
 	fprintf( fp_dsc_ESQL_ec , "		DECLARE	%s_%s CURSOR FOR\n" , pstruct->struct_name , cursor_name );
 	
@@ -685,11 +687,8 @@ static int GenerateECCode_ec_SQL_ACTION_CURSOR( struct StructInfo *pstruct , cha
 			
 			while( ( ptr10 = strtok_r( NULL , " \t" , & saveptr ) ) )
 			{
-				if( STRCMP( ptr10 , == , "ORDER" ) )
-				{
-					fprintf( fp_dsc_ESQL_ec , "\n" );
-					goto _GOTO_ORDERBY;
-				}
+				if( STRCMP( ptr10 , != , "AND" ) && STRCMP( ptr10 , != , "OR" ) )
+						break;
 				
 				ptr11 = strtok_r( NULL , " \t" , & saveptr ) ;
 				if( ptr11 == NULL )
@@ -709,37 +708,21 @@ static int GenerateECCode_ec_SQL_ACTION_CURSOR( struct StructInfo *pstruct , cha
 			}
 			
 			fprintf( fp_dsc_ESQL_ec , "\n" );
+			
+			if( ptr10 )
+			{
+				ptr = ptr10 ;
+				goto _OUTPUT_CURSOR_REMAIN_SECTIONS;
+			}
 		}
-		else if( STRCMP( ptr , == , "ORDER" ) )
+		else
 		{
-_GOTO_ORDERBY :
-			ptr = strtok_r( NULL , " \t" , & saveptr ) ;
-			if( ptr == NULL )
-			{
-				fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
-				return -1;
-			}
-			if( STRCMP( ptr , != , "BY" ) )
-			{
-				fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
-				return -1;
-			}
+_OUTPUT_CURSOR_REMAIN_SECTIONS :
+			fprintf( fp_dsc_ESQL_ec , "		%s" , ptr );
 			
-			fprintf( fp_dsc_ESQL_ec , "		ORDER BY" );
-			
-			while(1)
+			while( ( ptr = strtok_r( NULL , " \t" , & saveptr ) ) )
 			{
-				ptr = strtok_r( NULL , " \t" , & saveptr ) ;
-				if( ptr == NULL )
-				{
-					fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
-					return -1;
-				}
-				
-				fprintf( fp_dsc_ESQL_ec , " %s" , ptr );
-				
-				if( STRCMP( ptr , == , "ASC" ) || STRCMP( ptr , == , "DESC" ) )
-					break;
+				fprintf( fp_dsc_ESQL_ec , " %s " , ptr );
 			}
 			
 			fprintf( fp_dsc_ESQL_ec , "\n" );
@@ -752,7 +735,7 @@ _GOTO_ORDERBY :
 	fprintf( fp_dsc_ESQL_ec , "	\n" );
 	fprintf( fp_dsc_ESQL_ec , "	EXEC SQL\n" );
 	fprintf( fp_dsc_ESQL_ec , "		OPEN	%s_%s\n" , pstruct->struct_name , cursor_name );
-	fprintf( fp_dsc_ESQL_ec , "		;" );
+	fprintf( fp_dsc_ESQL_ec , "		;\n" );
 	fprintf( fp_dsc_ESQL_ec , "	if( SQLCODE )\n" );
 	fprintf( fp_dsc_ESQL_ec , "		return;\n" );
 	fprintf( fp_dsc_ESQL_ec , "	\n" );
