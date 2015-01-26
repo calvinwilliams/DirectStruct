@@ -37,6 +37,10 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 		
 		lineno++;
 		
+		ptr = strchr( filebuffer , '#' ) ;
+		if( ptr )
+			(*ptr) = '\0' ;
+		
 		ClearLeft( filebuffer );
 		ClearRight( filebuffer );
 		StringNoEnter( filebuffer );
