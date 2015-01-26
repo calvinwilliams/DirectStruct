@@ -969,126 +969,126 @@ BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail
 BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionTailDetail[index[3]].message_text[]
 BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionTailDetail[index[3]].message_text[]
 BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionTailDetail[index[3]].message_text[]
-DSCSERIALIZE_JSON_BankJsonTransaction ok , len[1937]
+DSCSERIALIZE_JSON_BankJsonTransaction ok , len[2330]
 [{
-        BankJsonTransaction :
+        "BankJsonTransaction" :
         {
-                version : 1 ,
-                ResponseHeader :
+                "version" : 1 ,
+                "ResponseHeader" :
                 {
-                        transaction_code : "P0101" ,
-                        trans_jnlsno : 12345678 ,
-                        response_code : 0 ,
-                        response_desc : "OK"
+                        "transaction_code" : "P0101" ,
+                        "trans_jnlsno" : 12345678 ,
+                        "response_code" : 0 ,
+                        "response_desc" : "OK"
                 } ,
-                QueryTransactionDetails :
+                "QueryTransactionDetails" :
                 {
-                        AddonMessages :
+                        "AddonMessages" :
                         {
-                                AddonMessage :
+                                "AddonMessage" :
                                 [
                                 {
-                                        message_text : "Check account passed"
+                                        "message_text" : "Check account passed"
                                 } ,
                                 {
-                                        message_text : "Check channel passed"
+                                        "message_text" : "Check channel passed"
                                 } ,
                                 {
-                                        message_text : ""
+                                        "message_text" : ""
                                 }
                                 ]
                         } ,
-                        TransactionDetailTitle :
+                        "TransactionDetailTitle" :
                         {
-                                title_text : "DETAIL TITLE" ,
-                                page_no : 1 ,
-                                page_size : 2
+                                "title_text" : "DETAIL TITLE" ,
+                                "page_no" : 1 ,
+                                "page_size" : 2
                         } ,
-                        TransactionDetails :
+                        "TransactionDetails" :
                         {
-                                TransactionDetail :
+                                "TransactionDetail" :
                                 [
                                 {
-                                        trans_date : "2014-01-01" ,
-                                        trans_time : "08:01:01" ,
-                                        outlet_id : "1001" ,
-                                        card_no : "603367123412341234" ,
-                                        trans_amount : 100.000000
+                                        "trans_date" : "2014-01-01" ,
+                                        "trans_time" : "08:01:01" ,
+                                        "outlet_id" : "1001" ,
+                                        "card_no" : "603367123412341234" ,
+                                        "trans_amount" : 100.000000
                                 } ,
                                 {
-                                        trans_date : "2014-02-02" ,
-                                        trans_time : "08:02:02" ,
-                                        outlet_id : "2002" ,
-                                        card_no : "603367123412341234" ,
-                                        trans_amount : 200.000000
+                                        "trans_date" : "2014-02-02" ,
+                                        "trans_time" : "08:02:02" ,
+                                        "outlet_id" : "2002" ,
+                                        "card_no" : "603367123412341234" ,
+                                        "trans_amount" : 200.000000
                                 } ,
                                 {
-                                        trans_date : "" ,
-                                        trans_time : "" ,
-                                        outlet_id : "" ,
-                                        card_no : "\"" ,
-                                        trans_amount : 0.000000
+                                        "trans_date" : "" ,
+                                        "trans_time" : "" ,
+                                        "outlet_id" : "" ,
+                                        "card_no" : "\"" ,
+                                        "trans_amount" : 0.000000
                                 } ,
                                 {
-                                        trans_date : "" ,
-                                        trans_time : "" ,
-                                        outlet_id : "" ,
-                                        card_no : "\"你\"他\"" ,
-                                        trans_amount : 0.000000
+                                        "trans_date" : "" ,
+                                        "trans_time" : "" ,
+                                        "outlet_id" : "" ,
+                                        "card_no" : "\"你\"他\"" ,
+                                        "trans_amount" : 0.000000
                                 } ,
                                 {
-                                        trans_date : "" ,
-                                        trans_time : "" ,
-                                        outlet_id : "" ,
-                                        card_no : "我\"你\"他\"她" ,
-                                        trans_amount : 0.000000
+                                        "trans_date" : "" ,
+                                        "trans_time" : "" ,
+                                        "outlet_id" : "" ,
+                                        "card_no" : "我\"你\"他\"她" ,
+                                        "trans_amount" : 0.000000
                                 } ,
                                 {
-                                        trans_date : "" ,
-                                        trans_time : "" ,
-                                        outlet_id : "" ,
-                                        card_no : "" ,
-                                        trans_amount : 0.000000
+                                        "trans_date" : "" ,
+                                        "trans_time" : "" ,
+                                        "outlet_id" : "" ,
+                                        "card_no" : "" ,
+                                        "trans_amount" : 0.000000
                                 } ,
                                 {
-                                        trans_date : "" ,
-                                        trans_time : "" ,
-                                        outlet_id : "" ,
-                                        card_no : "" ,
-                                        trans_amount : 0.000000
+                                        "trans_date" : "" ,
+                                        "trans_time" : "" ,
+                                        "outlet_id" : "" ,
+                                        "card_no" : "" ,
+                                        "trans_amount" : 0.000000
                                 } ,
                                 {
-                                        trans_date : "" ,
-                                        trans_time : "" ,
-                                        outlet_id : "" ,
-                                        card_no : "" ,
-                                        trans_amount : 0.000000
+                                        "trans_date" : "" ,
+                                        "trans_time" : "" ,
+                                        "outlet_id" : "" ,
+                                        "card_no" : "" ,
+                                        "trans_amount" : 0.000000
                                 } ,
                                 {
-                                        trans_date : "" ,
-                                        trans_time : "" ,
-                                        outlet_id : "" ,
-                                        card_no : "" ,
-                                        trans_amount : 0.000000
+                                        "trans_date" : "" ,
+                                        "trans_time" : "" ,
+                                        "outlet_id" : "" ,
+                                        "card_no" : "" ,
+                                        "trans_amount" : 0.000000
                                 } ,
                                 {
-                                        trans_date : "" ,
-                                        trans_time : "" ,
-                                        outlet_id : "" ,
-                                        card_no : "" ,
-                                        trans_amount : 0.000000
+                                        "trans_date" : "" ,
+                                        "trans_time" : "" ,
+                                        "outlet_id" : "" ,
+                                        "card_no" : "" ,
+                                        "trans_amount" : 0.000000
                                 }
                                 ] ,
-                                TransactionTailDetail :
+                                "TransactionTailDetail" :
                                 [
                                 {
-                                        message_text : ""
+                                        "message_text" : ""
                                 } ,
                                 {
-                                        message_text : ""
+                                        "message_text" : ""
                                 } ,
                                 {
-                                        message_text : ""
+                                        "message_text" : ""
                                 }
                                 ]
                         }
@@ -1097,41 +1097,41 @@ DSCSERIALIZE_JSON_BankJsonTransaction ok , len[1937]
 }
 ]
 DSCDESERIALIZE_JSON_BankJsonTransaction ok
-BankJsonTransaction.version[0]
-BankJsonTransaction.ResponseHeader.transaction_code[]
-BankJsonTransaction.ResponseHeader.trans_jnlsno[0]
+BankJsonTransaction.version[1]
+BankJsonTransaction.ResponseHeader.transaction_code[P0101]
+BankJsonTransaction.ResponseHeader.trans_jnlsno[12345678]
 BankJsonTransaction.ResponseHeader.response_code[0]
-BankJsonTransaction.ResponseHeader.response_desc[]
+BankJsonTransaction.ResponseHeader.response_desc[OK]
+BankJsonTransaction.QueryTransactionDetails.AddonMessages.AddonMessage[index[3]].message_text[Check account passed]
+BankJsonTransaction.QueryTransactionDetails.AddonMessages.AddonMessage[index[3]].message_text[Check channel passed]
 BankJsonTransaction.QueryTransactionDetails.AddonMessages.AddonMessage[index[3]].message_text[]
-BankJsonTransaction.QueryTransactionDetails.AddonMessages.AddonMessage[index[3]].message_text[]
-BankJsonTransaction.QueryTransactionDetails.AddonMessages.AddonMessage[index[3]].message_text[]
-BankJsonTransaction.QueryTransactionDetails.TransactionDetailTitle.title_text[]
-BankJsonTransaction.QueryTransactionDetails.TransactionDetailTitle.page_no[0]
-BankJsonTransaction.QueryTransactionDetails.TransactionDetailTitle.page_size[0]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetailTitle.title_text[DETAIL TITLE]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetailTitle.page_no[1]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetailTitle.page_size[2]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[2014-01-01]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[08:01:01]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[1001]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[603367123412341234]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[100.000000]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[2014-02-02]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[08:02:02]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[2002]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[603367123412341234]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[200.000000]
 BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
 BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
 BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
-BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no["]
 BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
 BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
 BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
 BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
-BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no["你"他"]
 BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
 BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
 BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
 BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
-BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
-BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
-BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
-BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
-BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
-BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
-BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
-BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
-BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
-BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].outlet_id[]
-BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[]
+BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].card_no[我"你"他"她]
 BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_amount[0.000000]
 BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_date[]
 BankJsonTransaction.QueryTransactionDetails.TransactionDetails.TransactionDetail[index[3]].trans_time[]
