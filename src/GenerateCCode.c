@@ -1395,19 +1395,26 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON( struct CommandParameter *pcp , int
 	
 	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
 	{
-		fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \\n\"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pstruct->struct_name );
-		if( pstruct->array_size > 0 )
+		if( depth > 0 )
 		{
-			fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s[\\n\"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs );
+			fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \\n\"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;\n" , depth,tabs , pstruct->struct_name );
 		}
 		
 		if( pstruct->array_size > 0 )
 		{
-			fprintabs( fp_dsc_c , depth+2 ); fprintf( fp_dsc_c , "	for( index[%d] = 0 ; index[%d] < %d ; index[%d]++ )\n" , depth , depth , pstruct->array_size , depth );
-			fprintabs( fp_dsc_c , depth+2 ); fprintf( fp_dsc_c , "	{\n" );
+			fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s[\\n\"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;\n" , depth,tabs );
 		}
 		
-		fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s{\\n\"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs );
+		if( pstruct->array_size > 0 )
+		{
+			fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	for( index[%d] = 0 ; index[%d] < %d ; index[%d]++ )\n" , depth , depth , pstruct->array_size , depth );
+			fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{\n" );
+		}
+		
+		if( depth > 0 )
+		{
+			fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s{\\n\"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;\n" , depth,tabs );
+		}
 		
 		if( depth == 0 )
 		{
@@ -1431,22 +1438,22 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON( struct CommandParameter *pcp , int
 			{
 				if( pfield->field_len == 1 )
 				{
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+2,tabs , pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%d\",%s%s); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;\n" , pathname,pfield->field_name );
 				}
 				else if( pfield->field_len == 2 )
 				{
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+2,tabs , pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%hd\",%s%s); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;\n" , pathname,pfield->field_name );
 				}
 				else if( pfield->field_len == 4 )
 				{
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+2,tabs , pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%d\",%s%s); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;\n" , pathname,pfield->field_name );
 				}
 				else if( pfield->field_len == 8 )
 				{
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+2,tabs , pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,LONGLONG_FORMAT_SPEC\"\",%s%s); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;\n" , pathname,pfield->field_name );
 				}
 			}
@@ -1454,22 +1461,22 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON( struct CommandParameter *pcp , int
 			{
 				if( pfield->field_len == 1 )
 				{
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+2,tabs , pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%u\",%s%s); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;\n" , pathname,pfield->field_name );
 				}
 				else if( pfield->field_len == 2 )
 				{
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+2,tabs , pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%hu\",%s%s); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;\n" , pathname,pfield->field_name );
 				}
 				else if( pfield->field_len == 4 )
 				{
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+2,tabs , pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%u\",%s%s); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;\n" , pathname,pfield->field_name );
 				}
 				else if( pfield->field_len == 8 )
 				{
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+2,tabs , pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,LONGLONG_FORMAT_SPEC\"\",%s%s); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;\n" , pathname,pfield->field_name );
 				}
 			}
@@ -1477,28 +1484,28 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON( struct CommandParameter *pcp , int
 			{
 				if( pfield->field_len == 4 )
 				{
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+2,tabs , pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%f\",%s%s); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;\n" , pathname,pfield->field_name );
 				}
 				else if( pfield->field_len == 8 )
 				{
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+2,tabs , pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%lf\",%s%s); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;\n" , pathname,pfield->field_name );
 				}
 			}
 			else if( STRCMP( pfield->field_type , == , "CHAR" ) )
 			{
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+2,tabs , pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%c\",%s%s); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;\n" , pathname,pfield->field_name );
 			}
 			else if( STRCMP( pfield->field_type , == , "UCHAR" ) )
 			{
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+2,tabs , pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%c\",%s%s); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;\n" , pathname,pfield->field_name );
 			}
 			else if( STRCMP( pfield->field_type , == , "STRING" ) )
 			{
-				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+2,tabs , pfield->field_name );
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"\\\"\"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" );
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%s\",%s%s); JSONESCAPE_EXPAND(buf,len,remain_len); if( len < 0 ) return -1;\n" , pathname,pfield->field_name );
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"\\\"\"); if( len < 0 ) return -1; buf+=len; remain_len-=len;\n" );
@@ -1516,41 +1523,44 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON( struct CommandParameter *pcp , int
 		
 		if( pstruct->sub_struct_list )
 		{
-			nret = GenerateCCode_c_DSCSERIALIZE_JSON( pcp , depth + 1 , pstruct->sub_struct_list , fp_dsc_c , pathname ) ;
+			nret = GenerateCCode_c_DSCSERIALIZE_JSON( pcp , depth+1 , pstruct->sub_struct_list , fp_dsc_c , pathname ) ;
 			if( nret )
 				return nret;
 		}
 		
 		if( pstruct->array_size > 0 )
 		{
-			fprintabs( fp_dsc_c , depth+2 ); fprintf( fp_dsc_c , "\tif(index[%d]<%d-1)\n" , depth , pstruct->array_size );
-			fprintabs( fp_dsc_c , depth+2 ); fprintf( fp_dsc_c , "\t{ len=SNPRINTF(buf,remain_len,\"%.*s} ,\\n\"); if( len <= 0 ) return -1; buf+=len; remain_len-=len; }\n" , depth+1,tabs );
-			fprintabs( fp_dsc_c , depth+2 ); fprintf( fp_dsc_c , "\telse\n" );
-			fprintabs( fp_dsc_c , depth+2 ); fprintf( fp_dsc_c , "\t{ len=SNPRINTF(buf,remain_len,\"%.*s}\\n\"); if( len <= 0 ) return -1; buf+=len; remain_len-=len; }\n" , depth+1,tabs );
+			fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\tif(index[%d]<%d-1)\n" , depth , pstruct->array_size );
+			fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\t{ len=SNPRINTF(buf,remain_len,\"%.*s} ,\\n\"); if( len <= 0 ) return -1; buf+=len; remain_len-=len; }\n" , depth,tabs );
+			fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\telse\n" );
+			fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\t{ len=SNPRINTF(buf,remain_len,\"%.*s}\\n\"); if( len <= 0 ) return -1; buf+=len; remain_len-=len; }\n" , depth,tabs );
 		}
 		else
 		{
 			if( pstruct->next_struct )
 			{
-				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s} ,\\n\"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs );
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s} ,\\n\"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;\n" , depth,tabs );
 			}
 			else
 			{
-				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s}\\n\"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs );
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s}\\n\"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;\n" , depth,tabs );
 			}
 		}
 		
 		if( pstruct->array_size > 0 )
 		{
-			fprintabs( fp_dsc_c , depth+2 ); fprintf( fp_dsc_c , "	}\n" );
+			if( depth > 0 )
+			{
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	}\n" );
+			}
 			
 			if( pstruct->next_struct )
 			{
-				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s] ,\\n\"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs );
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s] ,\\n\"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;\n" , depth,tabs );
 			}
 			else
 			{
-				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s]\\n\"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs );
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s]\\n\"); if( len <= 0 ) return -1; buf+=len; remain_len-=len;\n" , depth,tabs );
 			}
 		}
 	}
@@ -2530,7 +2540,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "	int	nret = 0 ;\n" );
 		fprintf( fp_dsc_c , "	memset( xpath , 0x00 , sizeof(xpath) );\n" );
 		fprintf( fp_dsc_c , "	nret = TravelXmlBuffer( buf , xpath , sizeof(xpath) , & CallbackOnXmlNode_%s , (void*)pst ) ;\n" , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "	if( nret && nret != FASTERXML_INFO_END_OF_BUFFER )\n" );
+		fprintf( fp_dsc_c , "	if( nret )\n" );
 		fprintf( fp_dsc_c , "		return nret;\n" );
 		fprintf( fp_dsc_c , "	\n" );
 		fprintf( fp_dsc_c , "	return 0;\n" );
@@ -2552,6 +2562,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
 		fprintf( fp_dsc_c , "	remain_len = (*p_len) - 1 ;\n" );
 		fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
+		/* SNPRINTF( jsonpathname , sizeof(jsonpathname)-1 , "pst->%s." , pstruct->next_struct->struct_name ); */
 		nret = GenerateCCode_c_DSCSERIALIZE_JSON( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
 		if( nret )
 			return nret;
@@ -2573,15 +2584,13 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "	{\n" );
 		fprintf( fp_dsc_c , "		if( type & FASTERJSON_NODE_ENTER )\n" );
 		fprintf( fp_dsc_c , "		{\n" );
-		SNPRINTF( jsonpathname , sizeof(jsonpathname)-1 , "/%s" , pstruct->next_struct->struct_name );
-		nret = GenerateCCode_c_DSCDESERIALIZE_JSON_ENTERNODE( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" , jsonpathname ) ;
+		nret = GenerateCCode_c_DSCDESERIALIZE_JSON_ENTERNODE( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" , "" ) ;
 		if( nret )
 			return nret;
 		fprintf( fp_dsc_c , "		}\n" );
 		fprintf( fp_dsc_c , "		else if( type & FASTERJSON_NODE_LEAVE )\n" );
 		fprintf( fp_dsc_c , "		{\n" );
-		SNPRINTF( jsonpathname , sizeof(jsonpathname)-1 , "/%s" , pstruct->next_struct->struct_name );
-		nret = GenerateCCode_c_DSCDESERIALIZE_JSON_LEAVENODE( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" , jsonpathname ) ;
+		nret = GenerateCCode_c_DSCDESERIALIZE_JSON_LEAVENODE( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" , "" ) ;
 		if( nret )
 			return nret;
 		fprintf( fp_dsc_c , "		}\n" );
@@ -2589,7 +2598,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "	else if( type & FASTERJSON_NODE_LEAF )\n" );
 		fprintf( fp_dsc_c , "	{\n" );
 		SNPRINTF( jsonpathname , sizeof(jsonpathname)-1 , "/%s" , pstruct->next_struct->struct_name );
-		nret = GenerateCCode_c_DSCDESERIALIZE_JSON_LEAF( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" , jsonpathname ) ;
+		nret = GenerateCCode_c_DSCDESERIALIZE_JSON_LEAF( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" , "" ) ;
 		if( nret )
 			return nret;
 		fprintf( fp_dsc_c , "	}\n" );
@@ -2603,7 +2612,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "	int	nret = 0 ;\n" );
 		fprintf( fp_dsc_c , "	memset( jpath , 0x00 , sizeof(jpath) );\n" );
 		fprintf( fp_dsc_c , "	nret = TravelJsonBuffer( buf , jpath , sizeof(jpath) , & CallbackOnJsonNode_%s , (void*)pst ) ;\n" , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "	if( nret && nret != FASTERJSON_INFO_END_OF_BUFFER )\n" );
+		fprintf( fp_dsc_c , "	if( nret )\n" );
 		fprintf( fp_dsc_c , "		return nret;\n" );
 		fprintf( fp_dsc_c , "	\n" );
 		fprintf( fp_dsc_c , "	return 0;\n" );
