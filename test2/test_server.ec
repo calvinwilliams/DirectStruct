@@ -125,7 +125,7 @@ int test_server()
 	
 	DSCLOG_userinfo( & u );
 	
-	DSCDBCONN( "127.0.0.1" , 15432 , "calvin" , "calvin" , "calvinn" );
+	DSCDBCONN( "127.0.0.1" , 15432 , "calvin" , "calvin" , "calvin" );
 	if( SQLCODE )
 	{
 		printf( "CONNECT failed[%d][%s]\n" , SQLCODE , SQLSTATE );

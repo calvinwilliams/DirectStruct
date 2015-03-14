@@ -10,12 +10,12 @@
 # 编译宏
 AR		=	ar
 AFLAGS		=	rv
-SOFLAGS		=	-shared
-ESOFLAGS	=	
+SOFLAGS		=	-G -bnoentry
+ESOFLAGS	=	-bdynamic -brtl -qcpluscm
 
 # c源代码文件宏及推导规则
-CC		=	gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing
-CC_NOWARN	=	gcc -g -fPIC -O2
+CC		=	xlc -q64 -O2 -qlanglvl=ansi -qsrcmsg -qinfo=dcl:eff:ini:par:pro:rea:ret
+CC_NOWARN	=	xlc -q64 -O2
 
 c_FILE_o	=	$(c_FILE:.c=.o)
 c_FILE2_o	=	$(c_FILE2:.c=.o)
@@ -41,13 +41,13 @@ BIN		=	test_client			\
 
 ###### 编译选项
 CFLAGS		=	-I. \
-			-I/root/local/postgresql/include\
+			-I$(PGHOME)/include		\
 			-I/usr/include/fasterxml	\
 			-I/usr/include/fasterjson	\
 
 ###### 链接选项
 LFLAGS		=	-L. \
-			-L/root/local/postgresql/lib	\
+			-L$(PGHOME)/lib			\
 			-lecpg				\
 			-L/usr/lib			\
 			-lfasterxml			\
@@ -68,10 +68,9 @@ MV		=	mv -f
 MKDIR		=	mkdir -p
 
 # 预定义源文件清理删除关联宏
-_FILE_CLEAN	=	$(c_FILE_CLEAN) $(cpp_FILE_CLEAN) $(SQC_FILE_CLEAN) $(csm_FILE_CLEAN) $(c_html_FILE_CLEAN) $(cui_FILE_CLEAN) $(dtd_FILE_CLEAN) $(prt_FILE_CLEAN) $(fmd_FILE_CLEAN) $(smd_FILE_CLEAN) $(def_FILE_CLEAN) $(act_FILE_CLEAN) $(sml2c_FILE_CLEAN)
+_FILE_CLEAN	=	$(c_FILE_CLEAN) $(cpp_FILE_CLEAN) $(SQC_FILE_CLEAN) $(csm_FILE_CLEAN) $(c_html_FILE_CLEAN) $(cui_FILE_CLEAN) $(dtd_FILE_CLEAN) $(prt_FILE_CLEAN) $(fmd_FILE_CLEAN) $(smd_FILE_CLEAN) $(def_FILE_CLEAN) $(act_FILE_CLEAN)
 
 # 清理删除规则
-.PHONY:clean
 clean		:
 	@for FILE in $(_FILE_CLEAN) $(BIN) $(BIN2) $(LIB) $(LIB2) $(OBJ) $(OBJ2) $(NOINST_OBJ) $(CLEAN_ADDITION) ; do \
 		echo $(RM) $$FILE ; \
@@ -80,53 +79,46 @@ clean		:
 
 
 # 预定义源代码缺省头文件宏
-DFTHDER		=	$(csm_FILE_DFTHDER) $(cui_FILE_DFTHDER) $(dtd_FILE_DFTHDER) $(prt_FILE_DFTHDER) $(fmd_FILE_DFTHDER) $(smd_FILE_DFTHDER) $(def_FILE_DFTHDER) $(act_FILE_DFTHDER) $(sml2c_FILE_DFTHDER)
+DFTHDER		=	$(csm_FILE_DFTHDER) $(cui_FILE_DFTHDER) $(dtd_FILE_DFTHDER) $(prt_FILE_DFTHDER) $(fmd_FILE_DFTHDER) $(smd_FILE_DFTHDER) $(def_FILE_DFTHDER) $(act_FILE_DFTHDER)
 
 # 提交安装规则
-.PHONY:install
 install		:	all
 
-ifneq ($(strip $(BIN)),)
-ifneq ($(strip $(BININST)),)
-	@if [ ! -d "$(BININST)" ] ; then \
-		echo $(MKDIR) $(BININST) ; \
-		$(MKDIR) $(BININST) ; \
-	fi ; \
-	for FILE in `echo $(BIN)` ; do \
-		echo $(CP) $$FILE $(BININST)/ ; \
-		$(RM) $(BININST)/$$FILE ; \
-		$(CP) $$FILE $(BININST)/ ; \
-	done
-endif
-endif
+	@if [ -n "$(BIN)" -a -n "$(BININST)" ] ; then \
+		if [ ! -d "$(BININST)" ] ; then \
+			echo $(MKDIR) $(BININST) ; \
+			$(MKDIR) $(BININST) ; \
+		fi ; \
+		for FILE in `echo $(BIN)` ; do \
+			echo $(CP) $$FILE $(BININST)/ ; \
+			$(RM) $(BININST)/$$FILE ; \
+			$(CP) $$FILE $(BININST)/ ; \
+		done \
+	fi
 
-ifneq ($(strip $(HDER)),)
-ifneq ($(strip $(HDERINST)),)
-	@if [ ! -d "$(HDERINST)" ] ; then \
-		echo $(MKDIR) $(HDERINST) ; \
-		$(MKDIR) $(HDERINST) ; \
-	fi ; \
-	for FILE in `echo $(HDER)` ; do \
-		echo $(CP) $$FILE $(HDERINST)/ ; \
-		$(RM) $(HDERINST)/$$FILE ; \
-		$(CP) $$FILE $(HDERINST)/ ; \
-	done
-endif
-endif
+	@if [ -n "$(HDER)" -a -n "$(HDERINST)" ] ; then \
+		if [ ! -d "$(HDERINST)" ] ; then \
+			echo $(MKDIR) $(HDERINST) ; \
+			$(MKDIR) $(HDERINST) ; \
+		fi ; \
+		for FILE in `echo $(HDER)` ; do \
+			echo $(CP) $$FILE $(HDERINST)/ ; \
+			$(RM) $(HDERINST)/$$FILE ; \
+			$(CP) $$FILE $(HDERINST)/ ; \
+		done \
+	fi
 
-ifneq ($(strip $(DFTHDER)),)
-ifneq ($(strip $(DFTHDERINST)),)
-	@if [ ! -d "$(DFTHDERINST)" ] ; then \
-		echo $(MKDIR) $(DFTHDERINST) ; \
-		$(MKDIR) $(DFTHDERINST) ; \
-	fi ; \
-	for FILE in `echo $(DFTHDER)` ; do \
-		echo $(CP) $$FILE $(DFTHDERINST)/ ; \
-		$(RM) $(DFTHDERINST)/$$FILE ; \
-		$(CP) $$FILE $(DFTHDERINST)/ ; \
-	done
-endif
-endif
+	@if [ -n "$(DFTHDER)" -a -n "$(DFTHDERINST)" ] ; then \
+		if [ ! -d "$(DFTHDERINST)" ] ; then \
+			echo $(MKDIR) $(DFTHDERINST) ; \
+			$(MKDIR) $(DFTHDERINST) ; \
+		fi ; \
+		for FILE in `echo $(DFTHDER)` ; do \
+			echo $(CP) $$FILE $(DFTHDERINST)/ ; \
+			$(RM) $(DFTHDERINST)/$$FILE ; \
+			$(CP) $$FILE $(DFTHDERINST)/ ; \
+		done \
+	fi
 
 
 

@@ -19,9 +19,9 @@ static void usage()
 	printf( "USAGE : dsc -f .dsc [ -c ] [ -c-LOG ]\n" );
 	printf( "                    [ -c-order ]\n" );
 	printf( "                    [ -c-compact ] [ -c-compress ]\n" );
-	printf( "                    [ -c-xml ]\n" );
-	printf( "                    [ -c-json ]\n" );
-	printf( "                    [ -sql-pqsql ] [ -ec-pqsql | -ec-oracle ]\n" );
+	printf( "                    [ -c-xml | -c-xml-compact ]\n" );
+	printf( "                    [ -c-json | -c-json-compact ]\n" );
+	printf( "                    [ -sql-pgsql | -ec-pgsql ] [ -ec-pgsql | -ec-oracle ]\n" );
 	printf( "                    [ -c-ALL ]\n" );
 }
 
@@ -76,24 +76,38 @@ int main( int argc , char *argv[] )
 			cp.output_c_flag = 1 ;
 			cp.output_c_xml_flag = 1 ;
 		}
+		else if( strcmp( argv[c] , "-c-xml-compact" ) == 0 )
+		{
+			cp.output_c_flag = 1 ;
+			cp.output_c_xml_compact_flag = 1 ;
+		}
 		else if( strcmp( argv[c] , "-c-json" ) == 0 )
 		{
 			cp.output_c_flag = 1 ;
 			cp.output_c_json_flag = 1 ;
+		}
+		else if( strcmp( argv[c] , "-c-json-compact" ) == 0 )
+		{
+			cp.output_c_flag = 1 ;
+			cp.output_c_json_compact_flag = 1 ;
 		}
 		else if( strcmp( argv[c] , "-c-LOG" ) == 0 )
 		{
 			cp.output_c_flag = 1 ;
 			cp.output_c_LOG_flag = 1 ;
 		}
-		else if( strcmp( argv[c] , "-sql-pqsql" ) == 0 )
+		else if( strcmp( argv[c] , "-sql-pgsql" ) == 0 )
 		{
-			cp.output_sql_flag = 1 ;
+			cp.output_sql_pgsql_flag = 1 ;
 		}
-		else if( strcmp( argv[c] , "-ec-pqsql" ) == 0 )
+		else if( strcmp( argv[c] , "-ec-pgsql" ) == 0 )
 		{
 			cp.output_c_flag = 1 ;
-			cp.output_ec_pqsql_flag = 1 ;
+			cp.output_ec_pgsql_flag = 1 ;
+		}
+		else if( strcmp( argv[c] , "-sql-oracle" ) == 0 )
+		{
+			cp.output_sql_oracle_flag = 1 ;
 		}
 		else if( strcmp( argv[c] , "-ec-oracle" ) == 0 )
 		{
@@ -111,6 +125,7 @@ int main( int argc , char *argv[] )
 		}
 		else
 		{
+			printf( "Invalid parameter[%s]\n" , argv[c] );
 			usage();
 			exit(7);
 		}

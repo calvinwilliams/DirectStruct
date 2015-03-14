@@ -1074,7 +1074,7 @@ static int GenerateECCode_ec_SQL( struct CommandParameter *pcp , struct StructIn
 		fprintf( fp_dsc_ESQL_ec , "\n" );
 		fprintf( fp_dsc_ESQL_ec , "void DSCDBCONN( char *host , int port , char *dbname , char *user , char *pass )\n" );
 		fprintf( fp_dsc_ESQL_ec , "{\n" );
-		if( pcp->output_ec_pqsql_flag == 1 )
+		if( pcp->output_ec_pgsql_flag == 1 )
 		{
 			fprintf( fp_dsc_ESQL_ec , "	strcpy( DBNAME , dbname );\n" );
 			fprintf( fp_dsc_ESQL_ec , "	if( host )\n" );
@@ -1110,7 +1110,7 @@ static int GenerateECCode_ec_SQL( struct CommandParameter *pcp , struct StructIn
 		
 		fprintf( fp_dsc_ESQL_ec , "void DSCDBDISCONN()\n" );
 		fprintf( fp_dsc_ESQL_ec , "{\n" );
-		if( pcp->output_ec_pqsql_flag == 1 )
+		if( pcp->output_ec_pgsql_flag == 1 )
 		{
 			fprintf( fp_dsc_ESQL_ec , "	EXEC SQL\n" );
 			fprintf( fp_dsc_ESQL_ec , "		DISCONNECT ;\n" );
@@ -1121,7 +1121,7 @@ static int GenerateECCode_ec_SQL( struct CommandParameter *pcp , struct StructIn
 		
 		fprintf( fp_dsc_ESQL_ec , "void DSCDBBEGINWORK()\n" );
 		fprintf( fp_dsc_ESQL_ec , "{\n" );
-		if( pcp->output_ec_pqsql_flag == 1 )
+		if( pcp->output_ec_pgsql_flag == 1 )
 		{
 			fprintf( fp_dsc_ESQL_ec , "	EXEC SQL\n" );
 			fprintf( fp_dsc_ESQL_ec , "		BEGIN WORK ;\n" );
@@ -1173,7 +1173,12 @@ int GenerateECCode_PQSQL( struct CommandParameter *pcp , struct StructInfo *pstr
 	fprintf( fp_dsc_ESQL_eh , "#undef SQLSTATE\n" );
 	fprintf( fp_dsc_ESQL_eh , "#define SQLSTATE	sqlca.sqlstate\n" );
 	fprintf( fp_dsc_ESQL_eh , "\n" );
+	fprintf( fp_dsc_ESQL_eh , "#undef SQLDESC\n" );
+	fprintf( fp_dsc_ESQL_eh , "#define SQLDESC		sqlca.sqlerrm.sqlerrmc\n" );
+	fprintf( fp_dsc_ESQL_eh , "\n" );
+	fprintf( fp_dsc_ESQL_eh , "#ifndef SQLNOTFOUND\n" );
 	fprintf( fp_dsc_ESQL_eh , "#define SQLNOTFOUND	100\n" );
+	fprintf( fp_dsc_ESQL_eh , "#endif\n" );
 	fprintf( fp_dsc_ESQL_eh , "\n" );
 	nret = GenerateECCode_eh_SQL( pcp , pstruct->next_struct , fp_dsc_ESQL_eh ) ;
 	if( nret )
@@ -1210,9 +1215,12 @@ int GenerateECCode_ORACLE( struct CommandParameter *pcp , struct StructInfo *pst
 	fprintf( fp_dsc_ESQL_eh , "#ifndef SQLCODE\n" );
 	fprintf( fp_dsc_ESQL_eh , "#define SQLCODE		(int)(sqlca.sqlcode)\n" );
 	fprintf( fp_dsc_ESQL_eh , "#define SQLSTATE	\"\"\n" );
+	fprintf( fp_dsc_ESQL_eh , "#define SQLDESC		\"\"\n" );
 	fprintf( fp_dsc_ESQL_eh , "#endif\n" );
 	fprintf( fp_dsc_ESQL_eh , "\n" );
+	fprintf( fp_dsc_ESQL_eh , "#ifndef SQLNOTFOUND\n" );
 	fprintf( fp_dsc_ESQL_eh , "#define SQLNOTFOUND	1403\n" );
+	fprintf( fp_dsc_ESQL_eh , "#endif\n" );
 	fprintf( fp_dsc_ESQL_eh , "\n" );
 	nret = GenerateECCode_eh_SQL( pcp , pstruct->next_struct , fp_dsc_ESQL_eh ) ;
 	if( nret )

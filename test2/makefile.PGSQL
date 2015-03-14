@@ -23,13 +23,13 @@ BIN		=					\
 
 ###### 编译选项
 CFLAGS		=	-I. 				\
-			-I$(PQSQL_HOME)/include		\
+			-I$(PGHOME)/include		\
 			-I$(HOME)/exinc/fasterxml	\
 			-I$(HOME)/exinc/fasterjson	\
 
 ###### 链接选项
 LFLAGS		=	-L. 				\
-			-L$(PQSQL_HOME)/lib		\
+			-L$(PGHOME)/lib			\
 			-lecpg				\
 			-L$(HOME)/exlib			\
 			-lfasterxml			\
