@@ -6,19 +6,19 @@
 --------------------Configuration: dsc - Win32 Debug--------------------
 </h3>
 <h3>Command Lines</h3>
-Creating temporary file "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP130.tmp" with contents
+Creating temporary file "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP9F.tmp" with contents
 [
 /nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/dsc.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
-"D:\Work\C Projects\DirectStruct-1.1.3\src\dsc.c"
-"D:\Work\C Projects\DirectStruct-1.1.3\src\GenerateCCode.c"
-"D:\Work\C Projects\DirectStruct-1.1.3\src\GenerateECCode.c"
-"D:\Work\C Projects\DirectStruct-1.1.3\src\GenerateSqlCode.c"
-"D:\Work\C Projects\DirectStruct-1.1.3\src\main.c"
-"D:\Work\C Projects\DirectStruct-1.1.3\src\ReadDscFile.c"
-"D:\Work\C Projects\DirectStruct-1.1.3\src\util.c"
+"D:\Work\C Projects\DirectStruct-1.3.0\src\dsc.c"
+"D:\Work\C Projects\DirectStruct-1.3.0\src\GenerateCCode.c"
+"D:\Work\C Projects\DirectStruct-1.3.0\src\GenerateECCode.c"
+"D:\Work\C Projects\DirectStruct-1.3.0\src\GenerateSqlCode.c"
+"D:\Work\C Projects\DirectStruct-1.3.0\src\main.c"
+"D:\Work\C Projects\DirectStruct-1.3.0\src\ReadDscFile.c"
+"D:\Work\C Projects\DirectStruct-1.3.0\src\util.c"
 ]
-Creating command line "cl.exe @C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP130.tmp" 
-Creating temporary file "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP131.tmp" with contents
+Creating command line "cl.exe @C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP9F.tmp" 
+Creating temporary file "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSPA0.tmp" with contents
 [
 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/dsc.pdb" /debug /machine:I386 /out:"Debug/dsc.exe" /pdbtype:sept 
 ".\Debug\dsc.obj"
@@ -29,7 +29,7 @@ kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32
 ".\Debug\ReadDscFile.obj"
 ".\Debug\util.obj"
 ]
-Creating command line "link.exe @C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP131.tmp"
+Creating command line "link.exe @C:\DOCUME~1\calvin\LOCALS~1\Temp\RSPA0.tmp"
 <h3>Output Window</h3>
 Compiling...
 dsc.c
@@ -40,14 +40,14 @@ main.c
 ReadDscFile.c
 util.c
 Linking...
-Creating temporary file "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP133.bat" with contents
+Creating temporary file "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSPA2.bat" with contents
 [
 @echo off
 mkdir "%ProgramFiles%\DirectStruct"
 mkdir "%ProgramFiles%\DirectStruct\bin"
 copy Debug\dsc.exe "%ProgramFiles%\DirectStruct\bin\" /Y
 ]
-Creating command line "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP133.bat"
+Creating command line "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSPA2.bat"
 
 子目录或文件 C:\Program Files\DirectStruct 已经存在。
 子目录或文件 C:\Program Files\DirectStruct\bin 已经存在。

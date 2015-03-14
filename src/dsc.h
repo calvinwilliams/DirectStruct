@@ -79,10 +79,13 @@ struct CommandParameter
 	int	output_c_compact_flag ;
 	int	output_c_compress_flag ;
 	int	output_c_xml_flag ;
+	int	output_c_xml_compact_flag ;
 	int	output_c_json_flag ;
+	int	output_c_json_compact_flag ;
 	int	output_c_LOG_flag ;
-	int	output_sql_flag ;
-	int	output_ec_pqsql_flag ;
+	int	output_sql_pgsql_flag ;
+	int	output_sql_oracle_flag ;
+	int	output_ec_pgsql_flag ;
 	int	output_ec_oracle_flag ;
 } ;
 

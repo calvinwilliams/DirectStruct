@@ -1,3 +1,10 @@
+ver 1.3.0	2015-03-14	calvin
+		* 修正了SQL条件为<>,<=,>=时的ec自动代码生成问题
+		* 把dsc命令行参数包含pqsql改成pgsql
+		* 把dsc命令行参数-sql拆成-sql-pgsql,-sql-oracle
+		* 新增JSON紧缩风格的序列化函数
+		* 新增XML紧缩风格的序列化函数
+
 ver 1.2.0	2015-02-12	calvin
 		* 解决不能编译问题，去掉了自动生成的代码中引用返回值宏FASTERJSON_INFO_END_OF_BUFFER,FASTERXML_INFO_END_OF_BUFFER
 		* 去掉了生成的JSON报文中顶层结构体名作为根节点。谨慎升级！
@@ -16,10 +23,10 @@ ver 1.1.1	2014-10-07	calvin
 		* 新增综合示例 test_db2json
 
 ver 1.1.0	2014-09-20	calvin
-		* 新增自动生成代码 : XML序列化/反序列化函数
-		* 新增自动生成代码 : JSON序列化/反序列化函数
-		* 新增自动生成代码 : ESQL代码
-		* 支持PQSQL了
+		* 新增自动生成代码:XML序列化/反序列化函数，依赖开源库fasterxml
+		* 新增自动生成代码:JSON序列化/反序列化函数，依赖开源库fasterjson
+		* 新增自动生成代码:ESQL代码
+		* 支持PGSQL了
 
 ver 1.0.4	2014-09-09	calvin
 		* 修正了AIX上的编译问题

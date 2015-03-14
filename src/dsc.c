@@ -8,8 +8,8 @@
  * Licensed under the LGPL v2.1, see the file LICENSE in base directory.
  */
 
-char	__DIRECTSTRUCT_VERSION_1_2_0[] = "1.2.0" ;
-char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_2_0 ;
+char	__DIRECTSTRUCT_VERSION_1_3_0[] = "1.3.0" ;
+char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_3_0 ;
 
 int dsc( struct CommandParameter *pcmdparam )
 {
@@ -80,7 +80,7 @@ int dsc( struct CommandParameter *pcmdparam )
 		fclose( fp_dsc_LOG_c );
 	}
 	
-	if( pcmdparam->output_sql_flag == 1 )
+	if( pcmdparam->output_sql_pgsql_flag == 1 || pcmdparam->output_sql_oracle_flag == 1 )
 	{
 		FILE	*fp_dsc_create_sql = NULL ;
 		FILE	*fp_dsc_drop_sql = NULL ;
@@ -111,7 +111,7 @@ int dsc( struct CommandParameter *pcmdparam )
 		fclose( fp_dsc_drop_sql );
 	}
 	
-	if( pcmdparam->output_ec_pqsql_flag == 1 )
+	if( pcmdparam->output_ec_pgsql_flag == 1 )
 	{
 		FILE	*fp_dsc_ESQL_eh = NULL ;
 		FILE	*fp_dsc_ESQL_ec = NULL ;

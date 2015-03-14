@@ -22,13 +22,13 @@ BIN		=	test_client			\
 
 ###### 编译选项
 CFLAGS		=	-I. \
-			-I/root/local/postgresql/include\
+			-I$(PGHOME)/include		\
 			-I$(HOME)/exinc/fasterxml	\
 			-I$(HOME)/exinc/fasterjson	\
 
 ###### 链接选项
 LFLAGS		=	-L. \
-			-L/root/local/postgresql/lib	\
+			-L$(PGHOME)/lib			\
 			-lecpg				\
 			-L$(HOME)/exlib			\
 			-lfasterxml			\

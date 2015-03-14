@@ -338,18 +338,18 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 							(*ptr6) = 'A' ;
 						else if( (*ptr6) == ',' )
 							(*ptr6) = '_' ;
-						else if( (*ptr6) == '=' )
-							(*ptr6) = 'E' ;
-						else if( (*ptr6) == '>' )
-							(*ptr6) = 'G' ;
 						else if( strncmp( ptr6 , ">=" , 2 ) == 0 )
 							strncpy( ptr6++ , "GE" , 2 );
-						else if( (*ptr6) == '<' )
-							(*ptr6) = 'L' ;
 						else if( strncmp( ptr6 , "<=" , 2 ) == 0 )
 							strncpy( ptr6++ , "LE" , 2 );
 						else if( strncmp( ptr6 , "<>" , 2 ) == 0 )
 							strncpy( ptr6++ , "NE" , 2 );
+						else if( (*ptr6) == '=' )
+							(*ptr6) = 'E' ;
+						else if( (*ptr6) == '>' )
+							(*ptr6) = 'G' ;
+						else if( (*ptr6) == '<' )
+							(*ptr6) = 'L' ;
 						
 						ptr6++;
 					}

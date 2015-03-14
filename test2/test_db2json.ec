@@ -18,10 +18,10 @@ int test_client()
 	
 	int			nret ;
 	
-	DSCDBCONN( "127.0.0.1" , 15432 , "calvin" , "calvin" , "calvinn" );
+	DSCDBCONN( "127.0.0.1" , 18432 , "calvin" , "calvin" , "calvin" );
 	if( SQLCODE )
 	{
-		printf( "CONNECT failed[%d][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "CONNECT failed[%d][%s][%s]\n" , SQLCODE , SQLSTATE , SQLDESC );
 		return 1;
 	}
 	else
@@ -35,10 +35,10 @@ int test_client()
 		SELECT	*
 		INTO	DBVLLIST_userinfo
 		FROM	userinfo
-		WHERE	user_id = 101 ;
+		WHERE	user_id = 1001 ;
 	if( SQLCODE )
 	{
-		printf( "SELECT failed[%d][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "SELECT failed[%d][%s][%s]\n" , SQLCODE , SQLSTATE , SQLDESC );
 		return 1;
 	}
 	else
@@ -59,6 +59,25 @@ int test_client()
 	}
 	
 	fp = fopen( "test_db2json.json" , "w" ) ;
+	if( fp == NULL )
+	{
+		printf( "fopen failed , errno[%d]\n" , errno );
+		return -1;
+	}
+	
+	fwrite( json_buffer , 1 , json_len , fp );
+	
+	fclose( fp );
+	
+	memset( json_buffer , 0x00 , sizeof(json_buffer) );
+	nret = DSCSERIALIZE_JSON_COMPACT_userinfo( & u , "GBK" , json_buffer , & json_len ) ;
+	if( nret )
+	{
+		printf( "DSCSERIALIZE_JSON_COMPACT_userinfo failed[%d] , errno[%d]\n" , nret , errno );
+		return -1;
+	}
+	
+	fp = fopen( "test_db2json_compact.json" , "w" ) ;
 	if( fp == NULL )
 	{
 		printf( "fopen failed , errno[%d]\n" , errno );

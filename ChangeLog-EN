@@ -1,3 +1,10 @@
+ver 1.3.0	2015-03-14	calvin
+		* Fixed ec automatic code generation problems of SQL conditions for <>, <=, >=
+		* Adjust to 'pgsql' on command line parameters include 'pqsql'
+		* Unwrapped command line parameters '-sql' into '-sql-pgsql' and '-sql-oracle'
+		* Add compactly json style serialization function
+		* Add compactly xml style serialization function
+
 ver 1.2.0	2015-02-12	calvin
 		* Solve a compile problem , remove the auto-generated code in the return value macro FASTERJSON_INFO_END_OF_BUFFER FASTERXML_INFO_END_OF_BUFFER 
 		* Remove the top structure name of the generated JSON message as a root node. Cautious upgrade! 
@@ -16,8 +23,8 @@ ver 1.1.1	2014-10-07	calvin
 		* add demo test_db2json
 
 ver 1.1.0	2014-09-20	calvin
-		* add generate code automatically : XML serialize/unserialize functions
-		* add generate code automatically : JSON serialize/unserialize functions
+		* add generate code automatically : XML serialize/unserialize functions , Depend on library fasterxml
+		* add generate code automatically : JSON serialize/unserialize functions , Depend on library fasterjson
 		* add generate code automatically : ESQL code
 		* support PQSQL
 
