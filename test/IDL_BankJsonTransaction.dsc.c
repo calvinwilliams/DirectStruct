@@ -303,13 +303,13 @@ int CallbackOnJsonNode_BankJsonTransaction( int type , char *jpath , int jpath_l
 	}
 	else if( type & FASTERJSON_NODE_LEAF )
 	{
+printf( "nodename[%.*s] content[%.*s]\n" , nodename_len , nodename , content_len , content );
 		/* version */
 		if( jpath_len == 8 && strncmp( jpath , "/version" , jpath_len ) == 0 )
 		{NATOC(content,content_len,pst->version);}
 			/* transaction_code */
 			if( jpath_len == 32 && strncmp( jpath , "/ResponseHeader/transaction_code" , jpath_len ) == 0 )
-			{JSONUNESCAPE_FOLD(content,content_len,pst->ResponseHeader.transaction_code);
-			{if( content_len > sizeof(pst->ResponseHeader.transaction_code)-1 ) return -7;}}
+			{JSONUNESCAPE_FOLD(content,content_len,pst->ResponseHeader.transaction_code,sizeof(pst->ResponseHeader.transaction_code)-1,return -7);}
 			/* trans_jnlsno */
 			if( jpath_len == 28 && strncmp( jpath , "/ResponseHeader/trans_jnlsno" , jpath_len ) == 0 )
 			{NATOI(content,content_len,pst->ResponseHeader.trans_jnlsno);}
@@ -318,16 +318,13 @@ int CallbackOnJsonNode_BankJsonTransaction( int type , char *jpath , int jpath_l
 			{NATOI(content,content_len,pst->ResponseHeader.response_code);}
 			/* response_desc */
 			if( jpath_len == 29 && strncmp( jpath , "/ResponseHeader/response_desc" , jpath_len ) == 0 )
-			{JSONUNESCAPE_FOLD(content,content_len,pst->ResponseHeader.response_desc);
-			{if( content_len > sizeof(pst->ResponseHeader.response_desc)-1 ) return -7;}}
+			{JSONUNESCAPE_FOLD(content,content_len,pst->ResponseHeader.response_desc,sizeof(pst->ResponseHeader.response_desc)-1,return -7);}
 					/* message_text */
 					if( jpath_len == 64 && strncmp( jpath , "/QueryTransactionDetails/AddonMessages/AddonMessage/message_text" , jpath_len ) == 0 )
-					{JSONUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.AddonMessages.AddonMessage[pst->QueryTransactionDetails.AddonMessages._AddonMessage_count].message_text);
-					{if( content_len > sizeof(pst->QueryTransactionDetails.AddonMessages.AddonMessage[pst->QueryTransactionDetails.AddonMessages._AddonMessage_count].message_text)-1 ) return -7;}}
+					{JSONUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.AddonMessages.AddonMessage[pst->QueryTransactionDetails.AddonMessages._AddonMessage_count].message_text,sizeof(pst->QueryTransactionDetails.AddonMessages.AddonMessage[pst->QueryTransactionDetails.AddonMessages._AddonMessage_count].message_text)-1,return -7);}
 				/* title_text */
 				if( jpath_len == 58 && strncmp( jpath , "/QueryTransactionDetails/TransactionDetailTitle/title_text" , jpath_len ) == 0 )
-				{JSONUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.TransactionDetailTitle.title_text);
-				{if( content_len > sizeof(pst->QueryTransactionDetails.TransactionDetailTitle.title_text)-1 ) return -7;}}
+				{JSONUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.TransactionDetailTitle.title_text,sizeof(pst->QueryTransactionDetails.TransactionDetailTitle.title_text)-1,return -7);}
 				/* page_no */
 				if( jpath_len == 55 && strncmp( jpath , "/QueryTransactionDetails/TransactionDetailTitle/page_no" , jpath_len ) == 0 )
 				{NATOS(content,content_len,pst->QueryTransactionDetails.TransactionDetailTitle.page_no);}
@@ -336,27 +333,22 @@ int CallbackOnJsonNode_BankJsonTransaction( int type , char *jpath , int jpath_l
 				{NATOS(content,content_len,pst->QueryTransactionDetails.TransactionDetailTitle.page_size);}
 					/* trans_date */
 					if( jpath_len == 72 && strncmp( jpath , "/QueryTransactionDetails/TransactionDetails/TransactionDetail/trans_date" , jpath_len ) == 0 )
-					{JSONUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].trans_date);
-					{if( content_len > sizeof(pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].trans_date)-1 ) return -7;}}
+					{JSONUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].trans_date,sizeof(pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].trans_date)-1,return -7);}
 					/* trans_time */
 					if( jpath_len == 72 && strncmp( jpath , "/QueryTransactionDetails/TransactionDetails/TransactionDetail/trans_time" , jpath_len ) == 0 )
-					{JSONUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].trans_time);
-					{if( content_len > sizeof(pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].trans_time)-1 ) return -7;}}
+					{JSONUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].trans_time,sizeof(pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].trans_time)-1,return -7);}
 					/* outlet_id */
 					if( jpath_len == 71 && strncmp( jpath , "/QueryTransactionDetails/TransactionDetails/TransactionDetail/outlet_id" , jpath_len ) == 0 )
-					{JSONUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].outlet_id);
-					{if( content_len > sizeof(pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].outlet_id)-1 ) return -7;}}
+					{JSONUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].outlet_id,sizeof(pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].outlet_id)-1,return -7);}
 					/* card_no */
 					if( jpath_len == 69 && strncmp( jpath , "/QueryTransactionDetails/TransactionDetails/TransactionDetail/card_no" , jpath_len ) == 0 )
-					{JSONUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].card_no);
-					{if( content_len > sizeof(pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].card_no)-1 ) return -7;}}
+					{JSONUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].card_no,sizeof(pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].card_no)-1,return -7);}
 					/* trans_amount */
 					if( jpath_len == 74 && strncmp( jpath , "/QueryTransactionDetails/TransactionDetails/TransactionDetail/trans_amount" , jpath_len ) == 0 )
 					{NATOF(content,content_len,pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].trans_amount);}
 					/* message_text */
 					if( jpath_len == 78 && strncmp( jpath , "/QueryTransactionDetails/TransactionDetails/TransactionTailDetail/message_text" , jpath_len ) == 0 )
-					{JSONUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.TransactionDetails.TransactionTailDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionTailDetail_count].message_text);
-					{if( content_len > sizeof(pst->QueryTransactionDetails.TransactionDetails.TransactionTailDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionTailDetail_count].message_text)-1 ) return -7;}}
+					{JSONUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.TransactionDetails.TransactionTailDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionTailDetail_count].message_text,sizeof(pst->QueryTransactionDetails.TransactionDetails.TransactionTailDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionTailDetail_count].message_text)-1,return -7);}
 	}
 	
 	return 0;

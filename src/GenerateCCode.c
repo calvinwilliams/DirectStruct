@@ -2109,8 +2109,8 @@ static int GenerateCCode_c_DSCDESERIALIZE_JSON_LEAF( struct CommandParameter *pc
 			{
 				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	/* %s */\n" , pfield->field_name );
 				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	if( jpath_len == %d && strncmp( jpath , \"%s/%s\" , jpath_len ) == 0 )\n" , (int)(strlen(jsonpathname)+1+strlen(pfield->field_name)) , jsonpathname,pfield->field_name );
-				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{JSONUNESCAPE_FOLD(content,content_len,%s%s);\n" , pathname,pfield->field_name );
-				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{if( content_len > sizeof(%s%s)-1 ) return -7;}}\n" , pathname,pfield->field_name );
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{JSONUNESCAPE_FOLD(content,content_len,%s%s,sizeof(%s%s)-1,return -7);}\n" , pathname,pfield->field_name , pathname,pfield->field_name );
+				//fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{if( content_len > sizeof(%s%s)-1 ) return -7;}}\n" , pathname,pfield->field_name );
 			}
 		}
 		
@@ -2870,7 +2870,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		/* Generate DSCDESERIALIZE_XML_*() */
 		fprintf( fp_dsc_c , "\n" );
 		fprintf( fp_dsc_c , "funcCallbackOnXmlNode CallbackOnXmlNode_%s ;\n" , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "int CallbackOnXmlNode_%s( int type , char *xpath , int xpath_len , int xpath_size , char *nodename , int nodename_len , char *properties , int properties_len , char *content , int content_len , void *p )\n" , pstruct->next_struct->struct_name );
+		fprintf( fp_dsc_c , "int CallbackOnXmlNode_%s( int type , char *xpath , int xpath_len , int xpath_size , char *node , int node_len , char *properties , int properties_len , char *content , int content_len , void *p )\n" , pstruct->next_struct->struct_name );
 		fprintf( fp_dsc_c , "{\n" );
 		fprintf( fp_dsc_c , "	%s	*pst = (%s*)p ;\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
 		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
@@ -2975,7 +2975,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		/* Generate DSCDESERIALIZE_JSON_*() */
 		fprintf( fp_dsc_c , "\n" );
 		fprintf( fp_dsc_c , "funcCallbackOnJsonNode CallbackOnJsonNode_%s ;\n" , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "int CallbackOnJsonNode_%s( int type , char *jpath , int jpath_len , int jpath_size , char *nodename , int nodename_len , char *content , int content_len , void *p )\n" , pstruct->next_struct->struct_name );
+		fprintf( fp_dsc_c , "int CallbackOnJsonNode_%s( int type , char *jpath , int jpath_len , int jpath_size , char *node , int node_len , char *content , int content_len , void *p )\n" , pstruct->next_struct->struct_name );
 		fprintf( fp_dsc_c , "{\n" );
 		fprintf( fp_dsc_c , "	%s	*pst = (%s*)p ;\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
 		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
