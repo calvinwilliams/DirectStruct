@@ -92,15 +92,15 @@ int test_serialize_json()
 	
 	/* server code */
 	memset( & trans , 0x00 , sizeof(BankJsonTransaction) );
-	nret = DSCDESERIALIZE_JSON_BankJsonTransaction( NULL , buf , & len , & trans ) ;
+	nret = DSCDESERIALIZE_JSON_COMPACT_BankJsonTransaction( NULL , buf , & len , & trans ) ;
 	if( nret )
 	{
-		printf( "DSCDESERIALIZE_JSON_BankJsonTransaction failed[%d]\n" , nret );
+		printf( "DSCDESERIALIZE_JSON_COMPACT_BankJsonTransaction failed[%d]\n" , nret );
 		return nret;
 	}
 	else
 	{
-		printf( "DSCDESERIALIZE_JSON_BankJsonTransaction ok\n" );
+		printf( "DSCDESERIALIZE_JSON_COMPACT_BankJsonTransaction ok\n" );
 	}
 	
 	DSCLOG_BankJsonTransaction( & trans );

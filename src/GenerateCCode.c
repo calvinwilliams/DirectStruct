@@ -2863,7 +2863,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "}\n" );
 	}
 	
-	if( pcp->output_c_xml_flag == 1 || pcp->output_c_xml_compact_flag )
+	if( pcp->output_c_xml_flag == 1 || pcp->output_c_xml_compact_flag == 1 )
 	{
 		char	xmlpathname[ 1024 + 1 ] ;
 		
@@ -2902,8 +2902,26 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "	\n" );
 		fprintf( fp_dsc_c , "	return 0;\n" );
 		fprintf( fp_dsc_c , "}\n" );
+	}
+	if( pcp->output_c_xml_flag == 1 )
+	{
 		fprintf( fp_dsc_c , "\n" );
 		fprintf( fp_dsc_c , "int DSCDESERIALIZE_XML_%s( char *encoding , char *buf , int *p_len , %s *pst )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
+		fprintf( fp_dsc_c , "{\n" );
+		fprintf( fp_dsc_c , "	char	xpath[ 1024 + 1 ] ;\n" );
+		fprintf( fp_dsc_c , "	int	nret = 0 ;\n" );
+		fprintf( fp_dsc_c , "	memset( xpath , 0x00 , sizeof(xpath) );\n" );
+		fprintf( fp_dsc_c , "	nret = TravelXmlBuffer( buf , xpath , sizeof(xpath) , & CallbackOnXmlNode_%s , (void*)pst ) ;\n" , pstruct->next_struct->struct_name );
+		fprintf( fp_dsc_c , "	if( nret )\n" );
+		fprintf( fp_dsc_c , "		return nret;\n" );
+		fprintf( fp_dsc_c , "	\n" );
+		fprintf( fp_dsc_c , "	return 0;\n" );
+		fprintf( fp_dsc_c , "}\n" );
+	}
+	if( pcp->output_c_xml_compact_flag == 1 )
+	{
+		fprintf( fp_dsc_c , "\n" );
+		fprintf( fp_dsc_c , "int DSCDESERIALIZE_XML_COMPACT_%s( char *encoding , char *buf , int *p_len , %s *pst )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
 		fprintf( fp_dsc_c , "{\n" );
 		fprintf( fp_dsc_c , "	char	xpath[ 1024 + 1 ] ;\n" );
 		fprintf( fp_dsc_c , "	int	nret = 0 ;\n" );
@@ -3005,9 +3023,26 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "	\n" );
 		fprintf( fp_dsc_c , "	return 0;\n" );
 		fprintf( fp_dsc_c , "}\n" );
+	}
+	if( pcp->output_c_json_flag == 1 )
+	{	
 		fprintf( fp_dsc_c , "\n" );
-		
 		fprintf( fp_dsc_c , "int DSCDESERIALIZE_JSON_%s( char *encoding , char *buf , int *p_len , %s *pst )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
+		fprintf( fp_dsc_c , "{\n" );
+		fprintf( fp_dsc_c , "	char	jpath[ 1024 + 1 ] ;\n" );
+		fprintf( fp_dsc_c , "	int	nret = 0 ;\n" );
+		fprintf( fp_dsc_c , "	memset( jpath , 0x00 , sizeof(jpath) );\n" );
+		fprintf( fp_dsc_c , "	nret = TravelJsonBuffer( buf , jpath , sizeof(jpath) , & CallbackOnJsonNode_%s , (void*)pst ) ;\n" , pstruct->next_struct->struct_name );
+		fprintf( fp_dsc_c , "	if( nret )\n" );
+		fprintf( fp_dsc_c , "		return nret;\n" );
+		fprintf( fp_dsc_c , "	\n" );
+		fprintf( fp_dsc_c , "	return 0;\n" );
+		fprintf( fp_dsc_c , "}\n" );
+	}
+	if( pcp->output_c_json_compact_flag == 1 )
+	{	
+		fprintf( fp_dsc_c , "\n" );
+		fprintf( fp_dsc_c , "int DSCDESERIALIZE_JSON_COMPACT_%s( char *encoding , char *buf , int *p_len , %s *pst )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
 		fprintf( fp_dsc_c , "{\n" );
 		fprintf( fp_dsc_c , "	char	jpath[ 1024 + 1 ] ;\n" );
 		fprintf( fp_dsc_c , "	int	nret = 0 ;\n" );
