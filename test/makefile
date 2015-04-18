@@ -21,6 +21,8 @@ c_FILE		=	\
 			test_trans.c			\
 			test_serialize_xml.c		\
 			test_serialize_json.c		\
+			test_serialize_json_utf8.c	\
+			press_deserialize_json.c	\
 
 ###### 目标文件、安装目录配置区
 BIN		=	test_netorder			\
@@ -28,10 +30,6 @@ BIN		=	test_netorder			\
 			test_serialize_compress		\
 			test_serialize_compress_press	\
 			test_trans			\
-
-#			test_serialize_xml		\
-#			test_serialize_json		\
-#			test_testable			\
 
 ###### 编译选项
 CFLAGS		=	-I. \
@@ -78,6 +76,12 @@ test_serialize_xml	:	test_serialize_xml.o IDL_BankXmlTransaction.dsc.o
 
 test_serialize_json	:	test_serialize_json.o IDL_BankJsonTransaction.dsc.o
 	$(CC) -o $@ test_serialize_json.o IDL_BankJsonTransaction.dsc.o $(LFLAGS) -L$(HOME)/exlib -lfasterjson
+
+test_serialize_json_utf8	:	test_serialize_json_utf8.o IDL_BankJsonTransaction.dsc.o
+	$(CC) -o $@ test_serialize_json_utf8.o IDL_BankJsonTransaction.dsc.o $(LFLAGS) -L$(HOME)/exlib -lfasterjson
+
+press_deserialize_json	:	press_deserialize_json.o IDL_BankJsonTransaction.dsc.o
+	$(CC) -o $@ press_deserialize_json.o IDL_BankJsonTransaction.dsc.o $(LFLAGS) -L$(HOME)/exlib -lfasterjson
 
 ECP	=	ecpg
 
