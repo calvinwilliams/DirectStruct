@@ -1,5 +1,8 @@
+ver 1.4.1	2015-05-02	calvin
+		* Adjust by library fasterjson v1.1.1
+
 ver 1.4.0	2015-05-01	calvin
-		* Adjust automatically generated code with library fasterjson v1.1.0
+		* Adjust by library fasterjson v1.1.0
 		* Support json expression as like "name:[1,2,3,4,5,6]" , add prefix '_' on defining field in IDL file
 		* Add test program 'test/press_deserialize_json' for pressing
 		* Add test program 'test/test_deserialize_json_utf8' for encoding UTF8
@@ -12,7 +15,7 @@ ver 1.3.2	2015-03-21	calvin
 		* Completion function DSCDESERIALIZE_JSON_COMPACT_*
 
 ver 1.3.1	2015-03-16	calvin
-		* Adjust automatically generated code with library fasterjson
+		* Adjust by library fasterjson
 
 ver 1.3.0	2015-03-14	calvin
 		* Fixed ec automatic code generation problems of SQL conditions for <>, <=, >=
@@ -26,37 +29,37 @@ ver 1.2.0	2015-02-12	calvin
 		* Remove the top structure name of the generated JSON message as a root node. Cautious upgrade! 
 
 ver 1.1.3	2014-11-21	calvin
-		* add generate code automatically : CONNECT,DISCONNECT,BEGINWORK,COMMIT,ROLLBACK with keyword SQLCONN
-		* add comment grammar
+		* Add generate code automatically : CONNECT,DISCONNECT,BEGINWORK,COMMIT,ROLLBACK with keyword SQLCONN
+		* Add comment grammar
 
 ver 1.1.2	2014-10-10	calvin
 		* ESQL add generate SQLACTION code
 		* Fixed bug in XML,JSON serialize/unserialize functions
-		* support ORACLE
+		* Support ORACLE
 
 ver 1.1.1	2014-10-07	calvin
-		* add demo test_client,test_server
-		* add demo test_db2json
+		* Add demo test_client,test_server
+		* Add demo test_db2json
 
 ver 1.1.0	2014-09-20	calvin
-		* add generate code automatically : XML serialize/unserialize functions , Depend on library fasterxml
-		* add generate code automatically : JSON serialize/unserialize functions , Depend on library fasterjson
-		* add generate code automatically : ESQL code
-		* support PQSQL
+		* Add generate code automatically : XML serialize/unserialize functions , Depend on library fasterxml
+		* Add generate code automatically : JSON serialize/unserialize functions , Depend on library fasterjson
+		* Add generate code automatically : ESQL code
+		* Support PQSQL
 
 ver 1.0.4	2014-09-09	calvin
 		* Fixed a problem on AIX
 		* Fixed a problem about float-number
-		* optimized generate automatically code layout
-		* generate code header ( dsc version )
+		* Optimized generate automatically code layout
+		* Generate code header ( dsc version )
 
 ver 1.0.3	2014-09-05	calvin
-		* add generate code automatically : compack/compress serialize/unserialize functions
+		* Add generate code automatically : compack/compress serialize/unserialize functions
 
 ver 1.0.1	2014-09-01	calvin
-		* add type INT 8 and UINT (1,2,4,8) and UCHAR
+		* Add type INT 8 and UINT (1,2,4,8) and UCHAR
 
 ver 1.0.0	2014-08-29	calvin
-		* create
-		* read abstract definition file
-		* add generate code automatically : network/host byte-order convert functions , log output function
+		* Create
+		* Read abstract definition file
+		* Add generate code automatically : network/host byte-order convert functions , log output function
