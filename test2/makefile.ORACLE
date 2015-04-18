@@ -24,8 +24,8 @@ BIN		=					\
 ###### ±‡“Î—°œÓ
 CFLAGS		=	-I. 				\
 			-I$(ORACLE_HOME)/precomp/public	\
-			-I/usr/local/include/fasterxml	\
-			-I/usr/local/include/fasterjson	\
+			-I$(HOME)/include/fasterxml	\
+			-I$(HOME)/include/fasterjson	\
 
 #			-I/root/local/postgresql/include\
 
@@ -33,7 +33,7 @@ CFLAGS		=	-I. 				\
 LFLAGS		=	-L. 				\
 			-L$(ORACLE_HOME)/lib		\
 			-lclntsh			\
-			-L/usr/local/lib		\
+			-L$(HOME)/local/lib		\
 			-lfasterxml			\
 			-lfasterjson			\
 
