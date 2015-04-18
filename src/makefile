@@ -18,7 +18,7 @@ c_FILE		=	\
 
 ###### 目标文件、安装目录配置区
 BIN		=	dsc
-BININST		=	$(HOME)/bin
+BININST		=	/usr/local/bin
 
 ###### 编译选项
 CFLAGS		=	-I. \
