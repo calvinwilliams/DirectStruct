@@ -30,5 +30,6 @@ int FUNCNAME_DSCLOG_AllTypes( AllTypes *pst )
 	PREFIX_DSCLOG_AllTypes "AllTypes.uch[%c]" NEWLINE_DSCLOG_AllTypes , pst->uch );
 	PREFIX_DSCLOG_AllTypes "AllTypes.str32[%s]" NEWLINE_DSCLOG_AllTypes , pst->str32 );
 	PREFIX_DSCLOG_AllTypes "AllTypes.str1024[%s]" NEWLINE_DSCLOG_AllTypes , pst->str1024 );
+	PREFIX_DSCLOG_AllTypes "AllTypes.b1[%c]" NEWLINE_DSCLOG_AllTypes , pst->b1 );
 	return 0;
 }

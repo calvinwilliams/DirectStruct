@@ -37,4 +37,5 @@ STRUCT	BankJsonTransaction
 	{
 		INT	4	_trans_jnlsno
 	}
+	BOOL	1	sign_flag
 }

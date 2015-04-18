@@ -9,6 +9,7 @@ EXEC SQL BEGIN DECLARE SECTION ;
 	double testable_f8 ;	short testable_f8_id ;
 	char testable_str32[ 32 + 1 ] ;	short testable_str32_id ;
 	char testable_str1024[ 1024 + 1 ] ;	short testable_str1024_id ;
+	char testable_b1 ;	short testable_b1_id ;
 EXEC SQL END DECLARE SECTION ;
 
 void DSCINITV_testable()
@@ -25,6 +26,8 @@ void DSCINITV_testable()
 	testable_str32_id = 0 ;
 	memset( testable_str1024 , 0x00 , sizeof(testable_str1024) );
 	testable_str1024_id = 0 ;
+	testable_b1 = 0 ;
+	testable_b1_id = 0 ;
 	return;
 }
 
@@ -36,6 +39,7 @@ void DSCVTOS_testable( testable *pst )
 	pst->f8 = testable_f8 ;
 	strcpy( pst->str32 , testable_str32 );
 	strcpy( pst->str1024 , testable_str1024 );
+	pst->b1 = testable_b1 ;
 	return;
 }
 
@@ -47,6 +51,7 @@ void DSCSTOV_testable( testable *pst )
 	testable_f8 = pst->f8 ;
 	strcpy( testable_str32 , pst->str32 );
 	strcpy( testable_str1024 , pst->str1024 );
+	testable_b1 = pst->b1 ;
 	return;
 }
 

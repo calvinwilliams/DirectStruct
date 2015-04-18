@@ -64,6 +64,13 @@ int GenerateSqlCode_sql_create( struct StructInfo *pstruct , FILE *fp_dsc_create
 		{
 			fprintf( fp_dsc_create_sql , "	%s	CHARACTER VARYING(%d)" , pfield->field_name , pfield->field_len );
 		}
+		else if( STRCMP( pfield->field_type , == , "BOOL" ) )
+		{
+			if( pfield->field_len == 1 )
+			{
+				fprintf( fp_dsc_create_sql , "	%s	BOOLEAN" , pfield->field_name );
+			}
+		}
 		else
 		{
 			flag = 0 ;

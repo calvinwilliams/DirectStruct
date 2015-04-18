@@ -405,6 +405,12 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 						&&
 						pfld->field_len > 0
 					)
+					||
+					(
+						STRCMP( pfld->field_type , == , "BOOL" )
+						&&
+						pfld->field_len == 1
+					)
 				)
 				{
 					;

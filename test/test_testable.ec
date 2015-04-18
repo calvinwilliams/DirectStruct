@@ -14,7 +14,7 @@ int test_delete()
 	}
 	else if( SQLCODE )
 	{
-		printf( "DELETE failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "DELETE failed[%d][%s][%s]\n" , SQLCODE , SQLSTATE , SQLDESC );
 		return SQLCODE;
 	}
 	else
@@ -36,6 +36,9 @@ int test_insert()
 	t.f8 = 456.789 ;
 	strcpy( t.str32 , "hi" );
 	strcpy( t.str1024 , "hello world" );
+	t.b1 = DSCFALSE ;
+	
+	DSCLOG_testable( & t );
 	
 	DSCINITV_testable();
 	DSCSTOV_testable( & t );
@@ -46,7 +49,7 @@ int test_insert()
 		VALUES	( DBVLIST_testable ) ;
 	if( SQLCODE )
 	{
-		printf( "INSERT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "INSERT failed[%d][%s][%s]\n" , SQLCODE , SQLSTATE , SQLDESC );
 		return SQLCODE;
 	}
 	else
@@ -61,6 +64,9 @@ int test_insert()
 	t.f8 = 456.789 ;
 	strcpy( t.str32 , "hi" );
 	strcpy( t.str1024 , "hello earth" );
+	t.b1 = DSCTRUE ;
+	
+	DSCLOG_testable( & t );
 	
 	DSCINITV_testable();
 	DSCSTOV_testable( & t );
@@ -71,7 +77,7 @@ int test_insert()
 		VALUES	( DBVLIST_testable ) ;
 	if( SQLCODE )
 	{
-		printf( "INSERT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "INSERT failed[%d][%s][%s]\n" , SQLCODE , SQLSTATE , SQLDESC );
 		return SQLCODE;
 	}
 	else
@@ -86,6 +92,9 @@ int test_insert()
 	t.f8 = 456.789 ;
 	strcpy( t.str32 , "hi" );
 	strcpy( t.str1024 , "hello march" );
+	t.b1 = DSCTRUE ;
+	
+	DSCLOG_testable( & t );
 	
 	DSCINITV_testable();
 	DSCSTOV_testable( & t );
@@ -96,7 +105,7 @@ int test_insert()
 		VALUES	( DBVLIST_testable ) ;
 	if( SQLCODE )
 	{
-		printf( "INSERT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "INSERT failed[%d][%s][%s]\n" , SQLCODE , SQLSTATE , SQLDESC );
 		return SQLCODE;
 	}
 	else
@@ -114,6 +123,8 @@ int test_update()
 	memset( & t , 0x00 , sizeof(testable) );
 	t.n2 = 101 ;
 	
+	DSCLOG_testable( & t );
+	
 	DSCINITV_testable();
 	DSCSTOV_testable( & t );
 	
@@ -124,7 +135,7 @@ int test_update()
 		WHERE	n2 = :testable_n2 ;
 	if( SQLCODE )
 	{
-		printf( "SELECT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "SELECT failed[%d][%s][%s]\n" , SQLCODE , SQLSTATE , SQLDESC );
 		return SQLCODE;
 	}
 	else
@@ -135,6 +146,9 @@ int test_update()
 	DSCVTOS_testable( & t );
 	
 	strcpy( t.str1024 , "hello sun" );
+	t.b1 = DSCFALSE ;
+	
+	DSCLOG_testable( & t );
 	
 	DSCINITV_testable();
 	DSCSTOV_testable( & t );
@@ -145,7 +159,7 @@ int test_update()
 		WHERE	n2 = :testable_n2 ;
 	if( SQLCODE )
 	{
-		printf( "UPDATE failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "UPDATE failed[%d][%s][%s]\n" , SQLCODE , SQLSTATE , SQLDESC );
 		return SQLCODE;
 	}
 	else
@@ -169,7 +183,7 @@ int test_cursor()
 		ORDER BY	n2 ASC ;
 	if( SQLCODE )
 	{
-		printf( "DECLARE failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "DECLARE failed[%d][%s][%s]\n" , SQLCODE , SQLSTATE , SQLDESC );
 		return SQLCODE;
 	}
 	else
@@ -181,7 +195,7 @@ int test_cursor()
 		OPEN	testable_cursor ;
 	if( SQLCODE )
 	{
-		printf( "OPEN failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "OPEN failed[%d][%s][%s]\n" , SQLCODE , SQLSTATE , SQLDESC );
 		return SQLCODE;
 	}
 	else
@@ -200,7 +214,7 @@ int test_cursor()
 		}
 		else if( SQLCODE )
 		{
-			printf( "FETCH failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+			printf( "FETCH failed[%d][%s][%s]\n" , SQLCODE , SQLSTATE , SQLDESC );
 			nret = SQLCODE ;
 		}
 		else
@@ -218,7 +232,7 @@ int test_cursor()
 		CLOSE	testable_cursor ;
 	if( SQLCODE )
 	{
-		printf( "CLOSE failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "CLOSE failed[%d][%s][%s]\n" , SQLCODE , SQLSTATE , SQLDESC );
 		return SQLCODE;
 	}
 	else
@@ -242,7 +256,7 @@ int test_immediate()
 		EXECUTE IMMEDIATE :sql ;
 	if( SQLCODE )
 	{
-		printf( "EXECUTE failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "EXECUTE failed[%d][%s]\n" , SQLCODE , SQLSTATE );
 		return SQLCODE;
 	}
 	else
@@ -267,7 +281,7 @@ int test_prepare()
 		PREPARE prepare FROM :sql2 ;
 	if( SQLCODE )
 	{
-		printf( "PREPARE failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "PREPARE failed[%d][%s][%s]\n" , SQLCODE , SQLSTATE , SQLDESC );
 		return SQLCODE;
 	}
 	else
@@ -283,7 +297,7 @@ int test_prepare()
 		USING		:testable_n2 ;
 	if( SQLCODE )
 	{
-		printf( "EXECUTE failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "EXECUTE failed[%d][%s][%s]\n" , SQLCODE , SQLSTATE , SQLDESC );
 		return SQLCODE;
 	}
 	else
@@ -302,7 +316,7 @@ int test_prepare()
 		DECLARE testable_cursor2 CURSOR FOR prepare ;
 	if( SQLCODE )
 	{
-		printf( "DECLARE failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "DECLARE failed[%d][%s][%s]\n" , SQLCODE , SQLSTATE , SQLDESC );
 		return SQLCODE;
 	}
 	else
@@ -315,7 +329,7 @@ int test_prepare()
 		USING	:testable_n2 ;
 	if( SQLCODE )
 	{
-		printf( "OPEN failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "OPEN failed[%d][%s][%s]\n" , SQLCODE , SQLSTATE , SQLDESC );
 		return SQLCODE;
 	}
 	else
@@ -334,7 +348,7 @@ int test_prepare()
 		}
 		else if( SQLCODE )
 		{
-			printf( "FETCH failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+			printf( "FETCH failed[%d][%s][%s]\n" , SQLCODE , SQLSTATE , SQLDESC );
 			nret = SQLCODE ;
 		}
 		else
@@ -352,7 +366,7 @@ int test_prepare()
 		CLOSE	testable_cursor2 ;
 	if( SQLCODE )
 	{
-		printf( "CLOSE failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "CLOSE failed[%d][%s][%s]\n" , SQLCODE , SQLSTATE , SQLDESC );
 		return SQLCODE;
 	}
 	else
@@ -379,7 +393,7 @@ int main()
 		IDENTIFIED BY	'calvin' ;
 	if( SQLCODE )
 	{
-		printf( "CONNECT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "CONNECT failed[%d][%s][%s]\n" , SQLCODE , SQLSTATE , SQLDESC );
 		return 1;
 	}
 	else
@@ -391,7 +405,7 @@ int main()
 		BEGIN WORK ;
 	if( SQLCODE )
 	{
-		printf( "BEGIN WORK failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "BEGIN WORK failed[%d][%s][%s]\n" , SQLCODE , SQLSTATE , SQLDESC );
 		return 1;
 	}
 	else
@@ -438,7 +452,7 @@ int main()
 			ROLLBACK WORK ;
 		if( SQLCODE )
 		{
-			printf( "ROLLBACK WORK failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+			printf( "ROLLBACK WORK failed[%d][%s][%s]\n" , SQLCODE , SQLSTATE , SQLDESC );
 			return 1;
 		}
 		else
@@ -452,7 +466,7 @@ int main()
 			COMMIT WORK ;
 		if( SQLCODE )
 		{
-			printf( "COMMIT WORK failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+			printf( "COMMIT WORK failed[%d][%s][%s]\n" , SQLCODE , SQLSTATE , SQLDESC );
 			return 1;
 		}
 		else
@@ -465,7 +479,7 @@ int main()
 		DISCONNECT ;
 	if( SQLCODE )
 	{
-		printf( "DISCONNECT failed[%ld][%s]\n" , SQLCODE , SQLSTATE );
+		printf( "DISCONNECT failed[%d][%s][%s]\n" , SQLCODE , SQLSTATE , SQLDESC );
 		return 1;
 	}
 	else

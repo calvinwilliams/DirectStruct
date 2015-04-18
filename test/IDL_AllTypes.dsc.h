@@ -16,6 +16,13 @@
 #endif
 #endif
 
+#ifndef DSCTRUE
+#define DSCTRUE	(char)'t'
+#endif
+#ifndef DSCFALSE
+#define DSCFALSE	(char)'f'
+#endif
+
 #if ( defined __unix ) | ( defined __linux__ )
 #include <arpa/inet.h>
 #define SNPRINTF		snprintf
@@ -70,6 +77,9 @@
 #ifndef NATOLF
 #define NATOLF(_base_,_len_,_result_)	{char buf[60+1];memset(buf,0x00,sizeof(buf));strncpy(buf,_base_,60);_result_=atof(buf);}
 #endif
+#ifndef NATOB
+#define NATOB(_base_,_len_,_result_)	{if(memcmp(_base_,"true",4)==0)_result_=DSCTRUE;else _result_=DSCFALSE;}
+#endif
 
 typedef struct
 {
@@ -87,6 +97,7 @@ typedef struct
 	unsigned char uch ;
 	char	str32[ 32 + 1 ] ;
 	char	str1024[ 1024 + 1 ] ;
+	char	b1 ;
 } AllTypes ;
 
 _WINDLL_FUNC int DSCINIT_AllTypes( AllTypes *pst );
@@ -109,7 +120,7 @@ _WINDLL_FUNC int DSCINIT_AllTypes( AllTypes *pst );
 _WINDLL_FUNC int DSCNETORDER_AllTypes( AllTypes *pst );
 _WINDLL_FUNC int DSCHOSTORDER_AllTypes( AllTypes *pst );
 
-#define DSCSERIALIZE_COMPACT_BUFSIZE_AllTypes	1100
+#define DSCSERIALIZE_COMPACT_BUFSIZE_AllTypes	1101
 
 _WINDLL_FUNC int DSCSERIALIZE_COMPACT_AllTypes( AllTypes *pst , char *buf , int *p_len );
 _WINDLL_FUNC int DSCDESERIALIZE_COMPACT_AllTypes( char *buf , int *p_len , AllTypes *pst );
@@ -413,7 +424,7 @@ _WINDLL_FUNC int DSCDESERIALIZE_COMPACT_AllTypes( char *buf , int *p_len , AllTy
 	}
 #endif
 
-#define DSCSERIALIZE_COMPRESS_BUFSIZE_AllTypes	1114
+#define DSCSERIALIZE_COMPRESS_BUFSIZE_AllTypes	1116
 
 _WINDLL_FUNC int DSCSERIALIZE_COMPRESS_AllTypes( AllTypes *pst , char *buf , int *p_len );
 _WINDLL_FUNC int DSCDESERIALIZE_COMPRESS_AllTypes( char *buf , int *p_len , AllTypes *pst );
