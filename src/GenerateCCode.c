@@ -2070,7 +2070,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( struct CommandParameter *p
 				"if(buf_size<1024*1024*1024)" \
 					"new_buf_size=buf_size*2;" \
 				"else " \
-					"new_buf_size+=buf_size+10*1024*1024;" \
+					"new_buf_size=buf_size+10*1024*1024;" \
 				"tmp=realloc(*pp_base,new_buf_size);" \
 				"if(tmp==NULL)" \
 					"return -2;" \
@@ -3701,6 +3701,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "	}\n" );
 		fprintf( fp_dsc_c , "	else\n" );
 		fprintf( fp_dsc_c , "	{\n" );
+		fprintf( fp_dsc_c , "		buf_size = (*p_buf_size) ;\n" );
 		fprintf( fp_dsc_c , "		remain_len = (*p_len) ;\n" );
 		fprintf( fp_dsc_c , "	}\n" );
 		fprintf( fp_dsc_c , "	buf = (*pp_base) + buf_size-1 - remain_len ;\n" );
@@ -3771,6 +3772,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "	}\n" );
 		fprintf( fp_dsc_c , "	else\n" );
 		fprintf( fp_dsc_c , "	{\n" );
+		fprintf( fp_dsc_c , "		buf_size = (*p_buf_size) ;\n" );
 		fprintf( fp_dsc_c , "		remain_len = (*p_len) ;\n" );
 		fprintf( fp_dsc_c , "	}\n" );
 		fprintf( fp_dsc_c , "	buf = (*pp_base) + buf_size - remain_len ;\n" );
