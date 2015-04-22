@@ -147,7 +147,7 @@ int test_serialize_json()
 	free( base );
 	
 	base = NULL ;
-	buf_size = 100 ;
+	buf_size = 5 ;
 	len = 0 ;
 	nret = DSCSERIALIZE_JSON_DUP_BankJsonTransaction( & trans , "GBK" , & base , & buf_size , & len ) ;
 	if( nret )

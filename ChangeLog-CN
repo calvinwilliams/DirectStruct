@@ -1,6 +1,19 @@
 ver 1.5.0	2015-11-29	calvin
 		* 生成代码的一些小调整
-		* 新增json内部申请导出缓冲区函数_JSON_DUP_
+		* 新增导出JSON文本函数*_JSON_DUP_*
+		内部申请导出缓冲区，需要应用自己释放
+			base = NULL ;
+			nret = DSCSERIALIZE_JSON_DUP_BankJsonTransaction( & st , NULL , & ptr , NULL , NULL ) ;
+		|| 内部申请时初始化大小
+			base = NULL ;
+			buf_size = 1024 ;
+			nret = DSCSERIALIZE_JSON_DUP_BankJsonTransaction( & st , NULL , & ptr , & buf_size , NULL ) ;
+		|| 应用预申请好，但导出时不足时，内部调整；len输出实际填充长度
+			base = malloc( 1024 ) ;
+			buf_size = 1024 ;
+			len = buf_size - 1 ;
+			nret = DSCSERIALIZE_JSON_DUP_BankJsonTransaction( & st , NULL , & ptr , & buf_size , & len ) ;
+		|| 当len < buf_size - 1时，会预留ptr前面一块空间；len输出实际填充长度
 
 ver 1.4.5	2015-05-26	calvin
 		* 又修正了多层循环中的代码生成问题

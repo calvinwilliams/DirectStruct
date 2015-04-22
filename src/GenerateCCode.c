@@ -2062,13 +2062,13 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( struct CommandParameter *p
 }
 
 #define DUP_CHECK	\
-			"if(len<0||remain_len<len)" \
+			"if(len<0||remain_len<=len)" \
 			"{" \
 				"char *tmp=NULL;" \
 				"int buf_offset=buf-(*pp_base);" \
 				"int new_buf_size;" \
 				"if(buf_size<1024*1024*1024)" \
-					"new_buf_size=buf_size+1;" \
+					"new_buf_size=buf_size*2;" \
 				"else " \
 					"new_buf_size=buf_size+10*1024*1024;" \
 				"tmp=(char*)realloc(*pp_base,new_buf_size);" \
