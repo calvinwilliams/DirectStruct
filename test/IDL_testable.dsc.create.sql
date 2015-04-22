@@ -12,5 +12,4 @@ CREATE TABLE testable
 ) ;
 
 CREATE INDEX testable_idx1 ON testable ( n2 ) ;
-
 CREATE UNIQUE INDEX testable_idx2 ON testable ( str32 , str1024 ) ;

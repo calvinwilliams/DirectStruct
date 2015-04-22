@@ -11,7 +11,7 @@
 static int GenerateECCode_eh_SQL( struct CommandParameter *pcp , struct StructInfo *pstruct , FILE *fp_dsc_ESQL_eh )
 {
 	struct FieldInfo	*pfield = NULL ;
-	int			c ;
+	struct SqlActionOutput	*sqlaction_line ;
 	
 	fprintf( fp_dsc_ESQL_eh , "\n" );
 	fprintf( fp_dsc_ESQL_eh , "EXEC SQL BEGIN DECLARE SECTION ;\n" );
@@ -115,23 +115,26 @@ static int GenerateECCode_eh_SQL( struct CommandParameter *pcp , struct StructIn
 	fprintf( fp_dsc_ESQL_eh , "void DSCSTOV_%s( %s *pst );\n" , pstruct->struct_name , pstruct->struct_name );
 	fprintf( fp_dsc_ESQL_eh , "void DSCTRIM_%s( %s *pst );\n" , pstruct->struct_name , pstruct->struct_name );
 	
-	fprintf( fp_dsc_ESQL_eh , "\n" );
-	for( c = 0 ; c < pstruct->sqlaction_count ; c++ )
+	if( pstruct->first_sqlaction_line )
 	{
-		if( STRNCMP( pstruct->sqlaction[c] , == , "CURSOR" , 6 ) )
+		fprintf( fp_dsc_ESQL_eh , "\n" );
+	}
+	for( sqlaction_line = pstruct->first_sqlaction_line ; sqlaction_line ; sqlaction_line = sqlaction_line->next_line )
+	{
+		if( STRNCMP( sqlaction_line->content , == , "CURSOR" , 6 ) )
 		{
 			char	cursor_name[ 256 + 1 ] ;
 			
 			memset( cursor_name , 0x00 , sizeof(cursor_name) );
-			sscanf( pstruct->sqlaction[c] , "%*s%s" , cursor_name );
+			sscanf( sqlaction_line->content , "%*s%s" , cursor_name );
 			
-			fprintf( fp_dsc_ESQL_eh , "void DSCSQLACTION_OPEN_%s( %s *pst );\n" , pstruct->sqlaction_funcname[c] , pstruct->struct_name );
+			fprintf( fp_dsc_ESQL_eh , "void DSCSQLACTION_OPEN_%s( %s *pst );\n" , sqlaction_line->funcname , pstruct->struct_name );
 			fprintf( fp_dsc_ESQL_eh , "void DSCSQLACTION_FETCH_CURSOR_%s( %s *pst );\n" , cursor_name , pstruct->struct_name );
 			fprintf( fp_dsc_ESQL_eh , "void DSCSQLACTION_CLOSE_CURSOR_%s();\n" , cursor_name );
 		}
 		else
 		{
-			fprintf( fp_dsc_ESQL_eh , "void DSCSQLACTION_%s( %s *pst );\n" , pstruct->sqlaction_funcname[c] , pstruct->struct_name );
+			fprintf( fp_dsc_ESQL_eh , "void DSCSQLACTION_%s( %s *pst );\n" , sqlaction_line->funcname , pstruct->struct_name );
 		}
 	}
 	
@@ -837,7 +840,7 @@ _OUTPUT_CURSOR_REMAIN_SECTIONS :
 static int GenerateECCode_ec_SQL( struct CommandParameter *pcp , struct StructInfo *pstruct , FILE *fp_dsc_ESQL_ec )
 {
 	struct FieldInfo	*pfield = NULL ;
-	int			c ;
+	struct SqlActionOutput	*sqlaction_line ;
 	
 	int			nret = 0 ;
 	
@@ -1064,35 +1067,35 @@ static int GenerateECCode_ec_SQL( struct CommandParameter *pcp , struct StructIn
 	fprintf( fp_dsc_ESQL_ec , "	return;\n" );
 	fprintf( fp_dsc_ESQL_ec , "}\n" );
 	
-	for( c = 0 ; c < pstruct->sqlaction_count ; c++ )
+	for( sqlaction_line = pstruct->first_sqlaction_line ; sqlaction_line ; sqlaction_line = sqlaction_line->next_line )
 	{
-		if( STRNCMP( pstruct->sqlaction[c] , == , "CURSOR" , 6 ) )
+		if( STRNCMP( sqlaction_line->content , == , "CURSOR" , 6 ) )
 		{
-			nret = GenerateECCode_ec_SQL_ACTION_CURSOR( pstruct , pstruct->sqlaction[c] , pstruct->sqlaction_funcname[c] , fp_dsc_ESQL_ec ) ;
+			nret = GenerateECCode_ec_SQL_ACTION_CURSOR( pstruct , sqlaction_line->content , sqlaction_line->funcname , fp_dsc_ESQL_ec ) ;
 			if( nret )
 				return nret;
 		}
-		else if( STRNCMP( pstruct->sqlaction[c] , == , "SELECT" , 6 ) )
+		else if( STRNCMP( sqlaction_line->content , == , "SELECT" , 6 ) )
 		{
-			nret = GenerateECCode_ec_SQL_ACTION_SELECT( pstruct , pstruct->sqlaction[c] , pstruct->sqlaction_funcname[c] , fp_dsc_ESQL_ec ) ;
+			nret = GenerateECCode_ec_SQL_ACTION_SELECT( pstruct , sqlaction_line->content , sqlaction_line->funcname , fp_dsc_ESQL_ec ) ;
 			if( nret )
 				return nret;
 		}
-		else if( STRNCMP( pstruct->sqlaction[c] , == , "INSERT" , 6 ) )
+		else if( STRNCMP( sqlaction_line->content , == , "INSERT" , 6 ) )
 		{
-			nret = GenerateECCode_ec_SQL_ACTION_INSERT( pstruct , pstruct->sqlaction[c] , pstruct->sqlaction_funcname[c] , fp_dsc_ESQL_ec ) ;
+			nret = GenerateECCode_ec_SQL_ACTION_INSERT( pstruct , sqlaction_line->content , sqlaction_line->funcname , fp_dsc_ESQL_ec ) ;
 			if( nret )
 				return nret;
 		}
-		else if( STRNCMP( pstruct->sqlaction[c] , == , "UPDATE" , 6 ) )
+		else if( STRNCMP( sqlaction_line->content , == , "UPDATE" , 6 ) )
 		{
-			nret = GenerateECCode_ec_SQL_ACTION_UPDATE( pstruct , pstruct->sqlaction[c] , pstruct->sqlaction_funcname[c] , fp_dsc_ESQL_ec ) ;
+			nret = GenerateECCode_ec_SQL_ACTION_UPDATE( pstruct , sqlaction_line->content , sqlaction_line->funcname , fp_dsc_ESQL_ec ) ;
 			if( nret )
 				return nret;
 		}
-		else if( STRNCMP( pstruct->sqlaction[c] , == , "DELETE" , 6 ) )
+		else if( STRNCMP( sqlaction_line->content , == , "DELETE" , 6 ) )
 		{
-			nret = GenerateECCode_ec_SQL_ACTION_DELETE( pstruct , pstruct->sqlaction[c] , pstruct->sqlaction_funcname[c] , fp_dsc_ESQL_ec ) ;
+			nret = GenerateECCode_ec_SQL_ACTION_DELETE( pstruct , sqlaction_line->content , sqlaction_line->funcname , fp_dsc_ESQL_ec ) ;
 			if( nret )
 				return nret;
 		}
@@ -1186,7 +1189,7 @@ static int GenerateECCode_ec_SQL( struct CommandParameter *pcp , struct StructIn
 	return 0;
 }
 
-int GenerateECCode_PQSQL( struct CommandParameter *pcp , struct StructInfo *pstruct , FILE *fp_dsc_ESQL_eh , FILE *fp_dsc_ESQL_ec )
+int GenerateECCode_PGSQL( struct CommandParameter *pcp , struct StructInfo *pstruct , FILE *fp_dsc_ESQL_eh , FILE *fp_dsc_ESQL_ec )
 {
 	int		nret = 0 ;
 	

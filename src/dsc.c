@@ -8,8 +8,8 @@
  * Licensed under the LGPL v2.1, see the file LICENSE in base directory.
  */
 
-char	__DIRECTSTRUCT_VERSION_1_5_0[] = "1.5.0" ;
-char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_5_0 ;
+char	__DIRECTSTRUCT_VERSION_1_6_0[] = "1.6.0" ;
+char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_6_0 ;
 
 int dsc( struct CommandParameter *pcmdparam )
 {
@@ -136,7 +136,7 @@ int dsc( struct CommandParameter *pcmdparam )
 			return -1;
 		}
 		
-		nret = GenerateECCode_PQSQL( pcmdparam , & si , fp_dsc_ESQL_eh , fp_dsc_ESQL_ec ) ;
+		nret = GenerateECCode_PGSQL( pcmdparam , & si , fp_dsc_ESQL_eh , fp_dsc_ESQL_ec ) ;
 		if( nret )
 			return -nret;
 		

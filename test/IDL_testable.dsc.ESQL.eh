@@ -66,5 +66,4 @@ void DSCVTOS_testable( testable *pst );
 void DSCSTOV_testable( testable *pst );
 void DSCTRIM_testable( testable *pst );
 
-
 #endif
