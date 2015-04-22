@@ -8,23 +8,28 @@
 ###### 源文件配置区
 #@ c_FILE
 c_FILE		=	\
-			util.c \
 			main.c \
 			dsc.c \
 			ReadDscFile.c \
 			GenerateCCode.c \
-			GenerateSqlCode.c \
 			GenerateECCode.c \
+			GenerateSqlCode.c \
+			util.c \
 
 ###### 目标文件、安装目录配置区
+include ../makeinstall
 BIN		=	dsc
-BININST		=	$(HOME)/bin
+BININST		=	$(_BININST)
+HDER		= \
+			dsc.h \
+
+HDERINST	=	$(_HDERINST)
 
 ###### 编译选项
-CFLAGS		=	-I. \
+CFLAGS		=	$(_CFLAGS) \
 
 ###### 链接选项
-LFLAGS		=	-L. \
+LFLAGS		=	$(_LFLAGS) \
 
 ###### 额外宏定义区
 CLEAN_ADDITION	=
@@ -34,8 +39,12 @@ CLEAN_ADDITION	=
 #@ make_clean
 #@ make_install
 #@ make_install_BININST
+#@ make_install_HDERINST
 #@ make_install_DFTHDERINST
-
+#@ make_uninstall
+#@ make_uninstall_BININST
+#@ make_uninstall_HDERINST
+#@ make_uninstall_DFTHDERINST
 include $(MKTPLDIR)/makeobj_$(MKTPLOS).inc
 
 ###### 目标文件依赖关系

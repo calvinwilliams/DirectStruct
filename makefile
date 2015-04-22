@@ -16,5 +16,6 @@ DIROBJS		= \
 #@ dir_make
 #@ dir_clean
 #@ dir_install
+#@ dir_uninstall
 include $(MKTPLDIR)/makedir_$(MKTPLOS).inc
 

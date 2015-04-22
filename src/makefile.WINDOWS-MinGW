@@ -1,4 +1,5 @@
 # 此文件由makelocal.sh自动生成
+MAKEFILE_POSTFIX=.WINDOWS-MinGW
 # 此文件由makeobj.sh自动生成
 ############################################################
 # 项目名 : 
@@ -29,23 +30,28 @@ c_FILE_CLEAN	=	$(c_FILE_o) $(c_FILE2_o) $(c_FILE3_o) $(c_FILE4_o) $(c_FILE5_o)
 	$(CC) $(CFLAGS) -c $<
 
 c_FILE		=	\
-			util.c \
 			main.c \
 			dsc.c \
 			ReadDscFile.c \
 			GenerateCCode.c \
-			GenerateSqlCode.c \
 			GenerateECCode.c \
+			GenerateSqlCode.c \
+			util.c \
 
 ###### 目标文件、安装目录配置区
+include ../makeinstall
 BIN		=	dsc
-BININST		=	/usr/local/bin
+BININST		=	$(_BININST)
+HDER		= \
+			dsc.h \
+
+HDERINST	=	$(_HDERINST)
 
 ###### 编译选项
-CFLAGS		=	-I. \
+CFLAGS		=	$(_CFLAGS) \
 
 ###### 链接选项
-LFLAGS		=	-L. \
+LFLAGS		=	$(_LFLAGS) \
 
 ###### 额外宏定义区
 CLEAN_ADDITION	=
@@ -62,7 +68,7 @@ MV		=	move
 MKDIR		=	mkdir
 
 # 预定义源文件清理删除关联宏
-_FILE_CLEAN	=	$(c_FILE_CLEAN) $(cpp_FILE_CLEAN) $(SQC_FILE_CLEAN) $(csm_FILE_CLEAN) $(c_html_FILE_CLEAN) $(cui_FILE_CLEAN) $(dtd_FILE_CLEAN) $(prt_FILE_CLEAN) $(fmd_FILE_CLEAN) $(smd_FILE_CLEAN) $(def_FILE_CLEAN) $(act_FILE_CLEAN)
+_FILE_CLEAN	=	$(c_FILE_CLEAN) $(cpp_FILE_CLEAN) $(SQC_FILE_CLEAN) $(ec_FILE_CLEAN) $(ec_FILE2_CLEAN) $(csm_FILE_CLEAN) $(c_html_FILE_CLEAN) $(cui_FILE_CLEAN) $(dtd_FILE_CLEAN) $(prt_FILE_CLEAN) $(fmd_FILE_CLEAN) $(smd_FILE_CLEAN) $(def_FILE_CLEAN) $(act_FILE_CLEAN)
 
 # 清理删除规则
 clean		:
@@ -81,6 +87,25 @@ ifneq ($(strip $(BININST)),)
 	$(CP) $(BIN) "$(BININST)/"
 endif
 endif
+ifneq ($(strip $(BIN2)),)
+ifneq ($(strip $(BININST2)),)
+	-$(MKDIR) "$(BININST2)"
+	$(CP) $(BIN2) "$(BININST2)/"
+endif
+endif
+
+ifneq ($(strip $(HDER)),)
+ifneq ($(strip $(HDERINST)),)
+	-$(MKDIR) "$(HDERINST)"
+	$(CP) $(HDER) "$(HDERINST)/"
+endif
+endif
+ifneq ($(strip $(HDER2)),)
+ifneq ($(strip $(HDERINST2)),)
+	-$(MKDIR) "$(HDERINST2)"
+	$(CP) $(HDER2) "$(HDERINST2)/"
+endif
+endif
 
 ifneq ($(strip $(DFTHDER)),)
 ifneq ($(strip $(DFTHDERINST)),)
@@ -88,6 +113,15 @@ ifneq ($(strip $(DFTHDERINST)),)
 	$(CP) $(DFTHDER) "$(DFTHDERINST)/"
 endif
 endif
+
+
+# 预定义源代码缺省头文件宏
+DFTHDER		=	$(csm_FILE_DFTHDER) $(cui_FILE_DFTHDER) $(dtd_FILE_DFTHDER) $(prt_FILE_DFTHDER) $(fmd_FILE_DFTHDER) $(smd_FILE_DFTHDER) $(def_FILE_DFTHDER) $(act_FILE_DFTHDER)
+
+# 提交安装规则
+uninstall		:
+
+
 
 
 
