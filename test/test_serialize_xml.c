@@ -41,6 +41,7 @@ int test_serialize_xml()
 	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[5].card_no , "<&>" );
 	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[6].card_no , "<你&他>" );
 	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[7].card_no , "我<你&他>她" );
+	trans.QueryTransactionDetails.TransactionDetails._TransactionDetail_count = 8 ;
 	
 	DSCLOG_BankXmlTransaction( & trans );
 	
