@@ -1,0 +1,91 @@
+{
+	"version" : 1 ,
+	"ResponseHeader" : 
+	{
+		"transaction_code" : "P0101" ,
+		"trans_jnlsno" : 12345678 ,
+		"response_code" : 0 ,
+		"response_desc" : "OK"
+	} ,
+	"QueryTransactionDetails" : 
+	{
+		"AddonMessages" : 
+		{
+			"AddonMessage" : 
+			[
+			{
+				"message_text" : "Check account passed"
+			} ,
+			{
+				"message_text" : "Check channel passed"
+			} ,
+			{
+				"message_text" : ""
+			}
+			]
+		} ,
+		"TransactionDetailTitle" : 
+		{
+			"title_text" : "DETAIL TITLE" ,
+			"page_no" : 1 ,
+			"page_size" : 2
+		} ,
+		"TransactionDetails" : 
+		{
+			"TransactionDetail" : 
+			[
+			{
+				"trans_date" : "2014-01-01" ,
+				"trans_time" : "08:01:01" ,
+				"outlet_id" : "1001" ,
+				"card_no" : "603367123412341234" ,
+				"trans_amount" : 100.000000
+			} ,
+			{
+				"trans_date" : "2014-02-02" ,
+				"trans_time" : "08:02:02" ,
+				"outlet_id" : "2002" ,
+				"card_no" : "603367123412341234" ,
+				"trans_amount" : 200.000000
+			} ,
+			{
+				"trans_date" : "" ,
+				"trans_time" : "" ,
+				"outlet_id" : "" ,
+				"card_no" : "\\\"" ,
+				"trans_amount" : 0.000000
+			} ,
+			{
+				"trans_date" : "" ,
+				"trans_time" : "" ,
+				"outlet_id" : "" ,
+				"card_no" : "\"你\"他\"" ,
+				"trans_amount" : 0.000000
+			} ,
+			{
+				"trans_date" : "" ,
+				"trans_time" : "" ,
+				"outlet_id" : "" ,
+				"card_no" : "我\"你\"他\"她" ,
+				"trans_amount" : 0.000000
+			}
+			] ,
+			"TransactionTailDetail" : 
+			[
+			{
+				"message_text" : "\u0040\u0049\u004A\u004F"
+			} ,
+			{
+				"message_text" : "\u4049\u4a4f"
+			} ,
+			{
+				"message_text" : ""
+			}
+			]
+		}
+	} ,
+	OtherTransJnlsno :
+	[
+		20150417 , 20150423 , 20150429 , 20150430 , 20150501 , 20150503
+	]
+}

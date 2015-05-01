@@ -38,8 +38,8 @@ int test_serialize_json()
 	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[1].card_no , "603367123412341234" );
 	trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[1].trans_amount = 200.00 ;
 	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[2].card_no , "\\\"" );
-	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[3].card_no , "\"Äã\"Ëû\"" );
-	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[4].card_no , "ÎÒ\"Äã\"Ëû\"Ëý" );
+	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[3].card_no , "\"ä½ \"ä»–\"" );
+	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[4].card_no , "æˆ‘\"ä½ \"ä»–\"å¥¹" );
 	trans.QueryTransactionDetails.TransactionDetails._TransactionDetail_count = 5 ;
 	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionTailDetail[0].message_text , "uu0040uu0049uu004Auu004F" );
 	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionTailDetail[1].message_text , "uu4049uu4a4f" );
@@ -132,7 +132,7 @@ int test_serialize_json()
 
 int main()
 {
-	g_fasterjson_encoding = FASTERJSON_ENCODING_GB18030 ;
+	g_fasterjson_encoding = FASTERJSON_ENCODING_UTF8 ;
 	
 	return -test_serialize_json();
 }

@@ -33,4 +33,8 @@ STRUCT	BankJsonTransaction
 			}
 		}
 	}
+	STRUCT OtherTransJnlsno ARRAY 10
+	{
+		INT	4	_trans_jnlsno
+	}
 }

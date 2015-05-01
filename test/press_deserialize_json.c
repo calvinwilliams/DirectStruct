@@ -2,11 +2,177 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <time.h>
 
 #include "IDL_BankJsonTransaction.dsc.h"
 #include "IDL_BankJsonTransaction.dsc.LOG.c"
 
-int test_serialize_json()
+static long _GetFileSize(char *filename)
+{
+	struct stat stat_buf;
+	int ret;
+
+	ret=stat(filename,&stat_buf);
+	
+	if( ret == -1 )
+		return -1;
+	
+	return stat_buf.st_size;
+}
+
+static int ReadEntireFile( char *filename , char *mode , char *buf , long *bufsize )
+{
+	FILE	*fp = NULL ;
+	long	filesize ;
+	long	lret ;
+	
+	if( filename == NULL )
+		return -1;
+	if( strcmp( filename , "" ) == 0 )
+		return -1;
+	
+	filesize = _GetFileSize( filename ) ;
+	if( filesize  < 0 )
+		return -2;
+	
+	fp = fopen( filename , mode ) ;
+	if( fp == NULL )
+		return -3;
+	
+	if( filesize <= (*bufsize) )
+	{
+		lret = fread( buf , sizeof(char) , filesize , fp ) ;
+		if( lret < filesize )
+		{
+			fclose( fp );
+			return -4;
+		}
+		
+		(*bufsize) = filesize ;
+		
+		fclose( fp );
+		
+		return 0;
+	}
+	else
+	{
+		lret = fread( buf , sizeof(char) , (*bufsize) , fp ) ;
+		if( lret < (*bufsize) )
+		{
+			fclose( fp );
+			return -4;
+		}
+		
+		fclose( fp );
+		
+		return 1;
+	}
+}
+
+static int ReadEntireFileSafely( char *filename , char *mode , char **pbuf , long *pbufsize )
+{
+	long	filesize ;
+	
+	int	nret ;
+	
+	filesize = _GetFileSize( filename );
+	
+	(*pbuf) = (char*)malloc( filesize + 1 ) ;
+	if( (*pbuf) == NULL )
+		return -1;
+	memset( (*pbuf) , 0x00 , filesize + 1 );
+	
+	nret = ReadEntireFile( filename , mode , (*pbuf) , & filesize ) ;
+	if( nret )
+	{
+		free( (*pbuf) );
+		(*pbuf) = NULL ;
+		return nret;
+	}
+	else
+	{
+		if( pbufsize )
+			(*pbufsize) = filesize ;
+		return 0;
+	}
+}
+
+int main( int argc , char *argv[] )
+{
+	
+	if( argc == 1 + 2 )
+	{
+		char			*json_buffer = NULL ;
+		char			*json_buffer_bak = NULL ;
+		int			json_len ;
+		int			c , count ;
+		BankJsonTransaction	trans ;
+		int			nret = 0 ;
+		
+		nret = ReadEntireFileSafely( argv[1] , "rb" , & json_buffer_bak , NULL ) ;
+		if( nret )
+		{
+			printf( "ReadEntireFileSafely[%s] failed[%d]\n" , argv[1] , nret );
+			return nret;
+		}
+		json_buffer = strdup( json_buffer_bak ) ;
+		if( json_buffer == NULL )
+		{
+			printf( "strdup failed , errno[%d]\n" , errno );
+			return 1;
+		}
+		json_len = strlen(json_buffer) ;
+		
+		count = atol(argv[2]) ;
+		if( count > 0 )
+		{
+			time_t	t1 , t2 ;
+			
+			time( & t1 );
+			for( c = 0 ; c < count ; c++ )
+			{
+				memset( & trans , 0x00 , sizeof(BankJsonTransaction) );
+				nret = DSCDESERIALIZE_JSON_BankJsonTransaction( NULL , json_buffer , & json_len , & trans ) ;
+				if( nret )
+				{
+					printf( "DSCDESERIALIZE_JSON_BankJsonTransaction failed[%d]\n" , nret );
+					return nret;
+				}
+			}
+			time( & t2 );
+			printf( "Elapse %d seconds\n" , (int)(t2-t1) );
+			
+			DSCLOG_BankJsonTransaction( & trans );
+		}
+		else
+		{
+			int	len ;
+			
+			count = -count ;
+			len = 0 ;
+			for( c = 0 ; c < count ; c++ )
+			{
+				len += strlen( json_buffer + c % 10 ) ;
+			}
+			printf( "len[%d]\n" , len );
+		}
+		free( json_buffer );
+		free( json_buffer_bak );
+	}
+	else
+	{
+		printf( "USAGE : press_fastjson json_pathfilename press_count\n" );
+		exit(7);
+	}
+	
+	return 0;
+}
+
+#if 0
+int press_serialize_json()
 {
 	BankJsonTransaction	trans ;
 	char			buf[ 40960 + 1 ] ;
@@ -43,12 +209,6 @@ int test_serialize_json()
 	trans.QueryTransactionDetails.TransactionDetails._TransactionDetail_count = 5 ;
 	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionTailDetail[0].message_text , "uu0040uu0049uu004Auu004F" );
 	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionTailDetail[1].message_text , "uu4049uu4a4f" );
-	trans.OtherTransJnlsno[0]._trans_jnlsno = 20150417 ;
-	trans.OtherTransJnlsno[1]._trans_jnlsno = 20150423 ;
-	trans.OtherTransJnlsno[2]._trans_jnlsno = 20150429 ;
-	trans.OtherTransJnlsno[3]._trans_jnlsno = 20150430 ;
-	trans.OtherTransJnlsno[4]._trans_jnlsno = 20150501 ;
-	trans.OtherTransJnlsno[5]._trans_jnlsno = 20150503 ;
 	
 	DSCLOG_BankJsonTransaction( & trans );
 	
@@ -136,3 +296,5 @@ int main()
 	
 	return -test_serialize_json();
 }
+#endif
+
