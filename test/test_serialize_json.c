@@ -37,7 +37,7 @@ int test_serialize_json()
 	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[1].outlet_id , "2002" );
 	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[1].card_no , "603367123412341234" );
 	trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[1].trans_amount = 200.00 ;
-	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[2].card_no , "\\\"" );
+	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[2].card_no , "\\\"\t\r\n\f\b" );
 	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[3].card_no , "\"你\"他\"" );
 	strcpy( trans.QueryTransactionDetails.TransactionDetails.TransactionDetail[4].card_no , "我\"你\"他\"她" );
 	trans.QueryTransactionDetails.TransactionDetails._TransactionDetail_count = 5 ;
