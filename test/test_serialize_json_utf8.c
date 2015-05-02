@@ -49,6 +49,7 @@ int test_serialize_json()
 	trans.OtherTransJnlsno[3]._trans_jnlsno = 20150430 ;
 	trans.OtherTransJnlsno[4]._trans_jnlsno = 20150501 ;
 	trans.OtherTransJnlsno[5]._trans_jnlsno = 20150503 ;
+	trans.sign_flag = DSCFALSE ;
 	
 	DSCLOG_BankJsonTransaction( & trans );
 	

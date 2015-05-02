@@ -31,6 +31,7 @@ EXEC SQL BEGIN DECLARE SECTION ;
 	extern double testable_f8 ;	extern short testable_f8_id ;
 	extern char testable_str32[ 32 + 1 ] ;	extern short testable_str32_id ;
 	extern char testable_str1024[ 1024 + 1 ] ;	extern short testable_str1024_id ;
+	extern char testable_b1 ;	extern short testable_b1_id ;
 EXEC SQL END DECLARE SECTION ;
 
 #define	TFLIST_testable \
@@ -39,7 +40,8 @@ EXEC SQL END DECLARE SECTION ;
 	f4 , \
 	f8 , \
 	str32 , \
-	str1024
+	str1024 , \
+	b1
 
 #define	DBVLIST_testable \
 	:testable_n2 , \
@@ -47,7 +49,8 @@ EXEC SQL END DECLARE SECTION ;
 	:testable_f4 , \
 	:testable_f8 , \
 	:testable_str32 , \
-	:testable_str1024
+	:testable_str1024 , \
+	:testable_b1
 
 #define	DBVLLIST_testable \
 	:testable_n2 :testable_n2_id , \
@@ -55,7 +58,8 @@ EXEC SQL END DECLARE SECTION ;
 	:testable_f4 :testable_f4_id , \
 	:testable_f8 :testable_f8_id , \
 	:testable_str32 :testable_str32_id , \
-	:testable_str1024 :testable_str1024_id
+	:testable_str1024 :testable_str1024_id , \
+	:testable_b1 :testable_b1_id
 
 void DSCINITV_testable();
 void DSCVTOS_testable( testable *pst );

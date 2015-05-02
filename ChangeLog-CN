@@ -3,6 +3,7 @@ ver 1.4.0	2015-05-01	calvin
 		* json序列化新增匿名数组表达支持，如"name:[1,2,3,4,5,6]"，定义字段名时前加'_'
 		* 新增json压测程序test/press_deserialize_json
 		* 新增UTF8的json测试程序test/test_serialize_json_utf8
+		* 定义字段类型新增布尔类型BOOL，代码中使用DSCTRUE或DSCFALSE赋值
 
 ver 1.3.3	2015-04-25	calvin
 		* 生成的XML或JSON报文会根据内部变量"_*_count"值而减少输出量

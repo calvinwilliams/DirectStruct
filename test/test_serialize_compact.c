@@ -75,6 +75,7 @@ int test_serialize_compact()
 	st.uch = 'B' ;
 	strcpy( st.str32 , "calvin" );
 	strcpy( st.str1024 , "XXXXXXXXXXXXXXXX" );
+	st.b1 = DSCTRUE ;
 	
 	DSCLOG_AllTypes( & st );
 	

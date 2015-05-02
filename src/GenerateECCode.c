@@ -51,6 +51,13 @@ static int GenerateECCode_eh_SQL( struct CommandParameter *pcp , struct StructIn
 		{
 			fprintf( fp_dsc_ESQL_eh , "	extern char %s_%s[ %d + 1 ] ;	extern short %s_%s_id ;\n" , pstruct->struct_name , pfield->field_name , pfield->field_len , pstruct->struct_name , pfield->field_name );
 		}
+		else if( STRCMP( pfield->field_type , == , "BOOL" ) )
+		{
+			if( pfield->field_len == 1 )
+			{
+				fprintf( fp_dsc_ESQL_eh , "	extern char %s_%s ;	extern short %s_%s_id ;\n" , pstruct->struct_name , pfield->field_name , pstruct->struct_name , pfield->field_name );
+			}
+		}
 	}
 	fprintf( fp_dsc_ESQL_eh , "EXEC SQL END DECLARE SECTION ;\n" );
 	
@@ -872,6 +879,13 @@ static int GenerateECCode_ec_SQL( struct CommandParameter *pcp , struct StructIn
 		{
 			fprintf( fp_dsc_ESQL_ec , "	char %s_%s[ %d + 1 ] ;	short %s_%s_id ;\n" , pstruct->struct_name , pfield->field_name , pfield->field_len , pstruct->struct_name , pfield->field_name );
 		}
+		else if( STRCMP( pfield->field_type , == , "BOOL" ) )
+		{
+			if( pfield->field_len == 1 )
+			{
+				fprintf( fp_dsc_ESQL_ec , "	char %s_%s ;	short %s_%s_id ;\n" , pstruct->struct_name , pfield->field_name , pstruct->struct_name , pfield->field_name );
+			}
+		}
 	}
 	fprintf( fp_dsc_ESQL_ec , "EXEC SQL END DECLARE SECTION ;\n" );
 	
@@ -921,6 +935,14 @@ static int GenerateECCode_ec_SQL( struct CommandParameter *pcp , struct StructIn
 			fprintf( fp_dsc_ESQL_ec , "	memset( %s_%s , 0x00 , sizeof(%s_%s) );\n" , pstruct->struct_name , pfield->field_name , pstruct->struct_name , pfield->field_name );
 			fprintf( fp_dsc_ESQL_ec , "	%s_%s_id = 0 ;\n" , pstruct->struct_name , pfield->field_name );
 		}
+		else if( STRCMP( pfield->field_type , == , "BOOL" ) )
+		{
+			if( pfield->field_len == 1 )
+			{
+				fprintf( fp_dsc_ESQL_ec , "	%s_%s = 0 ;\n" , pstruct->struct_name , pfield->field_name );
+				fprintf( fp_dsc_ESQL_ec , "	%s_%s_id = 0 ;\n" , pstruct->struct_name , pfield->field_name );
+			}
+		}
 	}
 	fprintf( fp_dsc_ESQL_ec , "	return;\n" );
 	fprintf( fp_dsc_ESQL_ec , "}\n" );
@@ -964,6 +986,13 @@ static int GenerateECCode_ec_SQL( struct CommandParameter *pcp , struct StructIn
 		{
 			fprintf( fp_dsc_ESQL_ec , "	strcpy( pst->%s , %s_%s );\n" , pfield->field_name , pstruct->struct_name , pfield->field_name );
 		}
+		else if( STRCMP( pfield->field_type , == , "BOOL" ) )
+		{
+			if( pfield->field_len == 1 )
+			{
+				fprintf( fp_dsc_ESQL_ec , "	pst->%s = %s_%s ;\n" , pfield->field_name , pstruct->struct_name , pfield->field_name );
+			}
+		}
 	}
 	fprintf( fp_dsc_ESQL_ec , "	return;\n" );
 	fprintf( fp_dsc_ESQL_ec , "}\n" );
@@ -1006,6 +1035,13 @@ static int GenerateECCode_ec_SQL( struct CommandParameter *pcp , struct StructIn
 		else if( STRCMP( pfield->field_type , == , "STRING" ) )
 		{
 			fprintf( fp_dsc_ESQL_ec , "	strcpy( %s_%s , pst->%s );\n" , pstruct->struct_name , pfield->field_name , pfield->field_name );
+		}
+		else if( STRCMP( pfield->field_type , == , "BOOL" ) )
+		{
+			if( pfield->field_len == 1 )
+			{
+				fprintf( fp_dsc_ESQL_ec , "	%s_%s = pst->%s ;\n" , pstruct->struct_name , pfield->field_name , pfield->field_name );
+			}
 		}
 	}
 	fprintf( fp_dsc_ESQL_ec , "	return;\n" );

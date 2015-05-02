@@ -14,4 +14,5 @@ STRUCT	AllTypes
 	UCHAR	1	uch
 	STRING	32	str32
 	STRING	1024	str1024
+	BOOL	1	b1
 }

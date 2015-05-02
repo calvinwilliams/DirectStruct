@@ -84,6 +84,9 @@ int DSCSERIALIZE_COMPACT_AllTypes( AllTypes *pst , char *buf , int *p_len )
 	/* str1024 */
 	memcpy( ptr , pst->str1024 , 1024 );
 	len+=1024; ptr+=1024;
+	/* b1 */
+	(*ptr) = pst->b1 ;
+	len++; ptr++;
 	
 	if( p_len ) (*p_len) = len ;
 	
@@ -138,6 +141,9 @@ int DSCDESERIALIZE_COMPACT_AllTypes( char *buf , int *p_len , AllTypes *pst )
 	/* str1024 */
 	memcpy( pst->str1024 , ptr , 1024 );
 	len+=1024; ptr+=1024;
+	/* b1 */
+	pst->b1 = (char)(*ptr) ;
+	len++; ptr++;
 	
 	if( p_len ) (*p_len) = len ;
 	
@@ -195,6 +201,9 @@ int DSCSERIALIZE_COMPRESS_AllTypes( AllTypes *pst , char *buf , int *p_len )
 	memcpy( ptr , pst->str1024 , size );
 	len+=size; ptr+=size;
 	}
+	/* b1 */
+	(*ptr) = pst->b1 ;
+	len++; ptr++;
 	
 	if( p_len ) (*p_len) = len ;
 	
@@ -252,6 +261,9 @@ int DSCDESERIALIZE_COMPRESS_AllTypes( char *buf , int *p_len , AllTypes *pst )
 	memcpy( pst->str1024 , ptr , size );
 	len+=size; ptr+=size;
 	}
+	/* b1 */
+	pst->b1 = (char)(*ptr) ;
+	len++; ptr++;
 	
 	if( p_len ) (*p_len) = len ;
 	

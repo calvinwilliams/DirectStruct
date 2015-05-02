@@ -42,6 +42,10 @@ int DSCSERIALIZE_JSON_BankJsonTransaction( BankJsonTransaction *pst , char *enco
 	len=SNPRINTF(buf,remain_len,"\"version\" : "); if(len<0)return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"%d",pst->version); if(len<0)return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len," ,\n"); if(len<0)return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"	"); if(len<0)return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"\"sign_flag\" : "); if(len<0)return -1; buf+=len; remain_len-=len;
+	if(pst->sign_flag==DSCTRUE)len=SNPRINTF(buf,remain_len,"true");else len=SNPRINTF(buf,remain_len,"false"); if(len<0)return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len," ,\n"); if(len<0)return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"	\"ResponseHeader\" : \n"); if(len<0)return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"	{\n"); if(len<0)return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"		"); if(len<0)return -1; buf+=len; remain_len-=len;
@@ -196,6 +200,9 @@ int DSCSERIALIZE_JSON_COMPACT_BankJsonTransaction( BankJsonTransaction *pst , ch
 	len=SNPRINTF(buf,remain_len,"\"version\":"); if(len<0)return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"%d",pst->version); if(len<0)return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,","); if(len<0)return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,"\"sign_flag\":"); if(len<0)return -1; buf+=len; remain_len-=len;
+	if(pst->sign_flag==DSCTRUE)len=SNPRINTF(buf,remain_len,"true");else len=SNPRINTF(buf,remain_len,"false"); if(len<0)return -1; buf+=len; remain_len-=len;
+	len=SNPRINTF(buf,remain_len,","); if(len<0)return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"\"ResponseHeader\":"); if(len<0)return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"{"); if(len<0)return -1; buf+=len; remain_len-=len;
 	len=SNPRINTF(buf,remain_len,"\"transaction_code\":"); if(len<0)return -1; buf+=len; remain_len-=len;
@@ -348,6 +355,9 @@ int CallbackOnJsonNode_BankJsonTransaction( int type , char *jpath , int jpath_l
 		/* version */
 		if( jpath_len == 8 && strncmp( jpath , "/version" , jpath_len ) == 0 )
 		{NATOC(content,content_len,pst->version);}
+		/* sign_flag */
+		if( jpath_len == 10 && strncmp( jpath , "/sign_flag" , jpath_len ) == 0 )
+		{NATOB(content,content_len,pst->sign_flag);}
 			/* transaction_code */
 			if( jpath_len == 32 && strncmp( jpath , "/ResponseHeader/transaction_code" , jpath_len ) == 0 )
 			{JSONUNESCAPE_FOLD(content,content_len,pst->ResponseHeader.transaction_code,len,sizeof(pst->ResponseHeader.transaction_code)-1); if(len<0)return -7;}

@@ -16,6 +16,13 @@
 #endif
 #endif
 
+#ifndef DSCTRUE
+#define DSCTRUE	(char)'t'
+#endif
+#ifndef DSCFALSE
+#define DSCFALSE	(char)'f'
+#endif
+
 #if ( defined __unix ) | ( defined __linux__ )
 #include <arpa/inet.h>
 #define SNPRINTF		snprintf
@@ -70,10 +77,14 @@
 #ifndef NATOLF
 #define NATOLF(_base_,_len_,_result_)	{char buf[60+1];memset(buf,0x00,sizeof(buf));strncpy(buf,_base_,60);_result_=atof(buf);}
 #endif
+#ifndef NATOB
+#define NATOB(_base_,_len_,_result_)	{if(memcmp(_base_,"true",4)==0)_result_=DSCTRUE;else _result_=DSCFALSE;}
+#endif
 
 typedef struct
 {
 	char	version ;
+	char	sign_flag ;
 	struct
 	{
 		char	transaction_code[ 32 + 1 ] ;

@@ -22,5 +22,6 @@ int FUNCNAME_DSCLOG_testable( testable *pst )
 	PREFIX_DSCLOG_testable "testable.f8[%lf]" NEWLINE_DSCLOG_testable , pst->f8 );
 	PREFIX_DSCLOG_testable "testable.str32[%s]" NEWLINE_DSCLOG_testable , pst->str32 );
 	PREFIX_DSCLOG_testable "testable.str1024[%s]" NEWLINE_DSCLOG_testable , pst->str1024 );
+	PREFIX_DSCLOG_testable "testable.b1[%c]" NEWLINE_DSCLOG_testable , pst->b1 );
 	return 0;
 }
