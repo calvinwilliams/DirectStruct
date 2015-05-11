@@ -1,3 +1,7 @@
+ver 1.4.2	2015-05-11	calvin
+		* Fixed a bug on serializing XML,JSON
+		* Effect field '_*_count' on serializing XML,JSON
+
 ver 1.4.1	2015-05-02	calvin
 		* Adjust by library fasterjson v1.1.1
 

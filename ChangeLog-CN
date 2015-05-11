@@ -1,3 +1,7 @@
+ver 1.4.2	2015-05-11	calvin
+		* 解决了序列化XML,JSON时的缓冲区溢出问题
+		* 序列化XML,JSON明细时按照隐藏字段_*_count计算次数
+
 ver 1.4.1	2015-05-02	calvin
 		* 配合开源库fasterjson v1.1.1改造
 
