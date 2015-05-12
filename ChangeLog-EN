@@ -1,3 +1,6 @@
+ver 1.4.3	2015-05-12	calvin
+		* Precise buffer length calculation
+
 ver 1.4.2	2015-05-11	calvin
 		* Fixed a bug on serializing XML,JSON
 		* Effect field '_*_count' on serializing XML,JSON

@@ -3049,14 +3049,14 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "	int	len ;\n" );
 		fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
 		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
-		fprintf( fp_dsc_c , "	remain_len = (*p_len) - 1 ;\n" );
+		fprintf( fp_dsc_c , "	remain_len = (*p_len) ;\n" );
 		fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
 		fprintf( fp_dsc_c , "	len=SNPRINTF(buf,remain_len,\"<?xml version=\\\"1.0\\\" encoding=\\\"%%s\\\"?>\\n\",encoding); if(len<0)return -1; buf+=len; remain_len-=len;\n" );
 		nret = GenerateCCode_c_DSCSERIALIZE_XML( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
 		if( nret )
 			return nret;
 		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	if( p_len ) (*p_len) = (*p_len)-1 - remain_len ;\n" );
+		fprintf( fp_dsc_c , "	if( p_len ) (*p_len) = (*p_len) - remain_len ;\n" );
 		fprintf( fp_dsc_c , "	\n" );
 		fprintf( fp_dsc_c , "	return 0;\n" );
 		fprintf( fp_dsc_c , "}\n" );
@@ -3072,14 +3072,14 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "	int	len ;\n" );
 		fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
 		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
-		fprintf( fp_dsc_c , "	remain_len = (*p_len) - 1 ;\n" );
+		fprintf( fp_dsc_c , "	remain_len = (*p_len) ;\n" );
 		fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
 		fprintf( fp_dsc_c , "	len=SNPRINTF(buf,remain_len,\"<?xml version=\\\"1.0\\\" encoding=\\\"%%s\\\"?>\",encoding); if(len<0)return -1; buf+=len; remain_len-=len;\n" );
 		nret = GenerateCCode_c_DSCSERIALIZE_XML_COMPACT( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
 		if( nret )
 			return nret;
 		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	if( p_len ) (*p_len) = (*p_len)-1 - remain_len ;\n" );
+		fprintf( fp_dsc_c , "	if( p_len ) (*p_len) = (*p_len) - remain_len ;\n" );
 		fprintf( fp_dsc_c , "	\n" );
 		fprintf( fp_dsc_c , "	return 0;\n" );
 		fprintf( fp_dsc_c , "}\n" );
@@ -3172,14 +3172,14 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "	int	len ;\n" );
 		fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
 		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
-		fprintf( fp_dsc_c , "	remain_len = (*p_len) - 1 ;\n" );
+		fprintf( fp_dsc_c , "	remain_len = (*p_len) ;\n" );
 		fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
 		/* SNPRINTF( jsonpathname , sizeof(jsonpathname)-1 , "pst->%s." , pstruct->next_struct->struct_name ); */
 		nret = GenerateCCode_c_DSCSERIALIZE_JSON( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
 		if( nret )
 			return nret;
 		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	if( p_len ) (*p_len) = (*p_len)-1 - remain_len ;\n" );
+		fprintf( fp_dsc_c , "	if( p_len ) (*p_len) = (*p_len) - remain_len ;\n" );
 		fprintf( fp_dsc_c , "	\n" );
 		fprintf( fp_dsc_c , "	return 0;\n" );
 		fprintf( fp_dsc_c , "}\n" );
@@ -3195,14 +3195,14 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "	int	len ;\n" );
 		fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
 		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
-		fprintf( fp_dsc_c , "	remain_len = (*p_len) - 1 ;\n" );
+		fprintf( fp_dsc_c , "	remain_len = (*p_len) ;\n" );
 		fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
 		/* SNPRINTF( jsonpathname , sizeof(jsonpathname)-1 , "pst->%s." , pstruct->next_struct->struct_name ); */
 		nret = GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
 		if( nret )
 			return nret;
 		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	if( p_len ) (*p_len) = (*p_len)-1 - remain_len ;\n" );
+		fprintf( fp_dsc_c , "	if( p_len ) (*p_len) = (*p_len) - remain_len ;\n" );
 		fprintf( fp_dsc_c , "	\n" );
 		fprintf( fp_dsc_c , "	return 0;\n" );
 		fprintf( fp_dsc_c , "}\n" );
