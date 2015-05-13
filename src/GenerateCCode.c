@@ -2337,7 +2337,8 @@ static int GenerateCCode_LOG_c( struct CommandParameter *pcp , int depth , struc
 	{
 		if( pstruct->array_size > 0 )
 		{
-			fprintabs( fp_dsc_LOG_c , depth ); fprintf( fp_dsc_LOG_c , "	for( index[%d] = 0 ; index[%d] < %d ; index[%d]++ )\n" , depth , depth , pstruct->array_size , depth );
+			fprintabs( fp_dsc_LOG_c , depth ); fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s_%s_count[%%d]\" NEWLINE_DSCLOG_%s , %s_%s_count );\n" , grandfather_pmsginfo->struct_name , LOG_up_pathname,pstruct->struct_name , grandfather_pmsginfo->struct_name , up_pathname,pstruct->struct_name );
+			fprintabs( fp_dsc_LOG_c , depth ); fprintf( fp_dsc_LOG_c , "	for( index[%d] = 0 ; index[%d] < %s_%s_count ; index[%d]++ )\n" , depth , depth , up_pathname,pstruct->struct_name , depth );
 			fprintabs( fp_dsc_LOG_c , depth ); fprintf( fp_dsc_LOG_c , "	{\n" );
 		}
 		
