@@ -9,7 +9,7 @@
 int test_serialize_json()
 {
 	BankJsonTransaction	trans ;
-	char			buf[ 40960 + 1 ] ;
+	char			buf[ 10240 + 1 ] ;
 	int			len ;
 	int			nret = 0 ;
 	
@@ -49,6 +49,7 @@ int test_serialize_json()
 	trans.OtherTransJnlsno[3]._trans_jnlsno = 20150430 ;
 	trans.OtherTransJnlsno[4]._trans_jnlsno = 20150501 ;
 	trans.OtherTransJnlsno[5]._trans_jnlsno = 20150503 ;
+	trans._OtherTransJnlsno_count = 6 ;
 	trans.sign_flag = DSCTRUE ;
 	
 	DSCLOG_BankJsonTransaction( & trans );

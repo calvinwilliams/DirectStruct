@@ -14,6 +14,7 @@ c_FILE		=	\
 			IDL_ResponseHeader.dsc.c	\
 			IDL_BankTransaction.dsc.c	\
 			IDL_BankXmlTransaction.dsc.c	\
+			IDL_BankJsonTransaction.dsc.c	\
 			test_netorder.c			\
 			test_serialize_compact.c	\
 			test_serialize_compress.c	\
