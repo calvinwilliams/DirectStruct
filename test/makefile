@@ -34,8 +34,8 @@ BIN		=	test_netorder			\
 
 ###### 编译选项
 CFLAGS		=	-I. \
-			-I/usr/local/include/fasterxml	\
-			-I/usr/local/include/fasterjson	\
+			-I$(HOME)/include/fasterxml	\
+			-I$(HOME)/include/fasterjson	\
 
 ###### 链接选项
 LFLAGS		=	-L. \
