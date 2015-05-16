@@ -24,14 +24,14 @@ BIN		=					\
 ###### 编译选项
 CFLAGS		=	-I. 				\
 			-I$(PGHOME)/include		\
-			-I$(HOME)/exinc/fasterxml	\
-			-I$(HOME)/exinc/fasterjson	\
+			-I/usr/local/include/fasterxml	\
+			-I/usr/local/include/fasterjson	\
 
 ###### 链接选项
 LFLAGS		=	-L. 				\
 			-L$(PGHOME)/lib			\
 			-lecpg				\
-			-L$(HOME)/exlib			\
+			-L/usr/local/lib		\
 			-lfasterxml			\
 			-lfasterjson			\
 
