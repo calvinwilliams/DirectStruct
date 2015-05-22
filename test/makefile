@@ -73,16 +73,16 @@ IDL_BankXmlTransaction.dsc.o	:	IDL_BankXmlTransaction.dsc.c
 	$(CC) -I$(HOME)/exinc/fasterxml -I. -c IDL_BankXmlTransaction.dsc.c
 
 test_serialize_xml	:	test_serialize_xml.o IDL_BankXmlTransaction.dsc.o
-	$(CC) -o $@ test_serialize_xml.o IDL_BankXmlTransaction.dsc.o $(LFLAGS) -L$(HOME)/exlib -lfasterxml
+	$(CC) -o $@ test_serialize_xml.o IDL_BankXmlTransaction.dsc.o $(LFLAGS) -L$(HOME)/lib -lfasterxml
 
 test_serialize_json	:	test_serialize_json.o IDL_BankJsonTransaction.dsc.o
-	$(CC) -o $@ test_serialize_json.o IDL_BankJsonTransaction.dsc.o $(LFLAGS) -L$(HOME)/exlib -lfasterjson
+	$(CC) -o $@ test_serialize_json.o IDL_BankJsonTransaction.dsc.o $(LFLAGS) -L$(HOME)/lib -lfasterjson
 
 test_serialize_json_utf8	:	test_serialize_json_utf8.o IDL_BankJsonTransaction.dsc.o
-	$(CC) -o $@ test_serialize_json_utf8.o IDL_BankJsonTransaction.dsc.o $(LFLAGS) -L$(HOME)/exlib -lfasterjson
+	$(CC) -o $@ test_serialize_json_utf8.o IDL_BankJsonTransaction.dsc.o $(LFLAGS) -L$(HOME)/lib -lfasterjson
 
 press_deserialize_json	:	press_deserialize_json.o IDL_BankJsonTransaction.dsc.o
-	$(CC) -o $@ press_deserialize_json.o IDL_BankJsonTransaction.dsc.o $(LFLAGS) -L$(HOME)/exlib -lfasterjson
+	$(CC) -o $@ press_deserialize_json.o IDL_BankJsonTransaction.dsc.o $(LFLAGS) -L$(HOME)/lib -lfasterjson
 
 ECP	=	ecpg
 
