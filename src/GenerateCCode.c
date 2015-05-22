@@ -157,7 +157,7 @@ static int GenerateCCode_c_DSCINIT( struct CommandParameter *pcp , int depth , s
 			}
 			else
 			{
-				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s[index[%d]]." , up_pathname , pstruct->struct_name , depth );
+				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s[index[%d]]." , up_pathname , pstruct->struct_name , depth+1 );
 			}
 		}
 		
@@ -1375,7 +1375,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_XML_ENTERNODE( struct CommandParameter
 		if( pstruct->array_size > 0 )
 		{
 			fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	if( xpath_len == %d && strncmp( xpath , \"%s/%s\" , xpath_len ) == 0 )\n", (int)(strlen(up_xmlpathname)+1+strlen(pstruct->struct_name)) , up_xmlpathname,pstruct->struct_name );
-			fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{if( %s_%s_count > %d ) return -8;}\n" , up_pathname,pstruct->struct_name , pstruct->array_size );
+			fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{if(%s_%s_count>%d) return -8;}\n" , up_pathname,pstruct->struct_name , pstruct->array_size );
 		}
 		
 		if( depth == 0 )
@@ -1391,7 +1391,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_XML_ENTERNODE( struct CommandParameter
 			}
 			else
 			{
-				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s[index[%d]]." , up_pathname , pstruct->struct_name , depth );
+				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s[%s_%s_count]." , up_pathname , pstruct->struct_name , up_pathname,pstruct->struct_name );
 			}
 			SNPRINTF( xmlpathname , sizeof(xmlpathname)-1 , "%s/%s" , up_xmlpathname , pstruct->struct_name );
 		}
@@ -1436,7 +1436,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_XML_LEAVENODE( struct CommandParameter
 			}
 			else
 			{
-				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s[index[%d]]." , up_pathname , pstruct->struct_name , depth );
+				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s[%s_%s_count]." , up_pathname , pstruct->struct_name , up_pathname,pstruct->struct_name );
 			}
 			SNPRINTF( xmlpathname , sizeof(xmlpathname)-1 , "%s/%s" , up_xmlpathname , pstruct->struct_name );
 		}
@@ -2080,7 +2080,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_JSON_ENTERNODE( struct CommandParamete
 			else
 			{
 				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	if( jpath_len == %d && strncmp( jpath , \"%s/%s\" , jpath_len ) == 0 )\n" , (int)(strlen(up_jsonpathname)+1+strlen(pstruct->struct_name)) , up_jsonpathname,pstruct->struct_name );
-				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{if( %s_%s_count > %d ) return -8;}\n" , up_pathname,pstruct->struct_name , pstruct->array_size );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{if(%s_%s_count>=%d)return -8;}\n" , up_pathname,pstruct->struct_name , pstruct->array_size );
 			}
 		}
 		
@@ -2097,7 +2097,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_JSON_ENTERNODE( struct CommandParamete
 			}
 			else
 			{
-				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s[index[%d]]." , up_pathname , pstruct->struct_name , depth );
+				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s[%s_%s_count]." , up_pathname , pstruct->struct_name , up_pathname,pstruct->struct_name );
 			}
 			SNPRINTF( jsonpathname , sizeof(jsonpathname)-1 , "%s/%s" , up_jsonpathname , pstruct->struct_name );
 		}
@@ -2149,7 +2149,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_JSON_LEAVENODE( struct CommandParamete
 			}
 			else
 			{
-				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s[index[%d]]." , up_pathname , pstruct->struct_name , depth );
+				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s[%s_%s_count]." , up_pathname , pstruct->struct_name , up_pathname,pstruct->struct_name );
 			}
 			SNPRINTF( jsonpathname , sizeof(jsonpathname)-1 , "%s/%s" , up_jsonpathname , pstruct->struct_name );
 		}
