@@ -157,7 +157,7 @@ static int GenerateCCode_c_DSCINIT( struct CommandParameter *pcp , int depth , s
 			}
 			else
 			{
-				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s[index[%d]]." , up_pathname , pstruct->struct_name , depth+1 );
+				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s[index[%d]]." , up_pathname , pstruct->struct_name , depth );
 			}
 		}
 		
@@ -245,8 +245,8 @@ static int GenerateCCode_c_DSCINIT( struct CommandParameter *pcp , int depth , s
 		
 		if( pstruct->array_size > 0 )
 		{
-			fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s_%s_size = %d ;\n" , up_pathname,pstruct->struct_name , pstruct->array_size );
 			fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	}\n" );
+			fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s_%s_size = %d ;\n" , up_pathname,pstruct->struct_name , pstruct->array_size );
 		}
 	}
 	
