@@ -2071,11 +2071,11 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( struct CommandParameter *p
 					"new_buf_size=buf_size*2;" \
 				"else " \
 					"new_buf_size=buf_size+10*1024*1024;" \
-				"tmp=realloc(*pp_base,new_buf_size);" \
+				"tmp=(char*)realloc(*pp_base,new_buf_size);" \
 				"if(tmp==NULL)" \
 					"return -2;" \
 				"else " \
-					"buf=(*pp_base)+buf_offset,(*pp_base)=tmp,remain_len+=new_buf_size-buf_size,buf_size=new_buf_size;" \
+					"(*pp_base)=tmp,buf=(*pp_base)+buf_offset,remain_len+=new_buf_size-buf_size,buf_size=new_buf_size;" \
 			"}" \
 			"else " \
 			"{" \
@@ -3674,6 +3674,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "	int	buf_size ;\n" );
 		fprintf( fp_dsc_c , "	int	remain_len ;\n" );
 		fprintf( fp_dsc_c , "	char	*buf = NULL ;\n" );
+		fprintf( fp_dsc_c , "	int	buf_begin_offset ;\n" );
 		fprintf( fp_dsc_c , "	int	len ;\n" );
 		fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
 		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
@@ -3704,7 +3705,8 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "		buf_size = (*p_buf_size) ;\n" );
 		fprintf( fp_dsc_c , "		remain_len = (*p_len) ;\n" );
 		fprintf( fp_dsc_c , "	}\n" );
-		fprintf( fp_dsc_c , "	buf = (*pp_base) + buf_size-1 - remain_len ;\n" );
+		fprintf( fp_dsc_c , "	buf_begin_offset = buf_size-1 - remain_len ;\n" );
+		fprintf( fp_dsc_c , "	buf = (*pp_base) + buf_begin_offset ;\n" );
 		fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
 		nret = GenerateCCode_c_DSCSERIALIZE_JSON_DUP( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
 		if( nret )
@@ -3713,7 +3715,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "	if( p_buf_size )\n" );
 		fprintf( fp_dsc_c , "		(*p_buf_size) = buf_size ;\n" );
 		fprintf( fp_dsc_c , "	if( p_len )\n" );
-		fprintf( fp_dsc_c , "		(*p_len) = buf_size-1 - remain_len ;\n" );
+		fprintf( fp_dsc_c , "		(*p_len) = buf_size-1 - buf_begin_offset - remain_len ;\n" );
 		fprintf( fp_dsc_c , "	\n" );
 		fprintf( fp_dsc_c , "	return 0;\n" );
 		fprintf( fp_dsc_c , "}\n" );
@@ -3745,6 +3747,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "	int	buf_size ;\n" );
 		fprintf( fp_dsc_c , "	int	remain_len ;\n" );
 		fprintf( fp_dsc_c , "	char	*buf = NULL ;\n" );
+		fprintf( fp_dsc_c , "	int	buf_begin_offset ;\n" );
 		fprintf( fp_dsc_c , "	int	len ;\n" );
 		fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
 		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
@@ -3775,7 +3778,8 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "		buf_size = (*p_buf_size) ;\n" );
 		fprintf( fp_dsc_c , "		remain_len = (*p_len) ;\n" );
 		fprintf( fp_dsc_c , "	}\n" );
-		fprintf( fp_dsc_c , "	buf = (*pp_base) + buf_size - remain_len ;\n" );
+		fprintf( fp_dsc_c , "	buf_begin_offset = buf_size-1 - remain_len ;\n" );
+		fprintf( fp_dsc_c , "	buf = (*pp_base) + buf_begin_offset ;\n" );
 		fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
 		nret = GenerateCCode_c_DSCSERIALIZE_JSON_DUP_COMPACT( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
 		if( nret )
@@ -3784,7 +3788,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "	if( p_buf_size )\n" );
 		fprintf( fp_dsc_c , "		(*p_buf_size) = buf_size ;\n" );
 		fprintf( fp_dsc_c , "	if( p_len )\n" );
-		fprintf( fp_dsc_c , "		(*p_len) = buf_size-1 - remain_len ;\n" );
+		fprintf( fp_dsc_c , "		(*p_len) = buf_size-1 - buf_begin_offset - remain_len ;\n" );
 		fprintf( fp_dsc_c , "	\n" );
 		fprintf( fp_dsc_c , "	return 0;\n" );
 		fprintf( fp_dsc_c , "}\n" );

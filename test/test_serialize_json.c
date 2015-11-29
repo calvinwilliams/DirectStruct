@@ -9,10 +9,8 @@
 int test_serialize_json()
 {
 	BankJsonTransaction	trans ;
-#if 0
 	char			buf[ 1416 + 1 ] ;
 	char			*p = NULL ;
-#endif
 	int			len ;
 	char			*base = NULL ;
 	int			buf_size ;
@@ -57,7 +55,6 @@ int test_serialize_json()
 	
 	DSCLOG_BankJsonTransaction( & trans );
 	
-#if 0
 	memset( buf , 0x00 , sizeof(buf) );
 	len = sizeof(buf)-1 ;
 	nret = DSCSERIALIZE_JSON_BankJsonTransaction( & trans , "GBK" , buf , & len ) ;
@@ -132,7 +129,6 @@ int test_serialize_json()
 	}
 	
 	DSCLOG_BankJsonTransaction( & trans );
-#endif
 
 	base = NULL ;
 	nret = DSCSERIALIZE_JSON_DUP_BankJsonTransaction( & trans , "GBK" , & base , NULL , NULL ) ;
@@ -167,6 +163,7 @@ int test_serialize_json()
 	printf( "DUP base[%d][%d][%.*s]\n" , buf_size , len , len , base );
 	
 	memset( base , 0x00 , buf_size );
+	base[0] = ' ' ;
 	len = buf_size-1 - 1 ;
 	nret = DSCSERIALIZE_JSON_DUP_COMPACT_BankJsonTransaction( & trans , "GBK" , & base , & buf_size , & len ) ;
 	if( nret )
