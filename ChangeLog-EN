@@ -1,3 +1,7 @@
+ver 1.5.0	2015-11-29	calvin
+		* Some adjustion in generate codes
+		* Add json dup funcation by alloc memory internally
+
 ver 1.4.5	2015-05-22	calvin
 		* Fixed a bug on multi-loop too
 

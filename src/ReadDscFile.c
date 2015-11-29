@@ -135,7 +135,6 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 				break;
 				
 			case 2 :
-				
 				if( STRCMP( filebuffer , == , "}" ) )
 				{
 					if( pstruct->array_size == 0 )

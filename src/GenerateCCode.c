@@ -2061,6 +2061,489 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( struct CommandParameter *p
 	return 0;
 }
 
+#define DUP_CHECK	\
+			"if(len<0||remain_len<len)" \
+			"{" \
+				"char *tmp=NULL;" \
+				"int buf_offset=buf-(*pp_base);" \
+				"int new_buf_size;" \
+				"if(buf_size<1024*1024*1024)" \
+					"new_buf_size=buf_size*2;" \
+				"else " \
+					"new_buf_size+=buf_size+10*1024*1024;" \
+				"tmp=realloc(*pp_base,new_buf_size);" \
+				"if(tmp==NULL)" \
+					"return -2;" \
+				"else " \
+					"buf=(*pp_base)+buf_offset,(*pp_base)=tmp,remain_len+=new_buf_size-buf_size,buf_size=new_buf_size;" \
+			"}" \
+			"else " \
+			"{" \
+				"break;" \
+			"}" \
+
+static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_c , char *up_pathname )
+{
+	struct StructInfo	*pstruct = NULL ;
+	char			pathname[ 1024 + 1 ] ;
+	struct FieldInfo	*pfield = NULL ;
+	char			tabs[ DSC_MAXDEPTH ] ;
+	int			nret = 0 ;
+	
+	memset( tabs , '\t' , DSC_MAXDEPTH );
+	
+	if( depth == 0 )
+	{
+		fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s{\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth,tabs );
+	}
+	
+	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
+	{
+		if( depth > 0 )
+		{
+			fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s\\\"%s\\\" : \\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth,tabs , pstruct->struct_name );
+		}
+		
+		if( pstruct->array_size > 0 )
+		{
+			fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s[\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth,tabs );
+		}
+		
+		if( pstruct->array_size > 0 )
+		{
+			fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	for( index[%d] = 0 ; index[%d]<%s_%s_count ; index[%d]++ )\n" , depth , depth , up_pathname , pstruct->struct_name , depth );
+			fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{\n" );
+		}
+		
+		if( depth > 0 )
+		{
+			if( pstruct->field_list && pstruct->field_list->field_name[0] == '_' )
+				;
+			else
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s{\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth,tabs );
+		}
+		
+		if( depth == 0 )
+		{
+			strcpy( pathname  , up_pathname );
+		}
+		else
+		{
+			if( pstruct->array_size == 0 )
+			{
+				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s." , up_pathname , pstruct->struct_name );
+			}
+			else
+			{
+				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s[index[%d]]." , up_pathname , pstruct->struct_name , depth );
+			}
+		}
+		
+		for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+		{
+			if( STRCMP( pfield->field_type , == , "INT" ) )
+			{
+				if( pfield->field_len == 1 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs );
+					if( pfield->field_name[0] != '_' )
+						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\" : \");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%d\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				}
+				else if( pfield->field_len == 2 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs );
+					if( pfield->field_name[0] != '_' )
+						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\" : \");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%hd\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				}
+				else if( pfield->field_len == 4 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs );
+					if( pfield->field_name[0] != '_' )
+						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\" : \");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%d\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				}
+				else if( pfield->field_len == 8 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs );
+					if( pfield->field_name[0] != '_' )
+						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\" : \");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,LONGLONG_FORMAT_SPEC\"\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				}
+			}
+			else if( STRCMP( pfield->field_type , == , "UINT" ) )
+			{
+				if( pfield->field_len == 1 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs );
+					if( pfield->field_name[0] != '_' )
+						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\" : \");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%u\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				}
+				else if( pfield->field_len == 2 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs );
+					if( pfield->field_name[0] != '_' )
+						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\" : \");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%hu\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				}
+				else if( pfield->field_len == 4 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs );
+					if( pfield->field_name[0] != '_' )
+						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\" : \");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%u\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				}
+				else if( pfield->field_len == 8 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs );
+					if( pfield->field_name[0] != '_' )
+						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\" : \");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,LONGLONG_FORMAT_SPEC\"\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				}
+			}
+			else if( STRCMP( pfield->field_type , == , "FLOAT" ) )
+			{
+				if( pfield->field_len == 4 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs );
+					if( pfield->field_name[0] != '_' )
+						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\" : \");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%f\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				}
+				else if( pfield->field_len == 8 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs );
+					if( pfield->field_name[0] != '_' )
+						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\" : \");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%lf\",%s%s);"DUP_CHECK"} remain_len-=len;\n" , pathname,pfield->field_name );
+				}
+			}
+			else if( STRCMP( pfield->field_type , == , "CHAR" ) )
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs );
+				if( pfield->field_name[0] != '_' )
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\" : \");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%c\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+			}
+			else if( STRCMP( pfield->field_type , == , "UCHAR" ) )
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs );
+				if( pfield->field_name[0] != '_' )
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\" : \");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%c\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+			}
+			else if( STRCMP( pfield->field_type , == , "STRING" ) )
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs );
+				if( pfield->field_name[0] != '_' )
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\" : \");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
+				fprintf( fp_dsc_c , "\twhile(1){JSONESCAPE_EXPAND(%s%s,strlen(%s%s),buf,len,remain_len);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
+			}
+			else if( STRCMP( pfield->field_type , == , "BOOL" ) )
+			{
+				if( pfield->field_len == 1 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs );
+					if( pfield->field_name[0] != '_' )
+						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\" : \");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){if(%s%s==DSCTRUE)len=SNPRINTF(buf,remain_len,\"true\");else len=SNPRINTF(buf,remain_len,\"false\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				}
+			}
+			
+			if( pfield->next_field || pstruct->sub_struct_list )
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\" ,\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
+			}
+			else
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
+			}
+		}
+		
+		if( pstruct->sub_struct_list )
+		{
+			nret = GenerateCCode_c_DSCSERIALIZE_JSON_DUP( pcp , depth+1 , pstruct->sub_struct_list , fp_dsc_c , pathname ) ;
+			if( nret )
+				return nret;
+		}
+		
+		if( pstruct->array_size > 0 )
+		{
+			if( pstruct->field_list && pstruct->field_list->field_name[0] == '_' )
+			{
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\tif((%s_%s_count==0)?(index[%d]<%d-1):(index[%d]<%s_%s_count-1))\n" , up_pathname , pstruct->struct_name , depth , pstruct->array_size , depth , up_pathname , pstruct->struct_name );
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\t{ while(1){len=SNPRINTF(buf,remain_len,\"%.*s ,\\n\");"DUP_CHECK"} buf+=len; remain_len-=len; }\n" , depth,tabs );
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\telse\n" );
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\t{ while(1){len=SNPRINTF(buf,remain_len,\"%.*s\\n\");"DUP_CHECK"} buf+=len; remain_len-=len; }\n" , depth,tabs );
+			}
+			else
+			{
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\tif((%s_%s_count==0)?(index[%d]<%d-1):(index[%d]<%s_%s_count-1))\n" , up_pathname , pstruct->struct_name , depth , pstruct->array_size , depth , up_pathname , pstruct->struct_name );
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\t{ while(1){len=SNPRINTF(buf,remain_len,\"%.*s} ,\\n\");"DUP_CHECK"} buf+=len; remain_len-=len; }\n" , depth,tabs );
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\telse\n" );
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\t{ while(1){len=SNPRINTF(buf,remain_len,\"%.*s}\\n\");"DUP_CHECK"} buf+=len; remain_len-=len; }\n" , depth,tabs );
+			}
+		}
+		else
+		{
+			if( pstruct->next_struct )
+			{
+				if( pstruct->field_list && pstruct->field_list->field_name[0] == '_' )
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s ,\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth,tabs );
+				else
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s} ,\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth,tabs );
+			}
+			else
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s}\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth,tabs );
+			}
+		}
+		
+		if( pstruct->array_size > 0 )
+		{
+			if( depth > 0 )
+			{
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	}\n" );
+			}
+			
+			if( pstruct->next_struct )
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s] ,\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth,tabs );
+			}
+			else
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s]\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth,tabs );
+			}
+		}
+	}
+	
+	return 0;
+}
+
+static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP_COMPACT( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_c , char *up_pathname )
+{
+	struct StructInfo	*pstruct = NULL ;
+	char			pathname[ 1024 + 1 ] ;
+	struct FieldInfo	*pfield = NULL ;
+	int			nret = 0 ;
+	
+	if( depth == 0 )
+	{
+		fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"{\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
+	}
+	
+	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
+	{
+		if( depth > 0 )
+		{
+			fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\":\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pstruct->struct_name );
+		}
+		
+		if( pstruct->array_size > 0 )
+		{
+			fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"[\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
+		}
+		
+		if( pstruct->array_size > 0 )
+		{
+			fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	for( index[%d] = 0 ; index[%d]<%s_%s_count ; index[%d]++ )\n" , depth , depth , up_pathname , pstruct->struct_name , depth );
+			fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{\n" );
+		}
+		
+		if( depth > 0 )
+		{
+			if( pstruct->field_list && pstruct->field_list->field_name[0] == '_' )
+				;
+			else
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"{\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
+		}
+		
+		if( depth == 0 )
+		{
+			strcpy( pathname  , up_pathname );
+		}
+		else
+		{
+			if( pstruct->array_size == 0 )
+			{
+				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s." , up_pathname , pstruct->struct_name );
+			}
+			else
+			{
+				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s[index[%d]]." , up_pathname , pstruct->struct_name , depth );
+			}
+		}
+		
+		for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+		{
+			if( STRCMP( pfield->field_type , == , "INT" ) )
+			{
+				if( pfield->field_len == 1 )
+				{
+					if( pfield->field_name[0] != '_' )
+						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\":\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%d\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				}
+				else if( pfield->field_len == 2 )
+				{
+					if( pfield->field_name[0] != '_' )
+						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\":\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%hd\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				}
+				else if( pfield->field_len == 4 )
+				{
+					if( pfield->field_name[0] != '_' )
+						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\":\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%d\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				}
+				else if( pfield->field_len == 8 )
+				{
+					if( pfield->field_name[0] != '_' )
+						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\":\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,LONGLONG_FORMAT_SPEC\"\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				}
+			}
+			else if( STRCMP( pfield->field_type , == , "UINT" ) )
+			{
+				if( pfield->field_len == 1 )
+				{
+					if( pfield->field_name[0] != '_' )
+						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\":\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%u\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				}
+				else if( pfield->field_len == 2 )
+				{
+					if( pfield->field_name[0] != '_' )
+						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\":\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%hu\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				}
+				else if( pfield->field_len == 4 )
+				{
+					if( pfield->field_name[0] != '_' )
+						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\":\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%u\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				}
+				else if( pfield->field_len == 8 )
+				{
+					if( pfield->field_name[0] != '_' )
+						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\":\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,LONGLONG_FORMAT_SPEC\"\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				}
+			}
+			else if( STRCMP( pfield->field_type , == , "FLOAT" ) )
+			{
+				if( pfield->field_len == 4 )
+				{
+					if( pfield->field_name[0] != '_' )
+						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\":\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%f\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				}
+				else if( pfield->field_len == 8 )
+				{
+					if( pfield->field_name[0] != '_' )
+						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\":\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%lf\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				}
+			}
+			else if( STRCMP( pfield->field_type , == , "CHAR" ) )
+			{
+				if( pfield->field_name[0] != '_' )
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\":\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%c\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+			}
+			else if( STRCMP( pfield->field_type , == , "UCHAR" ) )
+			{
+				if( pfield->field_name[0] != '_' )
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\":\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%c\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+			}
+			else if( STRCMP( pfield->field_type , == , "STRING" ) )
+			{
+				if( pfield->field_name[0] != '_' )
+						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\":\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
+				fprintf( fp_dsc_c , "\twhile(1){JSONESCAPE_EXPAND(%s%s,strlen(%s%s),buf,len,remain_len);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
+			}
+			else if( STRCMP( pfield->field_type , == , "BOOL" ) )
+			{
+				if( pfield->field_len == 1 )
+				{
+					if( pfield->field_name[0] != '_' )
+						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\":\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){if(%s%s==DSCTRUE)len=SNPRINTF(buf,remain_len,\"true\");else len=SNPRINTF(buf,remain_len,\"false\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				}
+			}
+			
+			if( pfield->next_field || pstruct->sub_struct_list )
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\",\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
+			}
+			else
+			{
+				/* fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" ); */
+			}
+		}
+		
+		if( pstruct->sub_struct_list )
+		{
+			nret = GenerateCCode_c_DSCSERIALIZE_JSON_DUP_COMPACT( pcp , depth+1 , pstruct->sub_struct_list , fp_dsc_c , pathname ) ;
+			if( nret )
+				return nret;
+		}
+		
+		if( pstruct->array_size > 0 )
+		{
+			if( pstruct->field_list && pstruct->field_list->field_name[0] == '_' )
+			{
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\tif((%s_%s_count==0)?(index[%d]<%d-1):(index[%d]<%s_%s_count-1))\n" , up_pathname , pstruct->struct_name , depth , pstruct->array_size , depth , up_pathname , pstruct->struct_name );
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\t{ while(1){len=SNPRINTF(buf,remain_len,\",\");"DUP_CHECK"} buf+=len; remain_len-=len; }\n" );
+			}
+			else
+			{
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\tif((%s_%s_count==0)?(index[%d]<%d-1):(index[%d]<%s_%s_count-1))\n" , up_pathname , pstruct->struct_name , depth , pstruct->array_size , depth , up_pathname , pstruct->struct_name );
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\t{ while(1){len=SNPRINTF(buf,remain_len,\"},\");"DUP_CHECK"} buf+=len; remain_len-=len; }\n" );
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\telse\n" );
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\t{ while(1){len=SNPRINTF(buf,remain_len,\"}\");"DUP_CHECK"} buf+=len; remain_len-=len; }\n" );
+			}
+		}
+		else
+		{
+			if( pstruct->next_struct )
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"},\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
+			}
+			else
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"}\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
+			}
+		}
+		
+		if( pstruct->array_size > 0 )
+		{
+			if( depth > 0 )
+			{
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "}\n" );
+			}
+			
+			if( pstruct->next_struct )
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"],\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
+			}
+			else
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"]\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
+			}
+		}
+	}
+	
+	return 0;
+}
+
 static int GenerateCCode_c_DSCDESERIALIZE_JSON_ENTERNODE( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_c , char *up_pathname , char *up_jsonpathname )
 {
 	struct StructInfo	*pstruct = NULL ;
@@ -2908,6 +3391,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 	{
 		fprintf( fp_dsc_h , "\n" );
 		fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_JSON_%s( %s *pst , char *encoding , char *buf , int *p_len );\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
+		fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_JSON_DUP_%s( %s *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len );\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
 		fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCDESERIALIZE_JSON_%s( char *encoding , char *buf , int *p_len , %s *pst );\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
 	}	
 	
@@ -2915,6 +3399,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 	{
 		fprintf( fp_dsc_h , "\n" );
 		fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_JSON_COMPACT_%s( %s *pst , char *encoding , char *buf , int *p_len );\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
+		fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_JSON_DUP_COMPACT_%s( %s *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len );\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
 		fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCDESERIALIZE_JSON_COMPACT_%s( char *encoding , char *buf , int *p_len , %s *pst );\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
 	}	
 	
@@ -3057,7 +3542,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		if( nret )
 			return nret;
 		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	if( p_len ) (*p_len) = (*p_len) - remain_len ;\n" );
+		fprintf( fp_dsc_c , "	(*p_len) = (*p_len) - remain_len ;\n" );
 		fprintf( fp_dsc_c , "	\n" );
 		fprintf( fp_dsc_c , "	return 0;\n" );
 		fprintf( fp_dsc_c , "}\n" );
@@ -3080,7 +3565,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		if( nret )
 			return nret;
 		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	if( p_len ) (*p_len) = (*p_len) - remain_len ;\n" );
+		fprintf( fp_dsc_c , "	(*p_len) = (*p_len) - remain_len ;\n" );
 		fprintf( fp_dsc_c , "	\n" );
 		fprintf( fp_dsc_c , "	return 0;\n" );
 		fprintf( fp_dsc_c , "}\n" );
@@ -3175,12 +3660,59 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
 		fprintf( fp_dsc_c , "	remain_len = (*p_len) ;\n" );
 		fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
-		/* SNPRINTF( jsonpathname , sizeof(jsonpathname)-1 , "pst->%s." , pstruct->next_struct->struct_name ); */
 		nret = GenerateCCode_c_DSCSERIALIZE_JSON( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
 		if( nret )
 			return nret;
 		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	if( p_len ) (*p_len) = (*p_len) - remain_len ;\n" );
+		fprintf( fp_dsc_c , "	(*p_len) = (*p_len) - remain_len ;\n" );
+		fprintf( fp_dsc_c , "	\n" );
+		fprintf( fp_dsc_c , "	return 0;\n" );
+		fprintf( fp_dsc_c , "}\n" );
+		fprintf( fp_dsc_c , "\n" );
+		fprintf( fp_dsc_c , "int DSCSERIALIZE_JSON_DUP_%s( %s *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
+		fprintf( fp_dsc_c , "{\n" );
+		fprintf( fp_dsc_c , "	int	buf_size ;\n" );
+		fprintf( fp_dsc_c , "	int	remain_len ;\n" );
+		fprintf( fp_dsc_c , "	char	*buf = NULL ;\n" );
+		fprintf( fp_dsc_c , "	int	len ;\n" );
+		fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
+		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+		fprintf( fp_dsc_c , "	if( (*pp_base) == NULL )\n" );
+		fprintf( fp_dsc_c , "	{\n" );
+		fprintf( fp_dsc_c , "		char	*tmp = NULL ;\n" );
+		fprintf( fp_dsc_c , "		if( p_buf_size && (*p_buf_size) > 0 )\n" );
+		fprintf( fp_dsc_c , "		{\n" );
+		fprintf( fp_dsc_c , "			buf_size = (*p_buf_size) ;\n" );
+		fprintf( fp_dsc_c , "			tmp = (char*)malloc( buf_size ) ;\n" );
+		fprintf( fp_dsc_c , "			if( tmp == NULL )\n" );
+		fprintf( fp_dsc_c , "				return -2;\n" );
+		fprintf( fp_dsc_c , "			(*pp_base) = tmp ;\n" );
+		fprintf( fp_dsc_c , "			remain_len = buf_size - 1 ;\n" );
+		fprintf( fp_dsc_c , "		}\n" );
+		fprintf( fp_dsc_c , "		else\n" );
+		fprintf( fp_dsc_c , "		{\n" );
+		fprintf( fp_dsc_c , "			buf_size = 1024 ;\n" );
+		fprintf( fp_dsc_c , "			tmp = (char*)malloc( buf_size ) ;\n" );
+		fprintf( fp_dsc_c , "			if( tmp == NULL )\n" );
+		fprintf( fp_dsc_c , "				return -2;\n" );
+		fprintf( fp_dsc_c , "			(*pp_base) = tmp ;\n" );
+		fprintf( fp_dsc_c , "			remain_len = buf_size - 1 ;\n" );
+		fprintf( fp_dsc_c , "		}\n" );
+		fprintf( fp_dsc_c , "	}\n" );
+		fprintf( fp_dsc_c , "	else\n" );
+		fprintf( fp_dsc_c , "	{\n" );
+		fprintf( fp_dsc_c , "		remain_len = (*p_len) ;\n" );
+		fprintf( fp_dsc_c , "	}\n" );
+		fprintf( fp_dsc_c , "	buf = (*pp_base) + buf_size-1 - remain_len ;\n" );
+		fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
+		nret = GenerateCCode_c_DSCSERIALIZE_JSON_DUP( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
+		if( nret )
+			return nret;
+		fprintf( fp_dsc_c , "	\n" );
+		fprintf( fp_dsc_c , "	if( p_buf_size )\n" );
+		fprintf( fp_dsc_c , "		(*p_buf_size) = buf_size ;\n" );
+		fprintf( fp_dsc_c , "	if( p_len )\n" );
+		fprintf( fp_dsc_c , "		(*p_len) = buf_size-1 - remain_len ;\n" );
 		fprintf( fp_dsc_c , "	\n" );
 		fprintf( fp_dsc_c , "	return 0;\n" );
 		fprintf( fp_dsc_c , "}\n" );
@@ -3198,12 +3730,59 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
 		fprintf( fp_dsc_c , "	remain_len = (*p_len) ;\n" );
 		fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
-		/* SNPRINTF( jsonpathname , sizeof(jsonpathname)-1 , "pst->%s." , pstruct->next_struct->struct_name ); */
 		nret = GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
 		if( nret )
 			return nret;
 		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	if( p_len ) (*p_len) = (*p_len) - remain_len ;\n" );
+		fprintf( fp_dsc_c , "	(*p_len) = (*p_len) - remain_len ;\n" );
+		fprintf( fp_dsc_c , "	\n" );
+		fprintf( fp_dsc_c , "	return 0;\n" );
+		fprintf( fp_dsc_c , "}\n" );
+		fprintf( fp_dsc_c , "\n" );
+		fprintf( fp_dsc_c , "int DSCSERIALIZE_JSON_DUP_COMPACT_%s( %s *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
+		fprintf( fp_dsc_c , "{\n" );
+		fprintf( fp_dsc_c , "	int	buf_size ;\n" );
+		fprintf( fp_dsc_c , "	int	remain_len ;\n" );
+		fprintf( fp_dsc_c , "	char	*buf = NULL ;\n" );
+		fprintf( fp_dsc_c , "	int	len ;\n" );
+		fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
+		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+		fprintf( fp_dsc_c , "	if( (*pp_base) == NULL )\n" );
+		fprintf( fp_dsc_c , "	{\n" );
+		fprintf( fp_dsc_c , "		char	*tmp = NULL ;\n" );
+		fprintf( fp_dsc_c , "		if( p_buf_size && (*p_buf_size) > 0 )\n" );
+		fprintf( fp_dsc_c , "		{\n" );
+		fprintf( fp_dsc_c , "			buf_size = (*p_buf_size) ;\n" );
+		fprintf( fp_dsc_c , "			tmp = (char*)malloc( buf_size ) ;\n" );
+		fprintf( fp_dsc_c , "			if( tmp == NULL )\n" );
+		fprintf( fp_dsc_c , "				return -2;\n" );
+		fprintf( fp_dsc_c , "			(*pp_base) = tmp ;\n" );
+		fprintf( fp_dsc_c , "			remain_len = buf_size - 1 ;\n" );
+		fprintf( fp_dsc_c , "		}\n" );
+		fprintf( fp_dsc_c , "		else\n" );
+		fprintf( fp_dsc_c , "		{\n" );
+		fprintf( fp_dsc_c , "			buf_size = 1024 ;\n" );
+		fprintf( fp_dsc_c , "			tmp = (char*)malloc( buf_size ) ;\n" );
+		fprintf( fp_dsc_c , "			if( tmp == NULL )\n" );
+		fprintf( fp_dsc_c , "				return -2;\n" );
+		fprintf( fp_dsc_c , "			(*pp_base) = tmp ;\n" );
+		fprintf( fp_dsc_c , "			remain_len = buf_size - 1 ;\n" );
+		fprintf( fp_dsc_c , "		}\n" );
+		fprintf( fp_dsc_c , "	}\n" );
+		fprintf( fp_dsc_c , "	else\n" );
+		fprintf( fp_dsc_c , "	{\n" );
+		fprintf( fp_dsc_c , "		remain_len = (*p_len) ;\n" );
+		fprintf( fp_dsc_c , "	}\n" );
+		fprintf( fp_dsc_c , "	buf = (*pp_base) + buf_size - remain_len ;\n" );
+		fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
+		nret = GenerateCCode_c_DSCSERIALIZE_JSON_DUP_COMPACT( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
+		if( nret )
+			return nret;
+		fprintf( fp_dsc_c , "	\n" );
+		fprintf( fp_dsc_c , "	if( p_buf_size )\n" );
+		fprintf( fp_dsc_c , "		(*p_buf_size) = buf_size ;\n" );
+		fprintf( fp_dsc_c , "	if( p_len )\n" );
+		fprintf( fp_dsc_c , "		(*p_len) = buf_size-1 - remain_len ;\n" );
 		fprintf( fp_dsc_c , "	\n" );
 		fprintf( fp_dsc_c , "	return 0;\n" );
 		fprintf( fp_dsc_c , "}\n" );
