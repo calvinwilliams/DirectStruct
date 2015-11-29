@@ -2068,14 +2068,14 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( struct CommandParameter *p
 				"int buf_offset=buf-(*pp_base);" \
 				"int new_buf_size;" \
 				"if(buf_size<1024*1024*1024)" \
-					"new_buf_size=buf_size*2;" \
+					"new_buf_size=buf_size+1;" \
 				"else " \
 					"new_buf_size=buf_size+10*1024*1024;" \
 				"tmp=(char*)realloc(*pp_base,new_buf_size);" \
 				"if(tmp==NULL)" \
 					"return -2;" \
 				"else " \
-					"(*pp_base)=tmp,buf=(*pp_base)+buf_offset,remain_len+=new_buf_size-buf_size,buf_size=new_buf_size;" \
+					"(*pp_base)=tmp,buf=(*pp_base)+buf_offset,remain_len+=new_buf_size-buf_size,buf_size=new_buf_size,memset(buf,0x00,remain_len+1);" \
 			"}" \
 			"else " \
 			"{" \
@@ -3687,6 +3687,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "			tmp = (char*)malloc( buf_size ) ;\n" );
 		fprintf( fp_dsc_c , "			if( tmp == NULL )\n" );
 		fprintf( fp_dsc_c , "				return -2;\n" );
+		fprintf( fp_dsc_c , "			memset( tmp , 0x00 , buf_size );\n" );
 		fprintf( fp_dsc_c , "			(*pp_base) = tmp ;\n" );
 		fprintf( fp_dsc_c , "			remain_len = buf_size - 1 ;\n" );
 		fprintf( fp_dsc_c , "		}\n" );
@@ -3696,6 +3697,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "			tmp = (char*)malloc( buf_size ) ;\n" );
 		fprintf( fp_dsc_c , "			if( tmp == NULL )\n" );
 		fprintf( fp_dsc_c , "				return -2;\n" );
+		fprintf( fp_dsc_c , "			memset( tmp , 0x00 , buf_size );\n" );
 		fprintf( fp_dsc_c , "			(*pp_base) = tmp ;\n" );
 		fprintf( fp_dsc_c , "			remain_len = buf_size - 1 ;\n" );
 		fprintf( fp_dsc_c , "		}\n" );
@@ -3760,6 +3762,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "			tmp = (char*)malloc( buf_size ) ;\n" );
 		fprintf( fp_dsc_c , "			if( tmp == NULL )\n" );
 		fprintf( fp_dsc_c , "				return -2;\n" );
+		fprintf( fp_dsc_c , "			memset( tmp , 0x00 , buf_size );\n" );
 		fprintf( fp_dsc_c , "			(*pp_base) = tmp ;\n" );
 		fprintf( fp_dsc_c , "			remain_len = buf_size - 1 ;\n" );
 		fprintf( fp_dsc_c , "		}\n" );
@@ -3769,6 +3772,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "			tmp = (char*)malloc( buf_size ) ;\n" );
 		fprintf( fp_dsc_c , "			if( tmp == NULL )\n" );
 		fprintf( fp_dsc_c , "				return -2;\n" );
+		fprintf( fp_dsc_c , "			memset( tmp , 0x00 , buf_size );\n" );
 		fprintf( fp_dsc_c , "			(*pp_base) = tmp ;\n" );
 		fprintf( fp_dsc_c , "			remain_len = buf_size - 1 ;\n" );
 		fprintf( fp_dsc_c , "		}\n" );
