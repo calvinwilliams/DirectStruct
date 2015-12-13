@@ -133,17 +133,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 						return struct_len;
 					
 					(*p_offset) += struct_len ;
-					if( pstruct->next_struct == NULL )
-					{
-						pstruct->next_struct = psi_next ;
-					}
-					else
-					{
-						struct StructInfo	*last_struct = NULL ;
-						for( last_struct = pstruct->next_struct ; last_struct->next_struct ; last_struct = last_struct->next_struct )
-							;
-						last_struct->next_struct = psi_next ;
-					}
+					pstruct->next_struct = psi_next ;
 					pstruct->struct_length += struct_len ;
 					
 					continue;
@@ -266,9 +256,9 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 					if( struct_len < 0 )
 						return struct_len;
 					
-					if( pstruct->first_sub_struct == NULL )
+					if( pstruct->sub_struct_list == NULL )
 					{
-						pstruct->first_sub_struct = psi_sub ;
+						pstruct->sub_struct_list = psi_sub ;
 						pstruct->last_sub_struct = psi_sub ;
 					}
 					else
@@ -311,15 +301,15 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 						return -1;
 					}
 					
-					if( pstruct->first_header_line == NULL )
+					if( pstruct->first_line == NULL )
 					{
-						pstruct->first_header_line = line ;
-						pstruct->last_header_line = line ;
+						pstruct->first_line = line ;
+						pstruct->last_line = line ;
 					}
 					else
 					{
-						pstruct->last_header_line->next_line = line ;
-						pstruct->last_header_line = line ;
+						pstruct->last_line->next_line = line ;
+						pstruct->last_line = line ;
 					}
 					
 					continue;
@@ -604,9 +594,9 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 				pstruct->struct_length += pfld->field_len ;
 				pstruct->field_count++;
 				(*p_offset) += pfld->field_len ;
-				if( pstruct->first_field == NULL )
+				if( pstruct->field_list == NULL )
 				{
-					pstruct->first_field = pfld ;
+					pstruct->field_list = pfld ;
 				}
 				else
 				{

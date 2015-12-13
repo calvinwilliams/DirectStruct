@@ -19,7 +19,7 @@ int GenerateSqlCode_sql_create( struct StructInfo *pstruct , FILE *fp_dsc_create
 	fprintf( fp_dsc_create_sql , "\n" );
 	fprintf( fp_dsc_create_sql , "CREATE TABLE %s\n" , pstruct->struct_name );
 	fprintf( fp_dsc_create_sql , "(\n" );
-	for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
+	for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
 	{
 		flag = 1 ;
 		if( STRCMP( pfield->field_type , == , "INT" ) )

@@ -153,8 +153,8 @@ struct StructInfo
 	int			field_count ;
 	int			array_size ;
 	
-	struct HeaderOutput	*first_header_line ;
-	struct HeaderOutput	*last_header_line ;
+	struct HeaderOutput	*first_line ;
+	struct HeaderOutput	*last_line ;
 	struct CreateSqlOutput	*first_create_sql_line ;
 	struct CreateSqlOutput	*last_create_sql_line ;
 	struct DropSqlOutput	*first_drop_sql_line ;
@@ -163,10 +163,10 @@ struct StructInfo
 	struct SqlActionOutput	*last_sqlaction_line ;
 	int			sqlconn ;
 	
-	struct FieldInfo	*first_field ;
+	struct FieldInfo	*field_list ;
 	struct FieldInfo	*last_field ;
 	
-	struct StructInfo	*first_sub_struct ;
+	struct StructInfo	*sub_struct_list ;
 	struct StructInfo	*last_sub_struct ;
 	
 	struct StructInfo	*next_struct ;

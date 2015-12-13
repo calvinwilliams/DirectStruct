@@ -16,8 +16,3 @@ STRUCT	AllTypes
 	STRING	1024	str1024
 	BOOL	1	b1
 }
-
-STRUCT	AllType3
-{
-	INT	4	nnn
-}
