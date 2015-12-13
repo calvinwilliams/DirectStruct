@@ -133,7 +133,17 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 						return struct_len;
 					
 					(*p_offset) += struct_len ;
-					pstruct->next_struct = psi_next ;
+					if( pstruct->next_struct == NULL )
+					{
+						pstruct->next_struct = psi_next ;
+					}
+					else
+					{
+						struct StructInfo	*last_struct = NULL ;
+						for( last_struct = pstruct->next_struct ; last_struct->next_struct ; last_struct = last_struct->next_struct )
+							;
+						last_struct->next_struct = psi_next ;
+					}
 					pstruct->struct_length += struct_len ;
 					
 					continue;
@@ -256,9 +266,9 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 					if( struct_len < 0 )
 						return struct_len;
 					
-					if( pstruct->sub_struct_list == NULL )
+					if( pstruct->first_sub_struct == NULL )
 					{
-						pstruct->sub_struct_list = psi_sub ;
+						pstruct->first_sub_struct = psi_sub ;
 						pstruct->last_sub_struct = psi_sub ;
 					}
 					else
@@ -594,9 +604,9 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 				pstruct->struct_length += pfld->field_len ;
 				pstruct->field_count++;
 				(*p_offset) += pfld->field_len ;
-				if( pstruct->field_list == NULL )
+				if( pstruct->first_field == NULL )
 				{
-					pstruct->field_list = pfld ;
+					pstruct->first_field = pfld ;
 				}
 				else
 				{

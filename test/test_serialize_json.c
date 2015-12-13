@@ -142,7 +142,7 @@ int test_serialize_json()
 		printf( "DSCSERIALIZE_JSON_DUP_BankJsonTransaction ok\n" );
 	}
 	
-	printf( "DUP base[%d][%s]\n" , strlen(base) , base );
+	printf( "DUP base[%d][%s]\n" , (int)strlen(base) , base );
 	
 	free( base );
 	

@@ -15,7 +15,7 @@ static int GenerateECCode_eh_SQL( struct CommandParameter *pcp , struct StructIn
 	
 	fprintf( fp_dsc_ESQL_eh , "\n" );
 	fprintf( fp_dsc_ESQL_eh , "EXEC SQL BEGIN DECLARE SECTION ;\n" );
-	for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+	for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 	{
 		if( STRCMP( pfield->field_type , == , "INT" ) )
 		{
@@ -63,7 +63,7 @@ static int GenerateECCode_eh_SQL( struct CommandParameter *pcp , struct StructIn
 	
 	fprintf( fp_dsc_ESQL_eh , "\n" );
 	fprintf( fp_dsc_ESQL_eh , "#define	TFLIST_%s \\\n" , pstruct->struct_name );
-	for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+	for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 	{
 		fprintf( fp_dsc_ESQL_eh , "	%s" , pfield->field_name );
 		
@@ -79,7 +79,7 @@ static int GenerateECCode_eh_SQL( struct CommandParameter *pcp , struct StructIn
 	
 	fprintf( fp_dsc_ESQL_eh , "\n" );
 	fprintf( fp_dsc_ESQL_eh , "#define	DBVLIST_%s \\\n" , pstruct->struct_name );
-	for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+	for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 	{
 		fprintf( fp_dsc_ESQL_eh , "	:%s_%s" , pstruct->struct_name , pfield->field_name );
 		
@@ -95,7 +95,7 @@ static int GenerateECCode_eh_SQL( struct CommandParameter *pcp , struct StructIn
 	
 	fprintf( fp_dsc_ESQL_eh , "\n" );
 	fprintf( fp_dsc_ESQL_eh , "#define	DBVLLIST_%s \\\n" , pstruct->struct_name );
-	for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+	for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 	{
 		fprintf( fp_dsc_ESQL_eh , "	:%s_%s :%s_%s_id" , pstruct->struct_name , pfield->field_name , pstruct->struct_name , pfield->field_name );
 		
@@ -400,7 +400,7 @@ static int GenerateECCode_ec_SQL_ACTION_UPDATE( struct StructInfo *pstruct , cha
 	if( STRCMP( ptr , == , "*" ) )
 	{
 		fprintf( fp_dsc_ESQL_ec , "		SET	" );
-		for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 		{
 			fprintf( fp_dsc_ESQL_ec , "%s = :%s_%s " , pfield->field_name , pstruct->struct_name , pfield->field_name );
 			if( pfield->next_field )
@@ -846,7 +846,7 @@ static int GenerateECCode_ec_SQL( struct CommandParameter *pcp , struct StructIn
 	
 	fprintf( fp_dsc_ESQL_ec , "\n" );
 	fprintf( fp_dsc_ESQL_ec , "EXEC SQL BEGIN DECLARE SECTION ;\n" );
-	for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+	for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 	{
 		if( STRCMP( pfield->field_type , == , "INT" ) )
 		{
@@ -895,7 +895,7 @@ static int GenerateECCode_ec_SQL( struct CommandParameter *pcp , struct StructIn
 	fprintf( fp_dsc_ESQL_ec , "\n" );
 	fprintf( fp_dsc_ESQL_ec , "void DSCINITV_%s()\n" , pstruct->struct_name );
 	fprintf( fp_dsc_ESQL_ec , "{\n" );
-	for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+	for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 	{
 		if( STRCMP( pfield->field_type , == , "INT" ) )
 		{
@@ -953,7 +953,7 @@ static int GenerateECCode_ec_SQL( struct CommandParameter *pcp , struct StructIn
 	fprintf( fp_dsc_ESQL_ec , "\n" );
 	fprintf( fp_dsc_ESQL_ec , "void DSCVTOS_%s( %s *pst )\n" , pstruct->struct_name , pstruct->struct_name );
 	fprintf( fp_dsc_ESQL_ec , "{\n" );
-	for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+	for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 	{
 		if( STRCMP( pfield->field_type , == , "INT" ) )
 		{
@@ -1003,7 +1003,7 @@ static int GenerateECCode_ec_SQL( struct CommandParameter *pcp , struct StructIn
 	fprintf( fp_dsc_ESQL_ec , "\n" );
 	fprintf( fp_dsc_ESQL_ec , "void DSCSTOV_%s( %s *pst )\n" , pstruct->struct_name , pstruct->struct_name );
 	fprintf( fp_dsc_ESQL_ec , "{\n" );
-	for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+	for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 	{
 		if( STRCMP( pfield->field_type , == , "INT" ) )
 		{
@@ -1057,7 +1057,7 @@ static int GenerateECCode_ec_SQL( struct CommandParameter *pcp , struct StructIn
 	fprintf( fp_dsc_ESQL_ec , "\n" );
 	fprintf( fp_dsc_ESQL_ec , "void DSCTRIM_%s( %s *pst )\n" , pstruct->struct_name , pstruct->struct_name );
 	fprintf( fp_dsc_ESQL_ec , "{\n" );
-	for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+	for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 	{
 		if( STRCMP( pfield->field_type , == , "STRING" ) )
 		{

@@ -8,8 +8,8 @@
  * Licensed under the LGPL v2.1, see the file LICENSE in base directory.
  */
 
-char	__DIRECTSTRUCT_VERSION_1_6_0[] = "1.6.0" ;
-char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_6_0 ;
+char	__DIRECTSTRUCT_VERSION_1_6_1[] = "1.6.1" ;
+char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_6_1 ;
 
 int dsc( struct CommandParameter *pcmdparam )
 {
@@ -32,10 +32,13 @@ int dsc( struct CommandParameter *pcmdparam )
 	offset = 0 ;
 	lineno = 0 ;
 	memset( & si , 0x00 , sizeof(struct StructInfo) );
-	struct_len = ReadDscFile( pcmdparam , 0 , & offset , pcmdparam->pathfilename , 0 , fp_dsc , & lineno , & si ) ;
+	while( !feof(fp_dsc) )
+	{
+		struct_len = ReadDscFile( pcmdparam , 0 , & offset , pcmdparam->pathfilename , 0 , fp_dsc , & lineno , & si ) ;
+		if( struct_len < 0 )
+			return -struct_len;
+	}
 	fclose( fp_dsc );
-	if( struct_len < 0 )
-		return -struct_len;
 	printf( "ok!\n" );
 	
 	if( pcmdparam->output_c_flag == 1 )

@@ -62,7 +62,13 @@ CFLAGS		=	-I. \
 LFLAGS		=	-L. \
 
 ###### 额外宏定义区
-CLEAN_ADDITION	=
+CLEAN_ADDITION	=	test_testable.ecE test_testable.c test_testable.o \
+			IDL_testable.dsc.ESQL.ecE IDL_testable.dsc.ESQL.c IDL_testable.dsc.ESQL.o \
+			test_serialize_json		\
+			test_serialize_json_utf8	\
+			press_deserialize_json		\
+			test_serialize_xml		\
+			test_testable			\
 
 ###### 加载mktpl模板库
 # 最终目标列表
@@ -185,7 +191,4 @@ IDL_testable.dsc.ESQL.o	:	IDL_testable.dsc.ESQL.ec
 
 test_testable	:	IDL_testable.dsc.ESQL.o test_testable.o
 	$(CC) -o $@ IDL_testable.dsc.ESQL.o test_testable.o $(LFLAGS) -L/root/local/postgresql/lib -lecpg
-
-CLEAN_ADDITION	=	test_testable.ecE test_testable.c test_testable.o \
-			IDL_testable.dsc.ESQL.ecE IDL_testable.dsc.ESQL.c IDL_testable.dsc.ESQL.o \
 
