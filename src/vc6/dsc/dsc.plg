@@ -6,7 +6,7 @@
 --------------------Configuration: dsc - Win32 Debug--------------------
 </h3>
 <h3>Command Lines</h3>
-Creating temporary file "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP10B.tmp" with contents
+Creating temporary file "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP9B.tmp" with contents
 [
 /nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/dsc.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
 "D:\Work\gitfiles\oschina.net\DirectStruct\src\dsc.c"
@@ -17,8 +17,8 @@ Creating temporary file "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP10B.tmp" with conte
 "D:\Work\gitfiles\oschina.net\DirectStruct\src\ReadDscFile.c"
 "D:\Work\gitfiles\oschina.net\DirectStruct\src\util.c"
 ]
-Creating command line "cl.exe @C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP10B.tmp" 
-Creating temporary file "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP10C.tmp" with contents
+Creating command line "cl.exe @C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP9B.tmp" 
+Creating temporary file "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP9C.tmp" with contents
 [
 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/dsc.pdb" /debug /machine:I386 /out:"Debug/dsc.exe" /pdbtype:sept 
 .\Debug\dsc.obj
@@ -29,7 +29,7 @@ kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32
 .\Debug\ReadDscFile.obj
 .\Debug\util.obj
 ]
-Creating command line "link.exe @C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP10C.tmp"
+Creating command line "link.exe @C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP9C.tmp"
 <h3>Output Window</h3>
 Compiling...
 dsc.c
@@ -40,14 +40,14 @@ main.c
 ReadDscFile.c
 util.c
 Linking...
-Creating temporary file "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP10E.bat" with contents
+Creating temporary file "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP9E.bat" with contents
 [
 @echo off
 mkdir "%ProgramFiles%\DirectStruct"
 mkdir "%ProgramFiles%\DirectStruct\bin"
 copy Debug\dsc.exe "%ProgramFiles%\DirectStruct\bin\" /Y
 ]
-Creating command line "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP10E.bat"
+Creating command line "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP9E.bat"
 
 子目录或文件 C:\Program Files\DirectStruct 已经存在。
 子目录或文件 C:\Program Files\DirectStruct\bin 已经存在。
