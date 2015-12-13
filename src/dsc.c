@@ -32,10 +32,13 @@ int dsc( struct CommandParameter *pcmdparam )
 	offset = 0 ;
 	lineno = 0 ;
 	memset( & si , 0x00 , sizeof(struct StructInfo) );
-	struct_len = ReadDscFile( pcmdparam , 0 , & offset , pcmdparam->pathfilename , 0 , fp_dsc , & lineno , & si ) ;
+	while( !feof(fp_dsc) )
+	{
+		struct_len = ReadDscFile( pcmdparam , 0 , & offset , pcmdparam->pathfilename , 0 , fp_dsc , & lineno , & si ) ;
+		if( struct_len < 0 )
+			return -struct_len;
+	}
 	fclose( fp_dsc );
-	if( struct_len < 0 )
-		return -struct_len;
 	printf( "ok!\n" );
 	
 	if( pcmdparam->output_c_flag == 1 )

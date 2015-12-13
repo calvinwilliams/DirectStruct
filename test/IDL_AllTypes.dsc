@@ -16,3 +16,9 @@ STRUCT	AllTypes
 	STRING	1024	str1024
 	BOOL	1	b1
 }
+
+STRUCT	AllTypeee
+{
+	INT	4	nnn
+}
+

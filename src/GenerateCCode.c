@@ -8,7 +8,7 @@
  * Licensed under the LGPL v2.1, see the file LICENSE in base directory.
  */
 
-int GenerateCCode_h( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_h )
+int GenerateCCode_h( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_h )
 {
 	struct StructInfo	*pstruct = NULL ;
 	struct HeaderOutput	*line = NULL ;
@@ -16,7 +16,7 @@ int GenerateCCode_h( struct CommandParameter *pcp , int depth , struct StructInf
 	
 	int			nret = 0 ;
 	
-	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
+	for( pstruct = first_struct ; pstruct ; pstruct = pstruct->next_struct )
 	{
 		for( line = pstruct->first_line ; line ; line = line->next_line )
 		{
@@ -34,7 +34,7 @@ int GenerateCCode_h( struct CommandParameter *pcp , int depth , struct StructInf
 		}
 		fprintabs( fp_dsc_h , depth ); fprintf( fp_dsc_h , "{\n" );
 		
-		for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 		{
 			if( STRCMP( pfield->field_type , == , "INT" ) )
 			{
@@ -106,9 +106,9 @@ int GenerateCCode_h( struct CommandParameter *pcp , int depth , struct StructInf
 			}
 		}
 		
-		if( pstruct->sub_struct_list )
+		if( pstruct->first_sub_struct )
 		{
-			nret = GenerateCCode_h( pcp , depth + 1 , pstruct->sub_struct_list , fp_dsc_h ) ;
+			nret = GenerateCCode_h( pcp , depth + 1 , pstruct->first_sub_struct , 0 , fp_dsc_h ) ;
 			if( nret )
 				return nret;
 		}
@@ -130,12 +130,15 @@ int GenerateCCode_h( struct CommandParameter *pcp , int depth , struct StructInf
 				fprintabs( fp_dsc_h , depth ); fprintf( fp_dsc_h , "int	_%s_size ;\n" , pstruct->struct_name );
 			}
 		}
+		
+		if( only_once )
+			break;
 	}
 	
 	return 0;
 }
 
-static int GenerateCCode_c_DSCINIT( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_c , char *up_pathname )
+static int GenerateCCode_c_DSCINIT( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname )
 {
 	struct StructInfo	*pstruct = NULL ;
 	char			pathname[ 1024 + 1 ] ;
@@ -143,7 +146,7 @@ static int GenerateCCode_c_DSCINIT( struct CommandParameter *pcp , int depth , s
 	
 	int			nret = 0 ;
 	
-	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
+	for( pstruct = first_struct ; pstruct ; pstruct = pstruct->next_struct )
 	{
 		if( pstruct->array_size > 0 )
 		{
@@ -167,7 +170,7 @@ static int GenerateCCode_c_DSCINIT( struct CommandParameter *pcp , int depth , s
 			}
 		}
 		
-		for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 		{
 			if( STRCMP( pfield->init_default , == , "" ) )
 				continue;
@@ -242,9 +245,9 @@ static int GenerateCCode_c_DSCINIT( struct CommandParameter *pcp , int depth , s
 			}
 		}
 		
-		if( pstruct->sub_struct_list )
+		if( pstruct->first_sub_struct )
 		{
-			nret = GenerateCCode_c_DSCINIT( pcp , depth + 1 , pstruct->sub_struct_list , fp_dsc_c , pathname ) ;
+			nret = GenerateCCode_c_DSCINIT( pcp , depth + 1 , pstruct->first_sub_struct , 0 , fp_dsc_c , pathname ) ;
 			if( nret )
 				return nret;
 		}
@@ -254,12 +257,15 @@ static int GenerateCCode_c_DSCINIT( struct CommandParameter *pcp , int depth , s
 			fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	}\n" );
 			fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s_%s_size = %d ;\n" , up_pathname,pstruct->struct_name , pstruct->array_size );
 		}
+		
+		if( only_once )
+			break;
 	}
 	
 	return 0;
 }
 
-static int GenerateCCode_c_DSCNETORDER( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_c , char *up_pathname )
+static int GenerateCCode_c_DSCNETORDER( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname )
 {
 	struct StructInfo	*pstruct = NULL ;
 	char			pathname[ 1024 + 1 ] ;
@@ -267,7 +273,7 @@ static int GenerateCCode_c_DSCNETORDER( struct CommandParameter *pcp , int depth
 	
 	int			nret = 0 ;
 	
-	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
+	for( pstruct = first_struct ; pstruct ; pstruct = pstruct->next_struct )
 	{
 		if( pstruct->array_size > 0 )
 		{
@@ -291,7 +297,7 @@ static int GenerateCCode_c_DSCNETORDER( struct CommandParameter *pcp , int depth
 			}
 		}
 		
-		for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 		{
 			if( STRCMP( pfield->field_type , == , "INT" ) )
 			{
@@ -336,9 +342,9 @@ static int GenerateCCode_c_DSCNETORDER( struct CommandParameter *pcp , int depth
 			}
 		}
 		
-		if( pstruct->sub_struct_list )
+		if( pstruct->first_sub_struct )
 		{
-			nret = GenerateCCode_c_DSCNETORDER( pcp , depth + 1 , pstruct->sub_struct_list , fp_dsc_c , pathname ) ;
+			nret = GenerateCCode_c_DSCNETORDER( pcp , depth + 1 , pstruct->first_sub_struct , 0 , fp_dsc_c , pathname ) ;
 			if( nret )
 				return nret;
 		}
@@ -347,12 +353,15 @@ static int GenerateCCode_c_DSCNETORDER( struct CommandParameter *pcp , int depth
 		{
 			fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	}\n" );
 		}
+		
+		if( only_once )
+			break;
 	}
 	
 	return 0;
 }
 
-static int GenerateCCode_c_DSCHOSTORDER( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_c , char *up_pathname )
+static int GenerateCCode_c_DSCHOSTORDER( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname )
 {
 	struct StructInfo	*pstruct = NULL ;
 	char			pathname[ 1024 + 1 ] ;
@@ -360,7 +369,7 @@ static int GenerateCCode_c_DSCHOSTORDER( struct CommandParameter *pcp , int dept
 	
 	int			nret = 0 ;
 	
-	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
+	for( pstruct = first_struct ; pstruct ; pstruct = pstruct->next_struct )
 	{
 		if( pstruct->array_size > 0 )
 		{
@@ -384,7 +393,7 @@ static int GenerateCCode_c_DSCHOSTORDER( struct CommandParameter *pcp , int dept
 			}
 		}
 		
-		for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 		{
 			if( STRCMP( pfield->field_type , == , "INT" ) )
 			{
@@ -429,9 +438,9 @@ static int GenerateCCode_c_DSCHOSTORDER( struct CommandParameter *pcp , int dept
 			}
 		}
 		
-		if( pstruct->sub_struct_list )
+		if( pstruct->first_sub_struct )
 		{
-			nret = GenerateCCode_c_DSCHOSTORDER( pcp , depth + 1 , pstruct->sub_struct_list , fp_dsc_c , pathname ) ;
+			nret = GenerateCCode_c_DSCHOSTORDER( pcp , depth + 1 , pstruct->first_sub_struct , 0 , fp_dsc_c , pathname ) ;
 			if( nret )
 				return nret;
 		}
@@ -440,12 +449,15 @@ static int GenerateCCode_c_DSCHOSTORDER( struct CommandParameter *pcp , int dept
 		{
 			fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	}\n" );
 		}
+		
+		if( only_once )
+			break;
 	}
 	
 	return 0;
 }
 
-static int GenerateCCode_c_DSCSERIALIZE_COMPACT( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_c , char *up_pathname )
+static int GenerateCCode_c_DSCSERIALIZE_COMPACT( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname )
 {
 	struct StructInfo	*pstruct = NULL ;
 	char			pathname[ 1024 + 1 ] ;
@@ -453,7 +465,7 @@ static int GenerateCCode_c_DSCSERIALIZE_COMPACT( struct CommandParameter *pcp , 
 	
 	int			nret = 0 ;
 	
-	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
+	for( pstruct = first_struct ; pstruct ; pstruct = pstruct->next_struct )
 	{
 		if( pstruct->array_size > 0 )
 		{
@@ -477,7 +489,7 @@ static int GenerateCCode_c_DSCSERIALIZE_COMPACT( struct CommandParameter *pcp , 
 			}
 		}
 		
-		for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 		{
 			if( STRCMP( pfield->field_type , == , "INT" ) )
 			{
@@ -583,9 +595,9 @@ static int GenerateCCode_c_DSCSERIALIZE_COMPACT( struct CommandParameter *pcp , 
 			}
 		}
 		
-		if( pstruct->sub_struct_list )
+		if( pstruct->first_sub_struct )
 		{
-			nret = GenerateCCode_c_DSCSERIALIZE_COMPACT( pcp , depth + 1 , pstruct->sub_struct_list , fp_dsc_c , pathname ) ;
+			nret = GenerateCCode_c_DSCSERIALIZE_COMPACT( pcp , depth + 1 , pstruct->first_sub_struct , 0 , fp_dsc_c , pathname ) ;
 			if( nret )
 				return nret;
 		}
@@ -594,12 +606,15 @@ static int GenerateCCode_c_DSCSERIALIZE_COMPACT( struct CommandParameter *pcp , 
 		{
 			fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	}\n" );
 		}
+		
+		if( only_once )
+			break;
 	}
 	
 	return 0;
 }
 
-static int GenerateCCode_c_DSCDESERIALIZE_COMPACT( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_c , char *up_pathname )
+static int GenerateCCode_c_DSCDESERIALIZE_COMPACT( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname )
 {
 	struct StructInfo	*pstruct = NULL ;
 	char			pathname[ 1024 + 1 ] ;
@@ -607,7 +622,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_COMPACT( struct CommandParameter *pcp 
 	
 	int			nret = 0 ;
 	
-	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
+	for( pstruct = first_struct ; pstruct ; pstruct = pstruct->next_struct )
 	{
 		if( pstruct->array_size > 0 )
 		{
@@ -631,7 +646,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_COMPACT( struct CommandParameter *pcp 
 			}
 		}
 		
-		for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 		{
 			if( STRCMP( pfield->field_type , == , "INT" ) )
 			{
@@ -737,9 +752,9 @@ static int GenerateCCode_c_DSCDESERIALIZE_COMPACT( struct CommandParameter *pcp 
 			}
 		}
 		
-		if( pstruct->sub_struct_list )
+		if( pstruct->first_sub_struct )
 		{
-			nret = GenerateCCode_c_DSCDESERIALIZE_COMPACT( pcp , depth + 1 , pstruct->sub_struct_list , fp_dsc_c , pathname ) ;
+			nret = GenerateCCode_c_DSCDESERIALIZE_COMPACT( pcp , depth + 1 , pstruct->first_sub_struct , 0 , fp_dsc_c , pathname ) ;
 			if( nret )
 				return nret;
 		}
@@ -748,12 +763,15 @@ static int GenerateCCode_c_DSCDESERIALIZE_COMPACT( struct CommandParameter *pcp 
 		{
 			fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	}\n" );
 		}
+		
+		if( only_once )
+			break;
 	}
 	
 	return 0;
 }
 
-static int GenerateCCode_c_DSCSERIALIZE_COMPRESS( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_c , char *up_pathname )
+static int GenerateCCode_c_DSCSERIALIZE_COMPRESS( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname )
 {
 	struct StructInfo	*pstruct = NULL ;
 	char			pathname[ 1024 + 1 ] ;
@@ -761,7 +779,7 @@ static int GenerateCCode_c_DSCSERIALIZE_COMPRESS( struct CommandParameter *pcp ,
 	
 	int			nret = 0 ;
 	
-	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
+	for( pstruct = first_struct ; pstruct ; pstruct = pstruct->next_struct )
 	{
 		if( pstruct->array_size > 0 )
 		{
@@ -785,7 +803,7 @@ static int GenerateCCode_c_DSCSERIALIZE_COMPRESS( struct CommandParameter *pcp ,
 			}
 		}
 		
-		for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 		{
 			if( STRCMP( pfield->field_type , == , "INT" ) )
 			{
@@ -891,9 +909,9 @@ static int GenerateCCode_c_DSCSERIALIZE_COMPRESS( struct CommandParameter *pcp ,
 			}
 		}
 		
-		if( pstruct->sub_struct_list )
+		if( pstruct->first_sub_struct )
 		{
-			nret = GenerateCCode_c_DSCSERIALIZE_COMPRESS( pcp , depth + 1 , pstruct->sub_struct_list , fp_dsc_c , pathname ) ;
+			nret = GenerateCCode_c_DSCSERIALIZE_COMPRESS( pcp , depth + 1 , pstruct->first_sub_struct , 0 , fp_dsc_c , pathname ) ;
 			if( nret )
 				return nret;
 		}
@@ -902,12 +920,15 @@ static int GenerateCCode_c_DSCSERIALIZE_COMPRESS( struct CommandParameter *pcp ,
 		{
 			fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	}\n" );
 		}
+		
+		if( only_once )
+			break;
 	}
 	
 	return 0;
 }
 
-static int GenerateCCode_c_DSCDESERIALIZE_COMPRESS( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_c , char *up_pathname )
+static int GenerateCCode_c_DSCDESERIALIZE_COMPRESS( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname )
 {
 	struct StructInfo	*pstruct = NULL ;
 	char			pathname[ 1024 + 1 ] ;
@@ -915,7 +936,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_COMPRESS( struct CommandParameter *pcp
 	
 	int			nret = 0 ;
 	
-	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
+	for( pstruct = first_struct ; pstruct ; pstruct = pstruct->next_struct )
 	{
 		if( pstruct->array_size > 0 )
 		{
@@ -939,7 +960,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_COMPRESS( struct CommandParameter *pcp
 			}
 		}
 		
-		for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 		{
 			if( STRCMP( pfield->field_type , == , "INT" ) )
 			{
@@ -1045,9 +1066,9 @@ static int GenerateCCode_c_DSCDESERIALIZE_COMPRESS( struct CommandParameter *pcp
 			}
 		}
 		
-		if( pstruct->sub_struct_list )
+		if( pstruct->first_sub_struct )
 		{
-			nret = GenerateCCode_c_DSCDESERIALIZE_COMPRESS( pcp , depth + 1 , pstruct->sub_struct_list , fp_dsc_c , pathname ) ;
+			nret = GenerateCCode_c_DSCDESERIALIZE_COMPRESS( pcp , depth + 1 , pstruct->first_sub_struct , 0 , fp_dsc_c , pathname ) ;
 			if( nret )
 				return nret;
 		}
@@ -1056,12 +1077,15 @@ static int GenerateCCode_c_DSCDESERIALIZE_COMPRESS( struct CommandParameter *pcp
 		{
 			fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	}\n" );
 		}
+		
+		if( only_once )
+			break;
 	}
 	
 	return 0;
 }
 
-static int GenerateCCode_c_DSCSERIALIZE_XML( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_c , char *up_pathname )
+static int GenerateCCode_c_DSCSERIALIZE_XML( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname )
 {
 	struct StructInfo	*pstruct = NULL ;
 	char			pathname[ 1024 + 1 ] ;
@@ -1071,7 +1095,7 @@ static int GenerateCCode_c_DSCSERIALIZE_XML( struct CommandParameter *pcp , int 
 	
 	memset( tabs , '\t' , DSC_MAXDEPTH );
 	
-	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
+	for( pstruct = first_struct ; pstruct ; pstruct = pstruct->next_struct )
 	{
 		if( pstruct->array_size > 0 )
 		{
@@ -1098,7 +1122,7 @@ static int GenerateCCode_c_DSCSERIALIZE_XML( struct CommandParameter *pcp , int 
 		
 		fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s<%s>\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth,tabs , pstruct->struct_name );
 		
-		for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 		{
 			if( STRCMP( pfield->field_type , == , "INT" ) )
 			{
@@ -1198,9 +1222,9 @@ static int GenerateCCode_c_DSCSERIALIZE_XML( struct CommandParameter *pcp , int 
 			}
 		}
 		
-		if( pstruct->sub_struct_list )
+		if( pstruct->first_sub_struct )
 		{
-			nret = GenerateCCode_c_DSCSERIALIZE_XML( pcp , depth + 1 , pstruct->sub_struct_list , fp_dsc_c , pathname ) ;
+			nret = GenerateCCode_c_DSCSERIALIZE_XML( pcp , depth + 1 , pstruct->first_sub_struct , 0 , fp_dsc_c , pathname ) ;
 			if( nret )
 				return nret;
 		}
@@ -1211,19 +1235,22 @@ static int GenerateCCode_c_DSCSERIALIZE_XML( struct CommandParameter *pcp , int 
 		{
 			fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	}\n" );
 		}
+		
+		if( only_once )
+			break;
 	}
 	
 	return 0;
 }
 
-static int GenerateCCode_c_DSCSERIALIZE_XML_COMPACT( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_c , char *up_pathname )
+static int GenerateCCode_c_DSCSERIALIZE_XML_COMPACT( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname )
 {
 	struct StructInfo	*pstruct = NULL ;
 	char			pathname[ 1024 + 1 ] ;
 	struct FieldInfo	*pfield = NULL ;
 	int			nret = 0 ;
 	
-	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
+	for( pstruct = first_struct ; pstruct ; pstruct = pstruct->next_struct )
 	{
 		if( pstruct->array_size > 0 )
 		{
@@ -1250,7 +1277,7 @@ static int GenerateCCode_c_DSCSERIALIZE_XML_COMPACT( struct CommandParameter *pc
 		
 		fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pstruct->struct_name );
 		
-		for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 		{
 			if( STRCMP( pfield->field_type , == , "INT" ) )
 			{
@@ -1350,9 +1377,9 @@ static int GenerateCCode_c_DSCSERIALIZE_XML_COMPACT( struct CommandParameter *pc
 			}
 		}
 		
-		if( pstruct->sub_struct_list )
+		if( pstruct->first_sub_struct )
 		{
-			nret = GenerateCCode_c_DSCSERIALIZE_XML_COMPACT( pcp , depth + 1 , pstruct->sub_struct_list , fp_dsc_c , pathname ) ;
+			nret = GenerateCCode_c_DSCSERIALIZE_XML_COMPACT( pcp , depth + 1 , pstruct->first_sub_struct , 0 , fp_dsc_c , pathname ) ;
 			if( nret )
 				return nret;
 		}
@@ -1363,12 +1390,15 @@ static int GenerateCCode_c_DSCSERIALIZE_XML_COMPACT( struct CommandParameter *pc
 		{
 			fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "}\n" );
 		}
+		
+		if( only_once )
+			break;
 	}
 	
 	return 0;
 }
 
-static int GenerateCCode_c_DSCDESERIALIZE_XML_ENTERNODE( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_c , char *up_pathname , char *up_xmlpathname )
+static int GenerateCCode_c_DSCDESERIALIZE_XML_ENTERNODE( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname , char *up_xmlpathname )
 {
 	struct StructInfo	*pstruct = NULL ;
 	char			pathname[ 1024 + 1 ] ;
@@ -1376,7 +1406,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_XML_ENTERNODE( struct CommandParameter
 	
 	int			nret = 0 ;
 	
-	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
+	for( pstruct = first_struct ; pstruct ; pstruct = pstruct->next_struct )
 	{
 		if( pstruct->array_size > 0 )
 		{
@@ -1402,18 +1432,21 @@ static int GenerateCCode_c_DSCDESERIALIZE_XML_ENTERNODE( struct CommandParameter
 			SNPRINTF( xmlpathname , sizeof(xmlpathname)-1 , "%s/%s" , up_xmlpathname , pstruct->struct_name );
 		}
 		
-		if( pstruct->sub_struct_list )
+		if( pstruct->first_sub_struct )
 		{
-			nret = GenerateCCode_c_DSCDESERIALIZE_XML_ENTERNODE( pcp , depth + 1 , pstruct->sub_struct_list , fp_dsc_c , pathname , xmlpathname ) ;
+			nret = GenerateCCode_c_DSCDESERIALIZE_XML_ENTERNODE( pcp , depth + 1 , pstruct->first_sub_struct , 0 , fp_dsc_c , pathname , xmlpathname ) ;
 			if( nret )
 				return nret;
 		}
+		
+		if( only_once )
+			break;
 	}
 	
 	return 0;
 }
 
-static int GenerateCCode_c_DSCDESERIALIZE_XML_LEAVENODE( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_c , char *up_pathname , char *up_xmlpathname )
+static int GenerateCCode_c_DSCDESERIALIZE_XML_LEAVENODE( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname , char *up_xmlpathname )
 {
 	struct StructInfo	*pstruct = NULL ;
 	char			pathname[ 1024 + 1 ] ;
@@ -1421,7 +1454,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_XML_LEAVENODE( struct CommandParameter
 	
 	int			nret = 0 ;
 	
-	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
+	for( pstruct = first_struct ; pstruct ; pstruct = pstruct->next_struct )
 	{
 		if( pstruct->array_size > 0 )
 		{
@@ -1447,18 +1480,21 @@ static int GenerateCCode_c_DSCDESERIALIZE_XML_LEAVENODE( struct CommandParameter
 			SNPRINTF( xmlpathname , sizeof(xmlpathname)-1 , "%s/%s" , up_xmlpathname , pstruct->struct_name );
 		}
 		
-		if( pstruct->sub_struct_list )
+		if( pstruct->first_sub_struct )
 		{
-			nret = GenerateCCode_c_DSCDESERIALIZE_XML_LEAVENODE( pcp , depth + 1 , pstruct->sub_struct_list , fp_dsc_c , pathname , xmlpathname ) ;
+			nret = GenerateCCode_c_DSCDESERIALIZE_XML_LEAVENODE( pcp , depth + 1 , pstruct->first_sub_struct , 0 , fp_dsc_c , pathname , xmlpathname ) ;
 			if( nret )
 				return nret;
 		}
+		
+		if( only_once )
+			break;
 	}
 	
 	return 0;
 }
 
-static int GenerateCCode_c_DSCDESERIALIZE_XML_LEAF( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_c , char *up_pathname , char *up_xmlpathname )
+static int GenerateCCode_c_DSCDESERIALIZE_XML_LEAF( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname , char *up_xmlpathname )
 {
 	struct StructInfo	*pstruct = NULL ;
 	char			pathname[ 1024 + 1 ] ;
@@ -1467,7 +1503,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_XML_LEAF( struct CommandParameter *pcp
 	
 	int			nret = 0 ;
 	
-	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
+	for( pstruct = first_struct ; pstruct ; pstruct = pstruct->next_struct )
 	{
 		if( depth == 0 )
 		{
@@ -1487,7 +1523,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_XML_LEAF( struct CommandParameter *pcp
 			SNPRINTF( xmlpathname , sizeof(xmlpathname)-1 , "%s/%s" , up_xmlpathname , pstruct->struct_name );
 		}
 		
-		for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 		{
 			if( STRCMP( pfield->field_type , == , "INT" ) )
 			{
@@ -1594,18 +1630,21 @@ static int GenerateCCode_c_DSCDESERIALIZE_XML_LEAF( struct CommandParameter *pcp
 			}
 		}
 		
-		if( pstruct->sub_struct_list )
+		if( pstruct->first_sub_struct )
 		{
-			nret = GenerateCCode_c_DSCDESERIALIZE_XML_LEAF( pcp , depth + 1 , pstruct->sub_struct_list , fp_dsc_c , pathname , xmlpathname ) ;
+			nret = GenerateCCode_c_DSCDESERIALIZE_XML_LEAF( pcp , depth + 1 , pstruct->first_sub_struct , 0 , fp_dsc_c , pathname , xmlpathname ) ;
 			if( nret )
 				return nret;
 		}
+		
+		if( only_once )
+			break;
 	}
 	
 	return 0;
 }
 
-static int GenerateCCode_c_DSCSERIALIZE_JSON( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_c , char *up_pathname )
+static int GenerateCCode_c_DSCSERIALIZE_JSON( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname )
 {
 	struct StructInfo	*pstruct = NULL ;
 	char			pathname[ 1024 + 1 ] ;
@@ -1620,7 +1659,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON( struct CommandParameter *pcp , int
 		fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s{\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth,tabs );
 	}
 	
-	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
+	for( pstruct = first_struct ; pstruct ; pstruct = pstruct->next_struct )
 	{
 		if( depth > 0 )
 		{
@@ -1640,7 +1679,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON( struct CommandParameter *pcp , int
 		
 		if( depth > 0 )
 		{
-			if( pstruct->field_list && pstruct->field_list->field_name[0] == '_' )
+			if( pstruct->first_field && pstruct->first_field->field_name[0] == '_' )
 				;
 			else
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s{\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth,tabs );
@@ -1662,7 +1701,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON( struct CommandParameter *pcp , int
 			}
 		}
 		
-		for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 		{
 			if( STRCMP( pfield->field_type , == , "INT" ) )
 			{
@@ -1777,7 +1816,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON( struct CommandParameter *pcp , int
 				}
 			}
 			
-			if( pfield->next_field || pstruct->sub_struct_list )
+			if( pfield->next_field || pstruct->first_sub_struct )
 			{
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\" ,\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" );
 			}
@@ -1787,16 +1826,16 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON( struct CommandParameter *pcp , int
 			}
 		}
 		
-		if( pstruct->sub_struct_list )
+		if( pstruct->first_sub_struct )
 		{
-			nret = GenerateCCode_c_DSCSERIALIZE_JSON( pcp , depth+1 , pstruct->sub_struct_list , fp_dsc_c , pathname ) ;
+			nret = GenerateCCode_c_DSCSERIALIZE_JSON( pcp , depth+1 , pstruct->first_sub_struct , 0 , fp_dsc_c , pathname ) ;
 			if( nret )
 				return nret;
 		}
 		
 		if( pstruct->array_size > 0 )
 		{
-			if( pstruct->field_list && pstruct->field_list->field_name[0] == '_' )
+			if( pstruct->first_field && pstruct->first_field->field_name[0] == '_' )
 			{
 				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\tif((%s_%s_count==0)?(index[%d]<%d-1):(index[%d]<%s_%s_count-1))\n" , up_pathname , pstruct->struct_name , depth , pstruct->array_size , depth , up_pathname , pstruct->struct_name );
 				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\t{ len=SNPRINTF(buf,remain_len,\"%.*s ,\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len; }\n" , depth,tabs );
@@ -1815,7 +1854,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON( struct CommandParameter *pcp , int
 		{
 			if( pstruct->next_struct )
 			{
-				if( pstruct->field_list && pstruct->field_list->field_name[0] == '_' )
+				if( pstruct->first_field && pstruct->first_field->field_name[0] == '_' )
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s ,\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth,tabs );
 				else
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s} ,\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth,tabs );
@@ -1842,12 +1881,15 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON( struct CommandParameter *pcp , int
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s]\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth,tabs );
 			}
 		}
+		
+		if( only_once )
+			break;
 	}
 	
 	return 0;
 }
 
-static int GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_c , char *up_pathname )
+static int GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname )
 {
 	struct StructInfo	*pstruct = NULL ;
 	char			pathname[ 1024 + 1 ] ;
@@ -1859,7 +1901,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( struct CommandParameter *p
 		fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"{\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" );
 	}
 	
-	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
+	for( pstruct = first_struct ; pstruct ; pstruct = pstruct->next_struct )
 	{
 		if( depth > 0 )
 		{
@@ -1879,7 +1921,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( struct CommandParameter *p
 		
 		if( depth > 0 )
 		{
-			if( pstruct->field_list && pstruct->field_list->field_name[0] == '_' )
+			if( pstruct->first_field && pstruct->first_field->field_name[0] == '_' )
 				;
 			else
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"{\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" );
@@ -1901,7 +1943,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( struct CommandParameter *p
 			}
 		}
 		
-		for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 		{
 			if( STRCMP( pfield->field_type , == , "INT" ) )
 			{
@@ -2002,7 +2044,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( struct CommandParameter *p
 				}
 			}
 			
-			if( pfield->next_field || pstruct->sub_struct_list )
+			if( pfield->next_field || pstruct->first_sub_struct )
 			{
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\",\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" );
 			}
@@ -2012,16 +2054,16 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( struct CommandParameter *p
 			}
 		}
 		
-		if( pstruct->sub_struct_list )
+		if( pstruct->first_sub_struct )
 		{
-			nret = GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( pcp , depth+1 , pstruct->sub_struct_list , fp_dsc_c , pathname ) ;
+			nret = GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( pcp , depth+1 , pstruct->first_sub_struct , 0 , fp_dsc_c , pathname ) ;
 			if( nret )
 				return nret;
 		}
 		
 		if( pstruct->array_size > 0 )
 		{
-			if( pstruct->field_list && pstruct->field_list->field_name[0] == '_' )
+			if( pstruct->first_field && pstruct->first_field->field_name[0] == '_' )
 			{
 				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\tif((%s_%s_count==0)?(index[%d]<%d-1):(index[%d]<%s_%s_count-1))\n" , up_pathname , pstruct->struct_name , depth , pstruct->array_size , depth , up_pathname , pstruct->struct_name );
 				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\t{ len=SNPRINTF(buf,remain_len,\",\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len; }\n" );
@@ -2062,6 +2104,9 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( struct CommandParameter *p
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"]\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" );
 			}
 		}
+		
+		if( only_once )
+			break;
 	}
 	
 	return 0;
@@ -2088,7 +2133,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( struct CommandParameter *p
 				"break;" \
 			"}" \
 
-static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_c , char *up_pathname )
+static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname )
 {
 	struct StructInfo	*pstruct = NULL ;
 	char			pathname[ 1024 + 1 ] ;
@@ -2103,7 +2148,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP( struct CommandParameter *pcp ,
 		fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s{\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth,tabs );
 	}
 	
-	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
+	for( pstruct = first_struct ; pstruct ; pstruct = pstruct->next_struct )
 	{
 		if( depth > 0 )
 		{
@@ -2123,7 +2168,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP( struct CommandParameter *pcp ,
 		
 		if( depth > 0 )
 		{
-			if( pstruct->field_list && pstruct->field_list->field_name[0] == '_' )
+			if( pstruct->first_field && pstruct->first_field->field_name[0] == '_' )
 				;
 			else
 				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s{\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth,tabs );
@@ -2145,7 +2190,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP( struct CommandParameter *pcp ,
 			}
 		}
 		
-		for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 		{
 			if( STRCMP( pfield->field_type , == , "INT" ) )
 			{
@@ -2260,7 +2305,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP( struct CommandParameter *pcp ,
 				}
 			}
 			
-			if( pfield->next_field || pstruct->sub_struct_list )
+			if( pfield->next_field || pstruct->first_sub_struct )
 			{
 				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\" ,\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
 			}
@@ -2270,16 +2315,16 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP( struct CommandParameter *pcp ,
 			}
 		}
 		
-		if( pstruct->sub_struct_list )
+		if( pstruct->first_sub_struct )
 		{
-			nret = GenerateCCode_c_DSCSERIALIZE_JSON_DUP( pcp , depth+1 , pstruct->sub_struct_list , fp_dsc_c , pathname ) ;
+			nret = GenerateCCode_c_DSCSERIALIZE_JSON_DUP( pcp , depth+1 , pstruct->first_sub_struct , 0 , fp_dsc_c , pathname ) ;
 			if( nret )
 				return nret;
 		}
 		
 		if( pstruct->array_size > 0 )
 		{
-			if( pstruct->field_list && pstruct->field_list->field_name[0] == '_' )
+			if( pstruct->first_field && pstruct->first_field->field_name[0] == '_' )
 			{
 				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\tif((%s_%s_count==0)?(index[%d]<%d-1):(index[%d]<%s_%s_count-1))\n" , up_pathname , pstruct->struct_name , depth , pstruct->array_size , depth , up_pathname , pstruct->struct_name );
 				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\t{ while(1){len=SNPRINTF(buf,remain_len,\"%.*s ,\\n\");"DUP_CHECK"} buf+=len; remain_len-=len; }\n" , depth,tabs );
@@ -2298,7 +2343,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP( struct CommandParameter *pcp ,
 		{
 			if( pstruct->next_struct )
 			{
-				if( pstruct->field_list && pstruct->field_list->field_name[0] == '_' )
+				if( pstruct->first_field && pstruct->first_field->field_name[0] == '_' )
 					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s ,\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth,tabs );
 				else
 					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s} ,\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth,tabs );
@@ -2325,12 +2370,15 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP( struct CommandParameter *pcp ,
 				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s]\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth,tabs );
 			}
 		}
+		
+		if( only_once )
+			break;
 	}
 	
 	return 0;
 }
 
-static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP_COMPACT( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_c , char *up_pathname )
+static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP_COMPACT( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname )
 {
 	struct StructInfo	*pstruct = NULL ;
 	char			pathname[ 1024 + 1 ] ;
@@ -2342,7 +2390,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP_COMPACT( struct CommandParamete
 		fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"{\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
 	}
 	
-	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
+	for( pstruct = first_struct ; pstruct ; pstruct = pstruct->next_struct )
 	{
 		if( depth > 0 )
 		{
@@ -2362,7 +2410,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP_COMPACT( struct CommandParamete
 		
 		if( depth > 0 )
 		{
-			if( pstruct->field_list && pstruct->field_list->field_name[0] == '_' )
+			if( pstruct->first_field && pstruct->first_field->field_name[0] == '_' )
 				;
 			else
 				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"{\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
@@ -2384,7 +2432,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP_COMPACT( struct CommandParamete
 			}
 		}
 		
-		for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 		{
 			if( STRCMP( pfield->field_type , == , "INT" ) )
 			{
@@ -2485,7 +2533,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP_COMPACT( struct CommandParamete
 				}
 			}
 			
-			if( pfield->next_field || pstruct->sub_struct_list )
+			if( pfield->next_field || pstruct->first_sub_struct )
 			{
 				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\",\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
 			}
@@ -2495,16 +2543,16 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP_COMPACT( struct CommandParamete
 			}
 		}
 		
-		if( pstruct->sub_struct_list )
+		if( pstruct->first_sub_struct )
 		{
-			nret = GenerateCCode_c_DSCSERIALIZE_JSON_DUP_COMPACT( pcp , depth+1 , pstruct->sub_struct_list , fp_dsc_c , pathname ) ;
+			nret = GenerateCCode_c_DSCSERIALIZE_JSON_DUP_COMPACT( pcp , depth+1 , pstruct->first_sub_struct , 0 , fp_dsc_c , pathname ) ;
 			if( nret )
 				return nret;
 		}
 		
 		if( pstruct->array_size > 0 )
 		{
-			if( pstruct->field_list && pstruct->field_list->field_name[0] == '_' )
+			if( pstruct->first_field && pstruct->first_field->field_name[0] == '_' )
 			{
 				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\tif((%s_%s_count==0)?(index[%d]<%d-1):(index[%d]<%s_%s_count-1))\n" , up_pathname , pstruct->struct_name , depth , pstruct->array_size , depth , up_pathname , pstruct->struct_name );
 				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "\t{ while(1){len=SNPRINTF(buf,remain_len,\",\");"DUP_CHECK"} buf+=len; remain_len-=len; }\n" );
@@ -2545,12 +2593,15 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP_COMPACT( struct CommandParamete
 				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"]\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
 			}
 		}
+		
+		if( only_once )
+			break;
 	}
 	
 	return 0;
 }
 
-static int GenerateCCode_c_DSCDESERIALIZE_JSON_ENTERNODE( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_c , char *up_pathname , char *up_jsonpathname )
+static int GenerateCCode_c_DSCDESERIALIZE_JSON_ENTERNODE( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname , char *up_jsonpathname )
 {
 	struct StructInfo	*pstruct = NULL ;
 	char			pathname[ 1024 + 1 ] ;
@@ -2558,11 +2609,11 @@ static int GenerateCCode_c_DSCDESERIALIZE_JSON_ENTERNODE( struct CommandParamete
 	
 	int			nret = 0 ;
 	
-	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
+	for( pstruct = first_struct ; pstruct ; pstruct = pstruct->next_struct )
 	{
 		if( pstruct->array_size > 0 )
 		{
-			if( pstruct->field_list && pstruct->field_list->field_name[0] == '_' )
+			if( pstruct->first_field && pstruct->first_field->field_name[0] == '_' )
 			{
 				;
 			}
@@ -2591,18 +2642,21 @@ static int GenerateCCode_c_DSCDESERIALIZE_JSON_ENTERNODE( struct CommandParamete
 			SNPRINTF( jsonpathname , sizeof(jsonpathname)-1 , "%s/%s" , up_jsonpathname , pstruct->struct_name );
 		}
 		
-		if( pstruct->sub_struct_list )
+		if( pstruct->first_sub_struct )
 		{
-			nret = GenerateCCode_c_DSCDESERIALIZE_JSON_ENTERNODE( pcp , depth + 1 , pstruct->sub_struct_list , fp_dsc_c , pathname , jsonpathname ) ;
+			nret = GenerateCCode_c_DSCDESERIALIZE_JSON_ENTERNODE( pcp , depth + 1 , pstruct->first_sub_struct , 0 , fp_dsc_c , pathname , jsonpathname ) ;
 			if( nret )
 				return nret;
 		}
+		
+		if( only_once )
+			break;
 	}
 	
 	return 0;
 }
 
-static int GenerateCCode_c_DSCDESERIALIZE_JSON_LEAVENODE( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_c , char *up_pathname , char *up_jsonpathname )
+static int GenerateCCode_c_DSCDESERIALIZE_JSON_LEAVENODE( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname , char *up_jsonpathname )
 {
 	struct StructInfo	*pstruct = NULL ;
 	char			pathname[ 1024 + 1 ] ;
@@ -2610,11 +2664,11 @@ static int GenerateCCode_c_DSCDESERIALIZE_JSON_LEAVENODE( struct CommandParamete
 	
 	int			nret = 0 ;
 	
-	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
+	for( pstruct = first_struct ; pstruct ; pstruct = pstruct->next_struct )
 	{
 		if( pstruct->array_size > 0 )
 		{
-			if( pstruct->field_list && pstruct->field_list->field_name[0] == '_' )
+			if( pstruct->first_field && pstruct->first_field->field_name[0] == '_' )
 			{
 				;
 			}
@@ -2643,18 +2697,21 @@ static int GenerateCCode_c_DSCDESERIALIZE_JSON_LEAVENODE( struct CommandParamete
 			SNPRINTF( jsonpathname , sizeof(jsonpathname)-1 , "%s/%s" , up_jsonpathname , pstruct->struct_name );
 		}
 		
-		if( pstruct->sub_struct_list )
+		if( pstruct->first_sub_struct )
 		{
-			nret = GenerateCCode_c_DSCDESERIALIZE_JSON_LEAVENODE( pcp , depth + 1 , pstruct->sub_struct_list , fp_dsc_c , pathname , jsonpathname ) ;
+			nret = GenerateCCode_c_DSCDESERIALIZE_JSON_LEAVENODE( pcp , depth + 1 , pstruct->first_sub_struct , 0 , fp_dsc_c , pathname , jsonpathname ) ;
 			if( nret )
 				return nret;
 		}
+		
+		if( only_once )
+			break;
 	}
 	
 	return 0;
 }
 
-static int GenerateCCode_c_DSCDESERIALIZE_JSON_LEAF( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_c , char *up_pathname , char *up_jsonpathname )
+static int GenerateCCode_c_DSCDESERIALIZE_JSON_LEAF( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname , char *up_jsonpathname )
 {
 	struct StructInfo	*pstruct = NULL ;
 	char			pathname[ 1024 + 1 ] ;
@@ -2665,7 +2722,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_JSON_LEAF( struct CommandParameter *pc
 	
 	int			nret = 0 ;
 	
-	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
+	for( pstruct = first_struct ; pstruct ; pstruct = pstruct->next_struct )
 	{
 		if( depth == 0 )
 		{
@@ -2684,7 +2741,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_JSON_LEAF( struct CommandParameter *pc
 			}
 			SNPRINTF( jsonpathname , sizeof(jsonpathname)-1 , "%s/%s" , up_jsonpathname , pstruct->struct_name );
 		}
-		for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 		{
 			if( pfield->field_name[0] == '_' )
 			{
@@ -2802,18 +2859,21 @@ static int GenerateCCode_c_DSCDESERIALIZE_JSON_LEAF( struct CommandParameter *pc
 			}
 		}
 		
-		if( pstruct->sub_struct_list )
+		if( pstruct->first_sub_struct )
 		{
-			nret = GenerateCCode_c_DSCDESERIALIZE_JSON_LEAF( pcp , depth + 1 , pstruct->sub_struct_list , fp_dsc_c , pathname , jsonpathname ) ;
+			nret = GenerateCCode_c_DSCDESERIALIZE_JSON_LEAF( pcp , depth + 1 , pstruct->first_sub_struct , 0 , fp_dsc_c , pathname , jsonpathname ) ;
 			if( nret )
 				return nret;
 		}
+		
+		if( only_once )
+			break;
 	}
 	
 	return 0;
 }
 
-static int GenerateCCode_LOG_c( struct CommandParameter *pcp , int depth , struct StructInfo *grandfather_pmsginfo , struct StructInfo *first_pmsginfo , FILE *fp_dsc_LOG_c , char *LOG_up_pathname , char *up_pathname )
+static int GenerateCCode_LOG_c( struct CommandParameter *pcp , int depth , struct StructInfo *grandfather_pmsginfo , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_LOG_c , char *LOG_up_pathname , char *up_pathname )
 {
 	struct StructInfo	*pstruct = NULL ;
 	char			LOG_pathname[ 1024 + 1 ] ;
@@ -2822,7 +2882,7 @@ static int GenerateCCode_LOG_c( struct CommandParameter *pcp , int depth , struc
 	
 	int			nret = 0 ;
 	
-	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
+	for( pstruct = first_struct ; pstruct ; pstruct = pstruct->next_struct )
 	{
 		if( pstruct->array_size > 0 )
 		{
@@ -2850,7 +2910,7 @@ static int GenerateCCode_LOG_c( struct CommandParameter *pcp , int depth , struc
 			}
 		}
 		
-		for( pfield = pstruct->field_list ; pfield ; pfield = pfield->next_field )
+		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 		{
 			if( STRCMP( pfield->field_type , == , "INT" ) )
 			{
@@ -2922,9 +2982,9 @@ static int GenerateCCode_LOG_c( struct CommandParameter *pcp , int depth , struc
 			}
 		}
 		
-		if( pstruct->sub_struct_list )
+		if( pstruct->first_sub_struct )
 		{
-			nret = GenerateCCode_LOG_c( pcp , depth + 1 , grandfather_pmsginfo , pstruct->sub_struct_list , fp_dsc_LOG_c , LOG_pathname , pathname ) ;
+			nret = GenerateCCode_LOG_c( pcp , depth + 1 , grandfather_pmsginfo , pstruct->first_sub_struct , 0 , fp_dsc_LOG_c , LOG_pathname , pathname ) ;
 			if( nret )
 				return nret;
 		}
@@ -2933,6 +2993,9 @@ static int GenerateCCode_LOG_c( struct CommandParameter *pcp , int depth , struc
 		{
 			fprintabs( fp_dsc_LOG_c , depth ); fprintf( fp_dsc_LOG_c , "	}\n" );
 		}
+		
+		if( only_once )
+			break;
 	}
 	
 	return 0;
@@ -2940,8 +3003,11 @@ static int GenerateCCode_LOG_c( struct CommandParameter *pcp , int depth , struc
 
 int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , FILE *fp_dsc_h , FILE *fp_dsc_c , FILE *fp_dsc_LOG_c )
 {
-	char		LOG_pathname[ 64 + 1 ] ;
-	int		nret = 0 ;
+	char			LOG_pathname[ 64 + 1 ] ;
+	
+	struct StructInfo	*next_struct = NULL ;
+	
+	int			nret = 0 ;
 	
 	/* Generate *.dsc.h */
 	fprintf( fp_dsc_h , "/* It had generated by DirectStruct v%s */\n" , __DIRECTSTRUCT_VERSION );
@@ -3027,13 +3093,6 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 	fprintf( fp_dsc_h , "#define NATOB(_base_,_len_,_result_)	{if(memcmp(_base_,\"true\",4)==0)_result_=DSCTRUE;else _result_=DSCFALSE;}\n" );
 	fprintf( fp_dsc_h , "#endif\n" );
 	
-	nret = GenerateCCode_h( pcp , 0 , pstruct->next_struct , fp_dsc_h ) ;
-	if( nret )
-		return nret;
-	
-	fprintf( fp_dsc_h , "\n" );
-	fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCINIT_%s( %s *pst );\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-	
 	if( pcp->output_c_order_flag == 1 )
 	{
 		fprintf( fp_dsc_h , "\n" );
@@ -3051,18 +3110,6 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_h , "#define __HTONLF(_double_)		if(__BYTE_ORDER==__LITTLE_ENDIAN){union{ulonglong ull;double d;}_ull_d_; _ull_d_.d=_double_; __HTONLL(_ull_d_.ull); _double_=_ull_d_.d; }\n" );
 		fprintf( fp_dsc_h , "#define __NTOHLF(_double_)		if(__BYTE_ORDER==__LITTLE_ENDIAN){union{ulonglong ull;double d;}_ull_d_; _ull_d_.d=_double_; __NTOHLL(_ull_d_.ull); _double_=_ull_d_.d; }\n" );
 		fprintf( fp_dsc_h , "#endif\n" );
-		fprintf( fp_dsc_h , "\n" );
-		fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCNETORDER_%s( %s *pst );\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCHOSTORDER_%s( %s *pst );\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-	}
-	
-	if( pcp->output_c_compact_flag == 1 )
-	{
-		fprintf( fp_dsc_h , "\n" );
-		fprintf( fp_dsc_h , "#define DSCSERIALIZE_COMPACT_BUFSIZE_%s	%d\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_length );
-		fprintf( fp_dsc_h , "\n" );
-		fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_COMPACT_%s( %s *pst , char *buf , int *p_len );\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCDESERIALIZE_COMPACT_%s( char *buf , int *p_len , %s *pst );\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
 	}
 	
 	if( pcp->output_c_compress_flag == 1 )
@@ -3366,48 +3413,78 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_h , "		_bufoffset_+=8; _buf_+=8;					\\\n" );
 		fprintf( fp_dsc_h , "	}\n" );
 		fprintf( fp_dsc_h , "#endif\n" );
-		fprintf( fp_dsc_h , "\n" );
-		fprintf( fp_dsc_h , "#define DSCSERIALIZE_COMPRESS_BUFSIZE_%s	%d\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_length + pstruct->next_struct->field_count );
-		fprintf( fp_dsc_h , "\n" );
-		fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_COMPRESS_%s( %s *pst , char *buf , int *p_len );\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCDESERIALIZE_COMPRESS_%s( char *buf , int *p_len , %s *pst );\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
 	}
 	
-	if( pcp->output_c_xml_flag == 1 )
+	for( next_struct = pstruct->next_struct ; next_struct ; next_struct = next_struct->next_struct )
 	{
+		nret = GenerateCCode_h( pcp , 0 , next_struct , 1 , fp_dsc_h ) ;
+		if( nret )
+			return nret;
+		
 		fprintf( fp_dsc_h , "\n" );
-		fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_XML_%s( %s *pst , char *encoding , char *buf , int *p_len );\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCDESERIALIZE_XML_%s( char *encoding , char *buf , int *p_len , %s *pst );\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-	}	
+		fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCINIT_%s( %s *pst );\n" , next_struct->struct_name , next_struct->struct_name );
+		
+		if( pcp->output_c_order_flag == 1 )
+		{
+			fprintf( fp_dsc_h , "\n" );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCNETORDER_%s( %s *pst );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCHOSTORDER_%s( %s *pst );\n" , next_struct->struct_name , next_struct->struct_name );
+		}
 	
-	if( pcp->output_c_xml_compact_flag == 1 )
-	{
-		fprintf( fp_dsc_h , "\n" );
-		fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_XML_COMPACT_%s( %s *pst , char *encoding , char *buf , int *p_len );\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCDESERIALIZE_XML_COMPACT_%s( char *encoding , char *buf , int *p_len , %s *pst );\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-	}	
-	
-	if( pcp->output_c_json_flag == 1 || pcp->output_c_json_compact_flag == 1 )
-	{
-		fprintf( fp_dsc_h , "\n" );
-		fprintf( fp_dsc_h , "#include \"fasterjson.h\"\n" );
+		if( pcp->output_c_compact_flag == 1 )
+		{
+			fprintf( fp_dsc_h , "\n" );
+			fprintf( fp_dsc_h , "#define DSCSERIALIZE_COMPACT_BUFSIZE_%s	%d\n" , next_struct->struct_name , next_struct->struct_length );
+			fprintf( fp_dsc_h , "\n" );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_COMPACT_%s( %s *pst , char *buf , int *p_len );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCDESERIALIZE_COMPACT_%s( char *buf , int *p_len , %s *pst );\n" , next_struct->struct_name , next_struct->struct_name );
+		}
+		
+		if( pcp->output_c_compress_flag == 1 )
+		{
+			fprintf( fp_dsc_h , "\n" );
+			fprintf( fp_dsc_h , "#define DSCSERIALIZE_COMPRESS_BUFSIZE_%s	%d\n" , next_struct->struct_name , next_struct->struct_length + next_struct->field_count );
+			fprintf( fp_dsc_h , "\n" );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_COMPRESS_%s( %s *pst , char *buf , int *p_len );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCDESERIALIZE_COMPRESS_%s( char *buf , int *p_len , %s *pst );\n" , next_struct->struct_name , next_struct->struct_name );
+		}
+		
+		if( pcp->output_c_xml_flag == 1 )
+		{
+			fprintf( fp_dsc_h , "\n" );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_XML_%s( %s *pst , char *encoding , char *buf , int *p_len );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCDESERIALIZE_XML_%s( char *encoding , char *buf , int *p_len , %s *pst );\n" , next_struct->struct_name , next_struct->struct_name );
+		}	
+		
+		if( pcp->output_c_xml_compact_flag == 1 )
+		{
+			fprintf( fp_dsc_h , "\n" );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_XML_COMPACT_%s( %s *pst , char *encoding , char *buf , int *p_len );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCDESERIALIZE_XML_COMPACT_%s( char *encoding , char *buf , int *p_len , %s *pst );\n" , next_struct->struct_name , next_struct->struct_name );
+		}	
+		
+		if( pcp->output_c_json_flag == 1 || pcp->output_c_json_compact_flag == 1 )
+		{
+			fprintf( fp_dsc_h , "\n" );
+			fprintf( fp_dsc_h , "#include \"fasterjson.h\"\n" );
+		}
+		
+		if( pcp->output_c_json_flag == 1 )
+		{
+			fprintf( fp_dsc_h , "\n" );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_JSON_%s( %s *pst , char *encoding , char *buf , int *p_len );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_JSON_DUP_%s( %s *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCDESERIALIZE_JSON_%s( char *encoding , char *buf , int *p_len , %s *pst );\n" , next_struct->struct_name , next_struct->struct_name );
+		}	
+		
+		if( pcp->output_c_json_compact_flag == 1 )
+		{
+			fprintf( fp_dsc_h , "\n" );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_JSON_COMPACT_%s( %s *pst , char *encoding , char *buf , int *p_len );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_JSON_DUP_COMPACT_%s( %s *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCDESERIALIZE_JSON_COMPACT_%s( char *encoding , char *buf , int *p_len , %s *pst );\n" , next_struct->struct_name , next_struct->struct_name );
+		}	
 	}
-	
-	if( pcp->output_c_json_flag == 1 )
-	{
-		fprintf( fp_dsc_h , "\n" );
-		fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_JSON_%s( %s *pst , char *encoding , char *buf , int *p_len );\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_JSON_DUP_%s( %s *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len );\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCDESERIALIZE_JSON_%s( char *encoding , char *buf , int *p_len , %s *pst );\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-	}	
-	
-	if( pcp->output_c_json_compact_flag == 1 )
-	{
-		fprintf( fp_dsc_h , "\n" );
-		fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_JSON_COMPACT_%s( %s *pst , char *encoding , char *buf , int *p_len );\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_JSON_DUP_COMPACT_%s( %s *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len );\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCDESERIALIZE_JSON_COMPACT_%s( char *encoding , char *buf , int *p_len , %s *pst );\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-	}	
 	
 	fprintf( fp_dsc_h , "\n" );
 	fprintf( fp_dsc_h , "#endif\n" );
@@ -3416,494 +3493,497 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 	fprintf( fp_dsc_c , "/* It had generated by DirectStruct v%s */\n" , __DIRECTSTRUCT_VERSION );
 	fprintf( fp_dsc_c , "#include \"%s.h\"\n" , pcp->pathfilename );
 	
-	/* Generate DSCINIT_*() */
-	fprintf( fp_dsc_c , "\n" );
-	fprintf( fp_dsc_c , "int DSCINIT_%s( %s *pst )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-	fprintf( fp_dsc_c , "{\n" );
-	fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
-	fprintf( fp_dsc_c , "	memset( pst , 0x00 , sizeof(%s) );\n" , pstruct->next_struct->struct_name );
-	nret = GenerateCCode_c_DSCINIT( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
-	if( nret )
-		return nret;
-	fprintf( fp_dsc_c , "	return 0;\n" );
-	fprintf( fp_dsc_c , "}\n" );
-	
-	if( pcp->output_c_order_flag == 1 )
+	for( next_struct = pstruct->next_struct ; next_struct ; next_struct = next_struct->next_struct )
 	{
-		/* Generate DSCNETORDER_*() */
+		/* Generate DSCINIT_*() */
 		fprintf( fp_dsc_c , "\n" );
-		fprintf( fp_dsc_c , "int DSCNETORDER_%s( %s *pst )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
+		fprintf( fp_dsc_c , "int DSCINIT_%s( %s *pst )\n" , next_struct->struct_name , next_struct->struct_name );
 		fprintf( fp_dsc_c , "{\n" );
 		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
-		nret = GenerateCCode_c_DSCNETORDER( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
+		fprintf( fp_dsc_c , "	memset( pst , 0x00 , sizeof(%s) );\n" , next_struct->struct_name );
+		nret = GenerateCCode_c_DSCINIT( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
 		if( nret )
 			return nret;
 		fprintf( fp_dsc_c , "	return 0;\n" );
 		fprintf( fp_dsc_c , "}\n" );
 		
-		/* Generate DSCHOSTORDER_*() */
-		fprintf( fp_dsc_c , "\n" );
-		fprintf( fp_dsc_c , "int DSCHOSTORDER_%s( %s *pst )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "{\n" );
-		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
-		nret = GenerateCCode_c_DSCHOSTORDER( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
-		if( nret )
-			return nret;
-		fprintf( fp_dsc_c , "	return 0;\n" );
-		fprintf( fp_dsc_c , "}\n" );
-	}
-	
-	if( pcp->output_c_compact_flag == 1 )
-	{
-		/* Generate DSCSERIALIZE_COMPACT_*() */
-		fprintf( fp_dsc_c , "\n" );
-		fprintf( fp_dsc_c , "int DSCSERIALIZE_COMPACT_%s( %s *pst , char *buf , int *p_len )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "{\n" );
-		fprintf( fp_dsc_c , "	char	*ptr = buf ;\n" );
-		fprintf( fp_dsc_c , "	int	len = 0 ;\n" );
-		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
-		fprintf( fp_dsc_c , "	\n" );
-		nret = GenerateCCode_c_DSCSERIALIZE_COMPACT( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
-		if( nret )
-			return nret;
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	if( p_len ) (*p_len) = len ;\n" );
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	return 0;\n" );
-		fprintf( fp_dsc_c , "}\n" );
+		if( pcp->output_c_order_flag == 1 )
+		{
+			/* Generate DSCNETORDER_*() */
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCNETORDER_%s( %s *pst )\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			nret = GenerateCCode_c_DSCNETORDER( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
+			if( nret )
+				return nret;
+			fprintf( fp_dsc_c , "	return 0;\n" );
+			fprintf( fp_dsc_c , "}\n" );
+			
+			/* Generate DSCHOSTORDER_*() */
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCHOSTORDER_%s( %s *pst )\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			nret = GenerateCCode_c_DSCHOSTORDER( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
+			if( nret )
+				return nret;
+			fprintf( fp_dsc_c , "	return 0;\n" );
+			fprintf( fp_dsc_c , "}\n" );
+		}
 		
-		/* Generate DSCDESERIALIZE_COMPACT_*() */
-		fprintf( fp_dsc_c , "\n" );
-		fprintf( fp_dsc_c , "int DSCDESERIALIZE_COMPACT_%s( char *buf , int *p_len , %s *pst )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "{\n" );
-		fprintf( fp_dsc_c , "	char	*ptr = buf ;\n" );
-		fprintf( fp_dsc_c , "	int	len = 0 ;\n" );
-		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
-		fprintf( fp_dsc_c , "	\n" );
-		nret = GenerateCCode_c_DSCDESERIALIZE_COMPACT( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
-		if( nret )
-			return nret;
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	if( p_len ) (*p_len) = len ;\n" );
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	return 0;\n" );
-		fprintf( fp_dsc_c , "}\n" );
-	}
-	
-	if( pcp->output_c_compress_flag == 1 )
-	{
-		/* Generate DSCSERIALIZE_COMPRESS_*() */
-		fprintf( fp_dsc_c , "\n" );
-		fprintf( fp_dsc_c , "int DSCSERIALIZE_COMPRESS_%s( %s *pst , char *buf , int *p_len )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "{\n" );
-		fprintf( fp_dsc_c , "	char	*ptr = buf ;\n" );
-		fprintf( fp_dsc_c , "	int	len = 0 ;\n" );
-		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
-		nret = GenerateCCode_c_DSCSERIALIZE_COMPRESS( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
-		if( nret )
-			return nret;
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	if( p_len ) (*p_len) = len ;\n" );
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	return 0;\n" );
-		fprintf( fp_dsc_c , "}\n" );
+		if( pcp->output_c_compact_flag == 1 )
+		{
+			/* Generate DSCSERIALIZE_COMPACT_*() */
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCSERIALIZE_COMPACT_%s( %s *pst , char *buf , int *p_len )\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	char	*ptr = buf ;\n" );
+			fprintf( fp_dsc_c , "	int	len = 0 ;\n" );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	\n" );
+			nret = GenerateCCode_c_DSCSERIALIZE_COMPACT( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
+			if( nret )
+				return nret;
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	if( p_len ) (*p_len) = len ;\n" );
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	return 0;\n" );
+			fprintf( fp_dsc_c , "}\n" );
+			
+			/* Generate DSCDESERIALIZE_COMPACT_*() */
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCDESERIALIZE_COMPACT_%s( char *buf , int *p_len , %s *pst )\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	char	*ptr = buf ;\n" );
+			fprintf( fp_dsc_c , "	int	len = 0 ;\n" );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	\n" );
+			nret = GenerateCCode_c_DSCDESERIALIZE_COMPACT( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
+			if( nret )
+				return nret;
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	if( p_len ) (*p_len) = len ;\n" );
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	return 0;\n" );
+			fprintf( fp_dsc_c , "}\n" );
+		}
 		
-		/* Generate DSCDESERIALIZE_COMPRESS_*() */
-		fprintf( fp_dsc_c , "\n" );
-		fprintf( fp_dsc_c , "int DSCDESERIALIZE_COMPRESS_%s( char *buf , int *p_len , %s *pst )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "{\n" );
-		fprintf( fp_dsc_c , "	char	*ptr = buf ;\n" );
-		fprintf( fp_dsc_c , "	int	len = 0 ;\n" );
-		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
-		nret = GenerateCCode_c_DSCDESERIALIZE_COMPRESS( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
-		if( nret )
-			return nret;
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	if( p_len ) (*p_len) = len ;\n" );
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	return 0;\n" );
-		fprintf( fp_dsc_c , "}\n" );
-	}
-	
-	if( pcp->output_c_xml_flag == 1 || pcp->output_c_xml_compact_flag == 1 )
-	{
-		fprintf( fp_dsc_c , "\n" );
-		fprintf( fp_dsc_c , "#include \"fasterxml.h\"\n" );
-	}
-	
-	if( pcp->output_c_xml_flag == 1 )
-	{
-		/* Generate DSCSERIALIZE_XML_*() */
-		fprintf( fp_dsc_c , "\n" );
-		fprintf( fp_dsc_c , "int DSCSERIALIZE_XML_%s( %s *pst , char *encoding , char *buf , int *p_len )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "{\n" );
-		fprintf( fp_dsc_c , "	int	remain_len ;\n" );
-		fprintf( fp_dsc_c , "	int	len ;\n" );
-		fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
-		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
-		fprintf( fp_dsc_c , "	remain_len = (*p_len) ;\n" );
-		fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
-		fprintf( fp_dsc_c , "	len=SNPRINTF(buf,remain_len,\"<?xml version=\\\"1.0\\\" encoding=\\\"%%s\\\"?>\\n\",encoding); if(len<0)return -1; buf+=len; remain_len-=len;\n" );
-		nret = GenerateCCode_c_DSCSERIALIZE_XML( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
-		if( nret )
-			return nret;
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	(*p_len) = (*p_len) - remain_len ;\n" );
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	return 0;\n" );
-		fprintf( fp_dsc_c , "}\n" );
-	}
-	
-	if( pcp->output_c_xml_compact_flag == 1 )
-	{
-		/* Generate DSCSERIALIZE_XML_*() */
-		fprintf( fp_dsc_c , "\n" );
-		fprintf( fp_dsc_c , "int DSCSERIALIZE_XML_COMPACT_%s( %s *pst , char *encoding , char *buf , int *p_len )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "{\n" );
-		fprintf( fp_dsc_c , "	int	remain_len ;\n" );
-		fprintf( fp_dsc_c , "	int	len ;\n" );
-		fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
-		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
-		fprintf( fp_dsc_c , "	remain_len = (*p_len) ;\n" );
-		fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
-		fprintf( fp_dsc_c , "	len=SNPRINTF(buf,remain_len,\"<?xml version=\\\"1.0\\\" encoding=\\\"%%s\\\"?>\",encoding); if(len<0)return -1; buf+=len; remain_len-=len;\n" );
-		nret = GenerateCCode_c_DSCSERIALIZE_XML_COMPACT( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
-		if( nret )
-			return nret;
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	(*p_len) = (*p_len) - remain_len ;\n" );
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	return 0;\n" );
-		fprintf( fp_dsc_c , "}\n" );
-	}
-	
-	if( pcp->output_c_xml_flag == 1 || pcp->output_c_xml_compact_flag == 1 )
-	{
-		char	xmlpathname[ 1024 + 1 ] ;
+		if( pcp->output_c_compress_flag == 1 )
+		{
+			/* Generate DSCSERIALIZE_COMPRESS_*() */
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCSERIALIZE_COMPRESS_%s( %s *pst , char *buf , int *p_len )\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	char	*ptr = buf ;\n" );
+			fprintf( fp_dsc_c , "	int	len = 0 ;\n" );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			nret = GenerateCCode_c_DSCSERIALIZE_COMPRESS( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
+			if( nret )
+				return nret;
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	if( p_len ) (*p_len) = len ;\n" );
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	return 0;\n" );
+			fprintf( fp_dsc_c , "}\n" );
+			
+			/* Generate DSCDESERIALIZE_COMPRESS_*() */
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCDESERIALIZE_COMPRESS_%s( char *buf , int *p_len , %s *pst )\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	char	*ptr = buf ;\n" );
+			fprintf( fp_dsc_c , "	int	len = 0 ;\n" );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			nret = GenerateCCode_c_DSCDESERIALIZE_COMPRESS( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
+			if( nret )
+				return nret;
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	if( p_len ) (*p_len) = len ;\n" );
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	return 0;\n" );
+			fprintf( fp_dsc_c , "}\n" );
+		}
 		
-		/* Generate DSCDESERIALIZE_XML_*() */
-		fprintf( fp_dsc_c , "\n" );
-		fprintf( fp_dsc_c , "funcCallbackOnXmlNode CallbackOnXmlNode_%s ;\n" , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "int CallbackOnXmlNode_%s( int type , char *xpath , int xpath_len , int xpath_size , char *node , int node_len , char *properties , int properties_len , char *content , int content_len , void *p )\n" , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "{\n" );
-		fprintf( fp_dsc_c , "	%s	*pst = (%s*)p ;\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	if( type & FASTERXML_NODE_BRANCH )\n" );
-		fprintf( fp_dsc_c , "	{\n" );
-		fprintf( fp_dsc_c , "		if( type & FASTERXML_NODE_ENTER )\n" );
-		fprintf( fp_dsc_c , "		{\n" );
-		SNPRINTF( xmlpathname , sizeof(xmlpathname)-1 , "/%s" , pstruct->next_struct->struct_name );
-		nret = GenerateCCode_c_DSCDESERIALIZE_XML_ENTERNODE( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" , xmlpathname ) ;
-		if( nret )
-			return nret;
-		fprintf( fp_dsc_c , "		}\n" );
-		fprintf( fp_dsc_c , "		else if( type & FASTERXML_NODE_LEAVE )\n" );
-		fprintf( fp_dsc_c , "		{\n" );
-		SNPRINTF( xmlpathname , sizeof(xmlpathname)-1 , "/%s" , pstruct->next_struct->struct_name );
-		nret = GenerateCCode_c_DSCDESERIALIZE_XML_LEAVENODE( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" , xmlpathname ) ;
-		if( nret )
-			return nret;
-		fprintf( fp_dsc_c , "		}\n" );
-		fprintf( fp_dsc_c , "	}\n" );
-		fprintf( fp_dsc_c , "	else if( type & FASTERXML_NODE_LEAF )\n" );
-		fprintf( fp_dsc_c , "	{\n" );
-		SNPRINTF( xmlpathname , sizeof(xmlpathname)-1 , "/%s" , pstruct->next_struct->struct_name );
-		nret = GenerateCCode_c_DSCDESERIALIZE_XML_LEAF( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" , xmlpathname ) ;
-		if( nret )
-			return nret;
-		fprintf( fp_dsc_c , "	}\n" );
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	return 0;\n" );
-		fprintf( fp_dsc_c , "}\n" );
-	}
-	if( pcp->output_c_xml_flag == 1 )
-	{
-		fprintf( fp_dsc_c , "\n" );
-		fprintf( fp_dsc_c , "int DSCDESERIALIZE_XML_%s( char *encoding , char *buf , int *p_len , %s *pst )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "{\n" );
-		fprintf( fp_dsc_c , "	char	xpath[ 1024 + 1 ] ;\n" );
-		fprintf( fp_dsc_c , "	int	nret = 0 ;\n" );
-		fprintf( fp_dsc_c , "	memset( xpath , 0x00 , sizeof(xpath) );\n" );
-		fprintf( fp_dsc_c , "	nret = TravelXmlBuffer( buf , xpath , sizeof(xpath) , & CallbackOnXmlNode_%s , (void*)pst ) ;\n" , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "	if( nret )\n" );
-		fprintf( fp_dsc_c , "		return nret;\n" );
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	return 0;\n" );
-		fprintf( fp_dsc_c , "}\n" );
-	}
-	if( pcp->output_c_xml_compact_flag == 1 )
-	{
-		fprintf( fp_dsc_c , "\n" );
-		fprintf( fp_dsc_c , "int DSCDESERIALIZE_XML_COMPACT_%s( char *encoding , char *buf , int *p_len , %s *pst )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "{\n" );
-		fprintf( fp_dsc_c , "	char	xpath[ 1024 + 1 ] ;\n" );
-		fprintf( fp_dsc_c , "	int	nret = 0 ;\n" );
-		fprintf( fp_dsc_c , "	memset( xpath , 0x00 , sizeof(xpath) );\n" );
-		fprintf( fp_dsc_c , "	nret = TravelXmlBuffer( buf , xpath , sizeof(xpath) , & CallbackOnXmlNode_%s , (void*)pst ) ;\n" , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "	if( nret )\n" );
-		fprintf( fp_dsc_c , "		return nret;\n" );
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	return 0;\n" );
-		fprintf( fp_dsc_c , "}\n" );
-	}
-	
-	if( pcp->output_c_json_flag == 1 || pcp->output_c_json_compact_flag == 1 )
-	{
-		fprintf( fp_dsc_c , "\n" );
-		fprintf( fp_dsc_c , "#include \"fasterjson.h\"\n" );
-	}
-	
-	if( pcp->output_c_json_flag == 1 )
-	{
-		/* Generate DSCSERIALIZE_JSON_*() */
-		fprintf( fp_dsc_c , "\n" );
-		fprintf( fp_dsc_c , "int DSCSERIALIZE_JSON_%s( %s *pst , char *encoding , char *buf , int *p_len )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "{\n" );
-		fprintf( fp_dsc_c , "	int	remain_len ;\n" );
-		fprintf( fp_dsc_c , "	int	len ;\n" );
-		fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
-		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
-		fprintf( fp_dsc_c , "	remain_len = (*p_len) ;\n" );
-		fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
-		nret = GenerateCCode_c_DSCSERIALIZE_JSON( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
-		if( nret )
-			return nret;
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	(*p_len) = (*p_len) - remain_len ;\n" );
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	return 0;\n" );
-		fprintf( fp_dsc_c , "}\n" );
-		fprintf( fp_dsc_c , "\n" );
-		fprintf( fp_dsc_c , "int DSCSERIALIZE_JSON_DUP_%s( %s *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "{\n" );
-		fprintf( fp_dsc_c , "	int	buf_size ;\n" );
-		fprintf( fp_dsc_c , "	int	remain_len ;\n" );
-		fprintf( fp_dsc_c , "	char	*buf = NULL ;\n" );
-		fprintf( fp_dsc_c , "	int	buf_begin_offset ;\n" );
-		fprintf( fp_dsc_c , "	int	len ;\n" );
-		fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
-		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
-		fprintf( fp_dsc_c , "	if( (*pp_base) == NULL )\n" );
-		fprintf( fp_dsc_c , "	{\n" );
-		fprintf( fp_dsc_c , "		char	*tmp = NULL ;\n" );
-		fprintf( fp_dsc_c , "		if( p_buf_size && (*p_buf_size) > 0 )\n" );
-		fprintf( fp_dsc_c , "		{\n" );
-		fprintf( fp_dsc_c , "			buf_size = (*p_buf_size) ;\n" );
-		fprintf( fp_dsc_c , "			tmp = (char*)malloc( buf_size ) ;\n" );
-		fprintf( fp_dsc_c , "			if( tmp == NULL )\n" );
-		fprintf( fp_dsc_c , "				return -2;\n" );
-		fprintf( fp_dsc_c , "			memset( tmp , 0x00 , buf_size );\n" );
-		fprintf( fp_dsc_c , "			(*pp_base) = tmp ;\n" );
-		fprintf( fp_dsc_c , "			remain_len = buf_size - 1 ;\n" );
-		fprintf( fp_dsc_c , "		}\n" );
-		fprintf( fp_dsc_c , "		else\n" );
-		fprintf( fp_dsc_c , "		{\n" );
-		fprintf( fp_dsc_c , "			buf_size = 1024 ;\n" );
-		fprintf( fp_dsc_c , "			tmp = (char*)malloc( buf_size ) ;\n" );
-		fprintf( fp_dsc_c , "			if( tmp == NULL )\n" );
-		fprintf( fp_dsc_c , "				return -2;\n" );
-		fprintf( fp_dsc_c , "			memset( tmp , 0x00 , buf_size );\n" );
-		fprintf( fp_dsc_c , "			(*pp_base) = tmp ;\n" );
-		fprintf( fp_dsc_c , "			remain_len = buf_size - 1 ;\n" );
-		fprintf( fp_dsc_c , "		}\n" );
-		fprintf( fp_dsc_c , "	}\n" );
-		fprintf( fp_dsc_c , "	else\n" );
-		fprintf( fp_dsc_c , "	{\n" );
-		fprintf( fp_dsc_c , "		buf_size = (*p_buf_size) ;\n" );
-		fprintf( fp_dsc_c , "		remain_len = (*p_len) ;\n" );
-		fprintf( fp_dsc_c , "	}\n" );
-		fprintf( fp_dsc_c , "	buf_begin_offset = buf_size-1 - remain_len ;\n" );
-		fprintf( fp_dsc_c , "	buf = (*pp_base) + buf_begin_offset ;\n" );
-		fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
-		nret = GenerateCCode_c_DSCSERIALIZE_JSON_DUP( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
-		if( nret )
-			return nret;
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	if( p_buf_size )\n" );
-		fprintf( fp_dsc_c , "		(*p_buf_size) = buf_size ;\n" );
-		fprintf( fp_dsc_c , "	if( p_len )\n" );
-		fprintf( fp_dsc_c , "		(*p_len) = buf_size-1 - buf_begin_offset - remain_len ;\n" );
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	return 0;\n" );
-		fprintf( fp_dsc_c , "}\n" );
-	}
-	
-	if( pcp->output_c_json_compact_flag == 1 )
-	{
-		/* Generate DSCSERIALIZE_JSON_*() */
-		fprintf( fp_dsc_c , "\n" );
-		fprintf( fp_dsc_c , "int DSCSERIALIZE_JSON_COMPACT_%s( %s *pst , char *encoding , char *buf , int *p_len )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "{\n" );
-		fprintf( fp_dsc_c , "	int	remain_len ;\n" );
-		fprintf( fp_dsc_c , "	int	len ;\n" );
-		fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
-		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
-		fprintf( fp_dsc_c , "	remain_len = (*p_len) ;\n" );
-		fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
-		nret = GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
-		if( nret )
-			return nret;
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	(*p_len) = (*p_len) - remain_len ;\n" );
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	return 0;\n" );
-		fprintf( fp_dsc_c , "}\n" );
-		fprintf( fp_dsc_c , "\n" );
-		fprintf( fp_dsc_c , "int DSCSERIALIZE_JSON_DUP_COMPACT_%s( %s *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "{\n" );
-		fprintf( fp_dsc_c , "	int	buf_size ;\n" );
-		fprintf( fp_dsc_c , "	int	remain_len ;\n" );
-		fprintf( fp_dsc_c , "	char	*buf = NULL ;\n" );
-		fprintf( fp_dsc_c , "	int	buf_begin_offset ;\n" );
-		fprintf( fp_dsc_c , "	int	len ;\n" );
-		fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
-		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
-		fprintf( fp_dsc_c , "	if( (*pp_base) == NULL )\n" );
-		fprintf( fp_dsc_c , "	{\n" );
-		fprintf( fp_dsc_c , "		char	*tmp = NULL ;\n" );
-		fprintf( fp_dsc_c , "		if( p_buf_size && (*p_buf_size) > 0 )\n" );
-		fprintf( fp_dsc_c , "		{\n" );
-		fprintf( fp_dsc_c , "			buf_size = (*p_buf_size) ;\n" );
-		fprintf( fp_dsc_c , "			tmp = (char*)malloc( buf_size ) ;\n" );
-		fprintf( fp_dsc_c , "			if( tmp == NULL )\n" );
-		fprintf( fp_dsc_c , "				return -2;\n" );
-		fprintf( fp_dsc_c , "			memset( tmp , 0x00 , buf_size );\n" );
-		fprintf( fp_dsc_c , "			(*pp_base) = tmp ;\n" );
-		fprintf( fp_dsc_c , "			remain_len = buf_size - 1 ;\n" );
-		fprintf( fp_dsc_c , "		}\n" );
-		fprintf( fp_dsc_c , "		else\n" );
-		fprintf( fp_dsc_c , "		{\n" );
-		fprintf( fp_dsc_c , "			buf_size = 1024 ;\n" );
-		fprintf( fp_dsc_c , "			tmp = (char*)malloc( buf_size ) ;\n" );
-		fprintf( fp_dsc_c , "			if( tmp == NULL )\n" );
-		fprintf( fp_dsc_c , "				return -2;\n" );
-		fprintf( fp_dsc_c , "			memset( tmp , 0x00 , buf_size );\n" );
-		fprintf( fp_dsc_c , "			(*pp_base) = tmp ;\n" );
-		fprintf( fp_dsc_c , "			remain_len = buf_size - 1 ;\n" );
-		fprintf( fp_dsc_c , "		}\n" );
-		fprintf( fp_dsc_c , "	}\n" );
-		fprintf( fp_dsc_c , "	else\n" );
-		fprintf( fp_dsc_c , "	{\n" );
-		fprintf( fp_dsc_c , "		buf_size = (*p_buf_size) ;\n" );
-		fprintf( fp_dsc_c , "		remain_len = (*p_len) ;\n" );
-		fprintf( fp_dsc_c , "	}\n" );
-		fprintf( fp_dsc_c , "	buf_begin_offset = buf_size-1 - remain_len ;\n" );
-		fprintf( fp_dsc_c , "	buf = (*pp_base) + buf_begin_offset ;\n" );
-		fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
-		nret = GenerateCCode_c_DSCSERIALIZE_JSON_DUP_COMPACT( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" ) ;
-		if( nret )
-			return nret;
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	if( p_buf_size )\n" );
-		fprintf( fp_dsc_c , "		(*p_buf_size) = buf_size ;\n" );
-		fprintf( fp_dsc_c , "	if( p_len )\n" );
-		fprintf( fp_dsc_c , "		(*p_len) = buf_size-1 - buf_begin_offset - remain_len ;\n" );
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	return 0;\n" );
-		fprintf( fp_dsc_c , "}\n" );
-	}
-	
-	if( pcp->output_c_json_flag == 1 || pcp->output_c_json_compact_flag == 1 )
-	{
-		char	jsonpathname[ 1024 + 1 ] ;
+		if( pcp->output_c_xml_flag == 1 || pcp->output_c_xml_compact_flag == 1 )
+		{
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "#include \"fasterxml.h\"\n" );
+		}
 		
-		/* Generate DSCDESERIALIZE_JSON_*() */
-		fprintf( fp_dsc_c , "\n" );
-		fprintf( fp_dsc_c , "funcCallbackOnJsonNode CallbackOnJsonNode_%s ;\n" , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "int CallbackOnJsonNode_%s( int type , char *jpath , int jpath_len , int jpath_size , char *node , int node_len , char *content , int content_len , void *p )\n" , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "{\n" );
-		fprintf( fp_dsc_c , "	%s	*pst = (%s*)p ;\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ;\n" , DSC_MAXDEPTH );
-		fprintf( fp_dsc_c , "	int	len ;\n" );
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	index[0] = 0 ;\n" );
-		fprintf( fp_dsc_c , "	len = 0 ;\n" );
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	if( type & FASTERJSON_NODE_BRANCH )\n" );
-		fprintf( fp_dsc_c , "	{\n" );
-		fprintf( fp_dsc_c , "		if( type & FASTERJSON_NODE_ENTER )\n" );
-		fprintf( fp_dsc_c , "		{\n" );
-		nret = GenerateCCode_c_DSCDESERIALIZE_JSON_ENTERNODE( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" , "" ) ;
-		if( nret )
-			return nret;
-		fprintf( fp_dsc_c , "		}\n" );
-		fprintf( fp_dsc_c , "		else if( type & FASTERJSON_NODE_LEAVE )\n" );
-		fprintf( fp_dsc_c , "		{\n" );
-		nret = GenerateCCode_c_DSCDESERIALIZE_JSON_LEAVENODE( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" , "" ) ;
-		if( nret )
-			return nret;
-		fprintf( fp_dsc_c , "		}\n" );
-		fprintf( fp_dsc_c , "	}\n" );
-		fprintf( fp_dsc_c , "	else if( type & FASTERJSON_NODE_LEAF )\n" );
-		fprintf( fp_dsc_c , "	{\n" );
-		SNPRINTF( jsonpathname , sizeof(jsonpathname)-1 , "/%s" , pstruct->next_struct->struct_name );
-		nret = GenerateCCode_c_DSCDESERIALIZE_JSON_LEAF( pcp , 0 , pstruct->next_struct , fp_dsc_c , "pst->" , "" ) ;
-		if( nret )
-			return nret;
-		fprintf( fp_dsc_c , "	}\n" );
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	return 0;\n" );
-		fprintf( fp_dsc_c , "}\n" );
-	}
-	if( pcp->output_c_json_flag == 1 )
-	{	
-		fprintf( fp_dsc_c , "\n" );
-		fprintf( fp_dsc_c , "int DSCDESERIALIZE_JSON_%s( char *encoding , char *buf , int *p_len , %s *pst )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "{\n" );
-		fprintf( fp_dsc_c , "	char	jpath[ 1024 + 1 ] ;\n" );
-		fprintf( fp_dsc_c , "	int	nret = 0 ;\n" );
-		fprintf( fp_dsc_c , "	memset( jpath , 0x00 , sizeof(jpath) );\n" );
-		fprintf( fp_dsc_c , "	nret = TravelJsonBuffer( buf , jpath , sizeof(jpath) , & CallbackOnJsonNode_%s , (void*)pst ) ;\n" , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "	if( nret )\n" );
-		fprintf( fp_dsc_c , "		return nret;\n" );
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	return 0;\n" );
-		fprintf( fp_dsc_c , "}\n" );
-	}
-	if( pcp->output_c_json_compact_flag == 1 )
-	{	
-		fprintf( fp_dsc_c , "\n" );
-		fprintf( fp_dsc_c , "int DSCDESERIALIZE_JSON_COMPACT_%s( char *encoding , char *buf , int *p_len , %s *pst )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "{\n" );
-		fprintf( fp_dsc_c , "	char	jpath[ 1024 + 1 ] ;\n" );
-		fprintf( fp_dsc_c , "	int	nret = 0 ;\n" );
-		fprintf( fp_dsc_c , "	memset( jpath , 0x00 , sizeof(jpath) );\n" );
-		fprintf( fp_dsc_c , "	nret = TravelJsonBuffer( buf , jpath , sizeof(jpath) , & CallbackOnJsonNode_%s , (void*)pst ) ;\n" , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_c , "	if( nret )\n" );
-		fprintf( fp_dsc_c , "		return nret;\n" );
-		fprintf( fp_dsc_c , "	\n" );
-		fprintf( fp_dsc_c , "	return 0;\n" );
-		fprintf( fp_dsc_c , "}\n" );
-	}
-	
-	if( pcp->output_c_LOG_flag == 1 )
-	{
-		/* Generate *.dsc.LOG.c */
-		fprintf( fp_dsc_LOG_c , "/* It had generated by DirectStruct v%s */\n" , __DIRECTSTRUCT_VERSION );
-		fprintf( fp_dsc_LOG_c , "#include \"%s.h\"\n" , pcp->pathfilename );
-		fprintf( fp_dsc_LOG_c , "\n" );
-		fprintf( fp_dsc_LOG_c , "#ifndef FUNCNAME_DSCLOG_%s\n" , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_LOG_c , "#define FUNCNAME_DSCLOG_%s	DSCLOG_%s\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_LOG_c , "#endif\n" );
-		fprintf( fp_dsc_LOG_c , "\n" );
-		fprintf( fp_dsc_LOG_c , "#ifndef PREFIX_DSCLOG_%s\n" , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_LOG_c , "#define PREFIX_DSCLOG_%s	printf( \n" , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_LOG_c , "#endif\n" );
-		fprintf( fp_dsc_LOG_c , "\n" );
-		fprintf( fp_dsc_LOG_c , "#ifndef NEWLINE_DSCLOG_%s\n" , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_LOG_c , "#define NEWLINE_DSCLOG_%s	\"\\n\"\n" , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_LOG_c , "#endif\n" );
-		fprintf( fp_dsc_LOG_c , "\n" );
-		fprintf( fp_dsc_LOG_c , "int FUNCNAME_DSCLOG_%s( %s *pst )\n" , pstruct->next_struct->struct_name , pstruct->next_struct->struct_name );
-		fprintf( fp_dsc_LOG_c , "{\n" );
-		fprintf( fp_dsc_LOG_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
-		SNPRINTF( LOG_pathname , sizeof(LOG_pathname)-1 , "%s." , pstruct->next_struct->struct_name );
-		nret = GenerateCCode_LOG_c( pcp , 0 , pstruct->next_struct , pstruct->next_struct , fp_dsc_LOG_c , LOG_pathname , "pst->" ) ;
-		if( nret )
-			return nret;
-		fprintf( fp_dsc_LOG_c , "	return 0;\n" );
-		fprintf( fp_dsc_LOG_c , "}\n" );
+		if( pcp->output_c_xml_flag == 1 )
+		{
+			/* Generate DSCSERIALIZE_XML_*() */
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCSERIALIZE_XML_%s( %s *pst , char *encoding , char *buf , int *p_len )\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	int	remain_len ;\n" );
+			fprintf( fp_dsc_c , "	int	len ;\n" );
+			fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	remain_len = (*p_len) ;\n" );
+			fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	len=SNPRINTF(buf,remain_len,\"<?xml version=\\\"1.0\\\" encoding=\\\"%%s\\\"?>\\n\",encoding); if(len<0)return -1; buf+=len; remain_len-=len;\n" );
+			nret = GenerateCCode_c_DSCSERIALIZE_XML( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
+			if( nret )
+				return nret;
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	(*p_len) = (*p_len) - remain_len ;\n" );
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	return 0;\n" );
+			fprintf( fp_dsc_c , "}\n" );
+		}
+		
+		if( pcp->output_c_xml_compact_flag == 1 )
+		{
+			/* Generate DSCSERIALIZE_XML_*() */
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCSERIALIZE_XML_COMPACT_%s( %s *pst , char *encoding , char *buf , int *p_len )\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	int	remain_len ;\n" );
+			fprintf( fp_dsc_c , "	int	len ;\n" );
+			fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	remain_len = (*p_len) ;\n" );
+			fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	len=SNPRINTF(buf,remain_len,\"<?xml version=\\\"1.0\\\" encoding=\\\"%%s\\\"?>\",encoding); if(len<0)return -1; buf+=len; remain_len-=len;\n" );
+			nret = GenerateCCode_c_DSCSERIALIZE_XML_COMPACT( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
+			if( nret )
+				return nret;
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	(*p_len) = (*p_len) - remain_len ;\n" );
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	return 0;\n" );
+			fprintf( fp_dsc_c , "}\n" );
+		}
+		
+		if( pcp->output_c_xml_flag == 1 || pcp->output_c_xml_compact_flag == 1 )
+		{
+			char	xmlpathname[ 1024 + 1 ] ;
+			
+			/* Generate DSCDESERIALIZE_XML_*() */
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "funcCallbackOnXmlNode CallbackOnXmlNode_%s ;\n" , next_struct->struct_name );
+			fprintf( fp_dsc_c , "int CallbackOnXmlNode_%s( int type , char *xpath , int xpath_len , int xpath_size , char *node , int node_len , char *properties , int properties_len , char *content , int content_len , void *p )\n" , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	%s	*pst = (%s*)p ;\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	if( type & FASTERXML_NODE_BRANCH )\n" );
+			fprintf( fp_dsc_c , "	{\n" );
+			fprintf( fp_dsc_c , "		if( type & FASTERXML_NODE_ENTER )\n" );
+			fprintf( fp_dsc_c , "		{\n" );
+			SNPRINTF( xmlpathname , sizeof(xmlpathname)-1 , "/%s" , next_struct->struct_name );
+			nret = GenerateCCode_c_DSCDESERIALIZE_XML_ENTERNODE( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" , xmlpathname ) ;
+			if( nret )
+				return nret;
+			fprintf( fp_dsc_c , "		}\n" );
+			fprintf( fp_dsc_c , "		else if( type & FASTERXML_NODE_LEAVE )\n" );
+			fprintf( fp_dsc_c , "		{\n" );
+			SNPRINTF( xmlpathname , sizeof(xmlpathname)-1 , "/%s" , next_struct->struct_name );
+			nret = GenerateCCode_c_DSCDESERIALIZE_XML_LEAVENODE( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" , xmlpathname ) ;
+			if( nret )
+				return nret;
+			fprintf( fp_dsc_c , "		}\n" );
+			fprintf( fp_dsc_c , "	}\n" );
+			fprintf( fp_dsc_c , "	else if( type & FASTERXML_NODE_LEAF )\n" );
+			fprintf( fp_dsc_c , "	{\n" );
+			SNPRINTF( xmlpathname , sizeof(xmlpathname)-1 , "/%s" , next_struct->struct_name );
+			nret = GenerateCCode_c_DSCDESERIALIZE_XML_LEAF( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" , xmlpathname ) ;
+			if( nret )
+				return nret;
+			fprintf( fp_dsc_c , "	}\n" );
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	return 0;\n" );
+			fprintf( fp_dsc_c , "}\n" );
+		}
+		if( pcp->output_c_xml_flag == 1 )
+		{
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCDESERIALIZE_XML_%s( char *encoding , char *buf , int *p_len , %s *pst )\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	char	xpath[ 1024 + 1 ] ;\n" );
+			fprintf( fp_dsc_c , "	int	nret = 0 ;\n" );
+			fprintf( fp_dsc_c , "	memset( xpath , 0x00 , sizeof(xpath) );\n" );
+			fprintf( fp_dsc_c , "	nret = TravelXmlBuffer( buf , xpath , sizeof(xpath) , & CallbackOnXmlNode_%s , (void*)pst ) ;\n" , next_struct->struct_name );
+			fprintf( fp_dsc_c , "	if( nret )\n" );
+			fprintf( fp_dsc_c , "		return nret;\n" );
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	return 0;\n" );
+			fprintf( fp_dsc_c , "}\n" );
+		}
+		if( pcp->output_c_xml_compact_flag == 1 )
+		{
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCDESERIALIZE_XML_COMPACT_%s( char *encoding , char *buf , int *p_len , %s *pst )\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	char	xpath[ 1024 + 1 ] ;\n" );
+			fprintf( fp_dsc_c , "	int	nret = 0 ;\n" );
+			fprintf( fp_dsc_c , "	memset( xpath , 0x00 , sizeof(xpath) );\n" );
+			fprintf( fp_dsc_c , "	nret = TravelXmlBuffer( buf , xpath , sizeof(xpath) , & CallbackOnXmlNode_%s , (void*)pst ) ;\n" , next_struct->struct_name );
+			fprintf( fp_dsc_c , "	if( nret )\n" );
+			fprintf( fp_dsc_c , "		return nret;\n" );
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	return 0;\n" );
+			fprintf( fp_dsc_c , "}\n" );
+		}
+		
+		if( pcp->output_c_json_flag == 1 || pcp->output_c_json_compact_flag == 1 )
+		{
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "#include \"fasterjson.h\"\n" );
+		}
+		
+		if( pcp->output_c_json_flag == 1 )
+		{
+			/* Generate DSCSERIALIZE_JSON_*() */
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCSERIALIZE_JSON_%s( %s *pst , char *encoding , char *buf , int *p_len )\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	int	remain_len ;\n" );
+			fprintf( fp_dsc_c , "	int	len ;\n" );
+			fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	remain_len = (*p_len) ;\n" );
+			fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
+			nret = GenerateCCode_c_DSCSERIALIZE_JSON( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
+			if( nret )
+				return nret;
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	(*p_len) = (*p_len) - remain_len ;\n" );
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	return 0;\n" );
+			fprintf( fp_dsc_c , "}\n" );
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCSERIALIZE_JSON_DUP_%s( %s *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len )\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	int	buf_size ;\n" );
+			fprintf( fp_dsc_c , "	int	remain_len ;\n" );
+			fprintf( fp_dsc_c , "	char	*buf = NULL ;\n" );
+			fprintf( fp_dsc_c , "	int	buf_begin_offset ;\n" );
+			fprintf( fp_dsc_c , "	int	len ;\n" );
+			fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	if( (*pp_base) == NULL )\n" );
+			fprintf( fp_dsc_c , "	{\n" );
+			fprintf( fp_dsc_c , "		char	*tmp = NULL ;\n" );
+			fprintf( fp_dsc_c , "		if( p_buf_size && (*p_buf_size) > 0 )\n" );
+			fprintf( fp_dsc_c , "		{\n" );
+			fprintf( fp_dsc_c , "			buf_size = (*p_buf_size) ;\n" );
+			fprintf( fp_dsc_c , "			tmp = (char*)malloc( buf_size ) ;\n" );
+			fprintf( fp_dsc_c , "			if( tmp == NULL )\n" );
+			fprintf( fp_dsc_c , "				return -2;\n" );
+			fprintf( fp_dsc_c , "			memset( tmp , 0x00 , buf_size );\n" );
+			fprintf( fp_dsc_c , "			(*pp_base) = tmp ;\n" );
+			fprintf( fp_dsc_c , "			remain_len = buf_size - 1 ;\n" );
+			fprintf( fp_dsc_c , "		}\n" );
+			fprintf( fp_dsc_c , "		else\n" );
+			fprintf( fp_dsc_c , "		{\n" );
+			fprintf( fp_dsc_c , "			buf_size = 1024 ;\n" );
+			fprintf( fp_dsc_c , "			tmp = (char*)malloc( buf_size ) ;\n" );
+			fprintf( fp_dsc_c , "			if( tmp == NULL )\n" );
+			fprintf( fp_dsc_c , "				return -2;\n" );
+			fprintf( fp_dsc_c , "			memset( tmp , 0x00 , buf_size );\n" );
+			fprintf( fp_dsc_c , "			(*pp_base) = tmp ;\n" );
+			fprintf( fp_dsc_c , "			remain_len = buf_size - 1 ;\n" );
+			fprintf( fp_dsc_c , "		}\n" );
+			fprintf( fp_dsc_c , "	}\n" );
+			fprintf( fp_dsc_c , "	else\n" );
+			fprintf( fp_dsc_c , "	{\n" );
+			fprintf( fp_dsc_c , "		buf_size = (*p_buf_size) ;\n" );
+			fprintf( fp_dsc_c , "		remain_len = (*p_len) ;\n" );
+			fprintf( fp_dsc_c , "	}\n" );
+			fprintf( fp_dsc_c , "	buf_begin_offset = buf_size-1 - remain_len ;\n" );
+			fprintf( fp_dsc_c , "	buf = (*pp_base) + buf_begin_offset ;\n" );
+			fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
+			nret = GenerateCCode_c_DSCSERIALIZE_JSON_DUP( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
+			if( nret )
+				return nret;
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	if( p_buf_size )\n" );
+			fprintf( fp_dsc_c , "		(*p_buf_size) = buf_size ;\n" );
+			fprintf( fp_dsc_c , "	if( p_len )\n" );
+			fprintf( fp_dsc_c , "		(*p_len) = buf_size-1 - buf_begin_offset - remain_len ;\n" );
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	return 0;\n" );
+			fprintf( fp_dsc_c , "}\n" );
+		}
+		
+		if( pcp->output_c_json_compact_flag == 1 )
+		{
+			/* Generate DSCSERIALIZE_JSON_*() */
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCSERIALIZE_JSON_COMPACT_%s( %s *pst , char *encoding , char *buf , int *p_len )\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	int	remain_len ;\n" );
+			fprintf( fp_dsc_c , "	int	len ;\n" );
+			fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	remain_len = (*p_len) ;\n" );
+			fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
+			nret = GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
+			if( nret )
+				return nret;
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	(*p_len) = (*p_len) - remain_len ;\n" );
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	return 0;\n" );
+			fprintf( fp_dsc_c , "}\n" );
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCSERIALIZE_JSON_DUP_COMPACT_%s( %s *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len )\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	int	buf_size ;\n" );
+			fprintf( fp_dsc_c , "	int	remain_len ;\n" );
+			fprintf( fp_dsc_c , "	char	*buf = NULL ;\n" );
+			fprintf( fp_dsc_c , "	int	buf_begin_offset ;\n" );
+			fprintf( fp_dsc_c , "	int	len ;\n" );
+			fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	if( (*pp_base) == NULL )\n" );
+			fprintf( fp_dsc_c , "	{\n" );
+			fprintf( fp_dsc_c , "		char	*tmp = NULL ;\n" );
+			fprintf( fp_dsc_c , "		if( p_buf_size && (*p_buf_size) > 0 )\n" );
+			fprintf( fp_dsc_c , "		{\n" );
+			fprintf( fp_dsc_c , "			buf_size = (*p_buf_size) ;\n" );
+			fprintf( fp_dsc_c , "			tmp = (char*)malloc( buf_size ) ;\n" );
+			fprintf( fp_dsc_c , "			if( tmp == NULL )\n" );
+			fprintf( fp_dsc_c , "				return -2;\n" );
+			fprintf( fp_dsc_c , "			memset( tmp , 0x00 , buf_size );\n" );
+			fprintf( fp_dsc_c , "			(*pp_base) = tmp ;\n" );
+			fprintf( fp_dsc_c , "			remain_len = buf_size - 1 ;\n" );
+			fprintf( fp_dsc_c , "		}\n" );
+			fprintf( fp_dsc_c , "		else\n" );
+			fprintf( fp_dsc_c , "		{\n" );
+			fprintf( fp_dsc_c , "			buf_size = 1024 ;\n" );
+			fprintf( fp_dsc_c , "			tmp = (char*)malloc( buf_size ) ;\n" );
+			fprintf( fp_dsc_c , "			if( tmp == NULL )\n" );
+			fprintf( fp_dsc_c , "				return -2;\n" );
+			fprintf( fp_dsc_c , "			memset( tmp , 0x00 , buf_size );\n" );
+			fprintf( fp_dsc_c , "			(*pp_base) = tmp ;\n" );
+			fprintf( fp_dsc_c , "			remain_len = buf_size - 1 ;\n" );
+			fprintf( fp_dsc_c , "		}\n" );
+			fprintf( fp_dsc_c , "	}\n" );
+			fprintf( fp_dsc_c , "	else\n" );
+			fprintf( fp_dsc_c , "	{\n" );
+			fprintf( fp_dsc_c , "		buf_size = (*p_buf_size) ;\n" );
+			fprintf( fp_dsc_c , "		remain_len = (*p_len) ;\n" );
+			fprintf( fp_dsc_c , "	}\n" );
+			fprintf( fp_dsc_c , "	buf_begin_offset = buf_size-1 - remain_len ;\n" );
+			fprintf( fp_dsc_c , "	buf = (*pp_base) + buf_begin_offset ;\n" );
+			fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
+			nret = GenerateCCode_c_DSCSERIALIZE_JSON_DUP_COMPACT( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
+			if( nret )
+				return nret;
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	if( p_buf_size )\n" );
+			fprintf( fp_dsc_c , "		(*p_buf_size) = buf_size ;\n" );
+			fprintf( fp_dsc_c , "	if( p_len )\n" );
+			fprintf( fp_dsc_c , "		(*p_len) = buf_size-1 - buf_begin_offset - remain_len ;\n" );
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	return 0;\n" );
+			fprintf( fp_dsc_c , "}\n" );
+		}
+		
+		if( pcp->output_c_json_flag == 1 || pcp->output_c_json_compact_flag == 1 )
+		{
+			char	jsonpathname[ 1024 + 1 ] ;
+			
+			/* Generate DSCDESERIALIZE_JSON_*() */
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "funcCallbackOnJsonNode CallbackOnJsonNode_%s ;\n" , next_struct->struct_name );
+			fprintf( fp_dsc_c , "int CallbackOnJsonNode_%s( int type , char *jpath , int jpath_len , int jpath_size , char *node , int node_len , char *content , int content_len , void *p )\n" , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	%s	*pst = (%s*)p ;\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	int	len ;\n" );
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	index[0] = 0 ;\n" );
+			fprintf( fp_dsc_c , "	len = 0 ;\n" );
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	if( type & FASTERJSON_NODE_BRANCH )\n" );
+			fprintf( fp_dsc_c , "	{\n" );
+			fprintf( fp_dsc_c , "		if( type & FASTERJSON_NODE_ENTER )\n" );
+			fprintf( fp_dsc_c , "		{\n" );
+			nret = GenerateCCode_c_DSCDESERIALIZE_JSON_ENTERNODE( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" , "" ) ;
+			if( nret )
+				return nret;
+			fprintf( fp_dsc_c , "		}\n" );
+			fprintf( fp_dsc_c , "		else if( type & FASTERJSON_NODE_LEAVE )\n" );
+			fprintf( fp_dsc_c , "		{\n" );
+			nret = GenerateCCode_c_DSCDESERIALIZE_JSON_LEAVENODE( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" , "" ) ;
+			if( nret )
+				return nret;
+			fprintf( fp_dsc_c , "		}\n" );
+			fprintf( fp_dsc_c , "	}\n" );
+			fprintf( fp_dsc_c , "	else if( type & FASTERJSON_NODE_LEAF )\n" );
+			fprintf( fp_dsc_c , "	{\n" );
+			SNPRINTF( jsonpathname , sizeof(jsonpathname)-1 , "/%s" , next_struct->struct_name );
+			nret = GenerateCCode_c_DSCDESERIALIZE_JSON_LEAF( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" , "" ) ;
+			if( nret )
+				return nret;
+			fprintf( fp_dsc_c , "	}\n" );
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	return 0;\n" );
+			fprintf( fp_dsc_c , "}\n" );
+		}
+		if( pcp->output_c_json_flag == 1 )
+		{	
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCDESERIALIZE_JSON_%s( char *encoding , char *buf , int *p_len , %s *pst )\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	char	jpath[ 1024 + 1 ] ;\n" );
+			fprintf( fp_dsc_c , "	int	nret = 0 ;\n" );
+			fprintf( fp_dsc_c , "	memset( jpath , 0x00 , sizeof(jpath) );\n" );
+			fprintf( fp_dsc_c , "	nret = TravelJsonBuffer( buf , jpath , sizeof(jpath) , & CallbackOnJsonNode_%s , (void*)pst ) ;\n" , next_struct->struct_name );
+			fprintf( fp_dsc_c , "	if( nret )\n" );
+			fprintf( fp_dsc_c , "		return nret;\n" );
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	return 0;\n" );
+			fprintf( fp_dsc_c , "}\n" );
+		}
+		if( pcp->output_c_json_compact_flag == 1 )
+		{	
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCDESERIALIZE_JSON_COMPACT_%s( char *encoding , char *buf , int *p_len , %s *pst )\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	char	jpath[ 1024 + 1 ] ;\n" );
+			fprintf( fp_dsc_c , "	int	nret = 0 ;\n" );
+			fprintf( fp_dsc_c , "	memset( jpath , 0x00 , sizeof(jpath) );\n" );
+			fprintf( fp_dsc_c , "	nret = TravelJsonBuffer( buf , jpath , sizeof(jpath) , & CallbackOnJsonNode_%s , (void*)pst ) ;\n" , next_struct->struct_name );
+			fprintf( fp_dsc_c , "	if( nret )\n" );
+			fprintf( fp_dsc_c , "		return nret;\n" );
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	return 0;\n" );
+			fprintf( fp_dsc_c , "}\n" );
+		}
+		
+		if( pcp->output_c_LOG_flag == 1 )
+		{
+			/* Generate *.dsc.LOG.c */
+			fprintf( fp_dsc_LOG_c , "/* It had generated by DirectStruct v%s */\n" , __DIRECTSTRUCT_VERSION );
+			fprintf( fp_dsc_LOG_c , "#include \"%s.h\"\n" , pcp->pathfilename );
+			fprintf( fp_dsc_LOG_c , "\n" );
+			fprintf( fp_dsc_LOG_c , "#ifndef FUNCNAME_DSCLOG_%s\n" , next_struct->struct_name );
+			fprintf( fp_dsc_LOG_c , "#define FUNCNAME_DSCLOG_%s	DSCLOG_%s\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_LOG_c , "#endif\n" );
+			fprintf( fp_dsc_LOG_c , "\n" );
+			fprintf( fp_dsc_LOG_c , "#ifndef PREFIX_DSCLOG_%s\n" , next_struct->struct_name );
+			fprintf( fp_dsc_LOG_c , "#define PREFIX_DSCLOG_%s	printf( \n" , next_struct->struct_name );
+			fprintf( fp_dsc_LOG_c , "#endif\n" );
+			fprintf( fp_dsc_LOG_c , "\n" );
+			fprintf( fp_dsc_LOG_c , "#ifndef NEWLINE_DSCLOG_%s\n" , next_struct->struct_name );
+			fprintf( fp_dsc_LOG_c , "#define NEWLINE_DSCLOG_%s	\"\\n\"\n" , next_struct->struct_name );
+			fprintf( fp_dsc_LOG_c , "#endif\n" );
+			fprintf( fp_dsc_LOG_c , "\n" );
+			fprintf( fp_dsc_LOG_c , "int FUNCNAME_DSCLOG_%s( %s *pst )\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_LOG_c , "{\n" );
+			fprintf( fp_dsc_LOG_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			SNPRINTF( LOG_pathname , sizeof(LOG_pathname)-1 , "%s." , next_struct->struct_name );
+			nret = GenerateCCode_LOG_c( pcp , 0 , next_struct , next_struct , 1 , fp_dsc_LOG_c , LOG_pathname , "pst->" ) ;
+			if( nret )
+				return nret;
+			fprintf( fp_dsc_LOG_c , "	return 0;\n" );
+			fprintf( fp_dsc_LOG_c , "}\n" );
+		}
 	}
 	
 	return 0;

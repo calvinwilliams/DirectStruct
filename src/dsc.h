@@ -163,10 +163,10 @@ struct StructInfo
 	struct SqlActionOutput	*last_sqlaction_line ;
 	int			sqlconn ;
 	
-	struct FieldInfo	*field_list ;
+	struct FieldInfo	*first_field ;
 	struct FieldInfo	*last_field ;
 	
-	struct StructInfo	*sub_struct_list ;
+	struct StructInfo	*first_sub_struct ;
 	struct StructInfo	*last_sub_struct ;
 	
 	struct StructInfo	*next_struct ;
@@ -194,13 +194,13 @@ struct EnumInfo
  * ReadDscFile
  */
 
-int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset , char *dsc_pathfilename , int flag , FILE *fp_dsc , int *p_lineno , struct StructInfo *pmsginfo );
+int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset , char *dsc_pathfilename , int flag , FILE *fp_dsc , int *p_lineno , struct StructInfo *first_struct );
 
 /*
  * GenerateCCode
  */
 
-int GenerateCCode( struct CommandParameter *pcmdparam , struct StructInfo *pmsginfo , FILE *fp_dsc_h , FILE *fp_dsc_c , FILE *fp_dsc_LOG_c );
+int GenerateCCode( struct CommandParameter *pcmdparam , struct StructInfo *first_struct , FILE *fp_dsc_h , FILE *fp_dsc_c , FILE *fp_dsc_LOG_c );
 int GenerateSqlCode( struct CommandParameter *pcp , struct StructInfo *pstruct , FILE *fp_dsc_create_sql , FILE *fp_dsc_drop_sql );
 int GenerateECCode_PGSQL( struct CommandParameter *pcp , struct StructInfo *pstruct , FILE *fp_dsc_ESQL_eh , FILE *fp_dsc_ESQL_ec );
 int GenerateECCode_ORACLE( struct CommandParameter *pcp , struct StructInfo *pstruct , FILE *fp_dsc_ESQL_eh , FILE *fp_dsc_ESQL_ec );

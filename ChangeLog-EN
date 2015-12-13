@@ -1,3 +1,7 @@
+ver 1.6.1	2015-12-13	calvin
+		FIXED
+		* More than two structs in one .dsc file
+
 ver 1.6.0	2015-12-13	calvin
 		ADD
 		* First tag "H" append output to header file in IDL files
