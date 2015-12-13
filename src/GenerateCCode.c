@@ -11,12 +11,18 @@
 int GenerateCCode_h( struct CommandParameter *pcp , int depth , struct StructInfo *first_pmsginfo , FILE *fp_dsc_h )
 {
 	struct StructInfo	*pstruct = NULL ;
+	struct HeaderOutput	*line = NULL ;
 	struct FieldInfo	*pfield = NULL ;
 	
 	int			nret = 0 ;
 	
 	for( pstruct = first_pmsginfo ; pstruct ; pstruct = pstruct->next_struct )
 	{
+		for( line = pstruct->first_line ; line ; line = line->next_line )
+		{
+			fprintabs( fp_dsc_h , depth ); fprintf( fp_dsc_h , "%s\n" , line->content );
+		}
+		
 		if( depth == 0 )
 		{
 			fprintabs( fp_dsc_h , depth ); fprintf( fp_dsc_h , "\n" );

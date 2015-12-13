@@ -85,6 +85,7 @@ typedef struct
 {
 	char	version ;
 	char	sign_flag ;
+	#define RESPONSE_CODE_PASSWORD_NOTMATCH	-12345
 	struct
 	{
 		char	transaction_code[ 32 + 1 ] ;
@@ -103,6 +104,7 @@ typedef struct
 			int	_AddonMessage_count ;
 			int	_AddonMessage_size ;
 		} AddonMessages ;
+		#define MAX_PAGE_SIZE	10
 		struct
 		{
 			char	title_text[ 64 + 1 ] ;
@@ -111,6 +113,7 @@ typedef struct
 		} TransactionDetailTitle ;
 		struct
 		{
+			#define CENTER_OUTLET_ID	"1001"
 			struct
 			{
 				char	trans_date[ 10 + 1 ] ;

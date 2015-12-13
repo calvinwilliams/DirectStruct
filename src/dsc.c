@@ -14,9 +14,10 @@ char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_5_0 ;
 int dsc( struct CommandParameter *pcmdparam )
 {
 	FILE			*fp_dsc = NULL ;
+	int			offset ;
+	int			lineno ;
 	struct StructInfo	si ;
 	int			struct_len ;
-	int			offset ;
 	
 	char			output_pathfilename[ 256 + 1 ] ;
 	
@@ -29,8 +30,9 @@ int dsc( struct CommandParameter *pcmdparam )
 		return -1;
 	}
 	offset = 0 ;
+	lineno = 0 ;
 	memset( & si , 0x00 , sizeof(struct StructInfo) );
-	struct_len = ReadDscFile( pcmdparam , 0 , & offset , pcmdparam->pathfilename , 0 , fp_dsc , 0 , & si ) ;
+	struct_len = ReadDscFile( pcmdparam , 0 , & offset , pcmdparam->pathfilename , 0 , fp_dsc , & lineno , & si ) ;
 	fclose( fp_dsc );
 	if( struct_len < 0 )
 		return -struct_len;

@@ -121,6 +121,30 @@ struct FieldInfo
 	struct StructInfo	*struct_list ;
 } ;
 
+struct HeaderOutput
+{
+	char			*content ;
+	struct HeaderOutput	*next_line ;
+} ;
+
+struct CreateSqlOutput
+{
+	char			*content ;
+	struct CreateSqlOutput	*next_line ;
+} ;
+
+struct DropSqlOutput
+{
+	char			*content ;
+	struct DropSqlOutput	*next_line ;
+} ;
+
+struct SqlActionOutput
+{
+	char			*content ;
+	struct SqlActionOutput	*next_line ;
+} ;
+
 struct StructInfo
 {
 	char			struct_name[ 64 + 1 ] ;
@@ -128,6 +152,8 @@ struct StructInfo
 	int			field_count ;
 	int			array_size ;
 	
+	struct HeaderOutput	*first_line ;
+	struct HeaderOutput	*last_line ;
 	char			create_sql[10][ 1024 + 1 ] ;
 	int			create_sql_count ;
 	char			drop_sql[10][ 1024 + 1 ] ;
@@ -168,7 +194,7 @@ struct EnumInfo
  * ReadDscFile
  */
 
-int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset , char *dsc_pathfilename , int flag , FILE *fp_dsc , long lineno , struct StructInfo *pmsginfo );
+int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset , char *dsc_pathfilename , int flag , FILE *fp_dsc , int *p_lineno , struct StructInfo *pmsginfo );
 
 /*
  * GenerateCCode

@@ -84,6 +84,7 @@
 typedef struct
 {
 	char	version ;
+	#define RESPONSE_CODE_PASSWORD_NOTMATCH	-12345
 	struct
 	{
 		char	transaction_code[ 32 + 1 ] ;

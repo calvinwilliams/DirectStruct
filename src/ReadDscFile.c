@@ -8,10 +8,11 @@
  * Licensed under the LGPL v2.1, see the file LICENSE in base directory.
  */
 
-int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset , char *dsc_pathfilename , int flag , FILE *fp_dsc , long lineno , struct StructInfo *pstruct )
+int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset , char *dsc_pathfilename , int flag , FILE *fp_dsc , int *p_lineno , struct StructInfo *pstruct )
 {
 	char			filebuffer[ 4096 + 1 ] ;
 	char			filebuffer_bak[ 4096 + 1 ] ;
+	char			quotas ;
 	char			*base = NULL ;
 	char			*ptr = NULL ;
 	char			*ptr2 = NULL ;
@@ -35,11 +36,33 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 		if( fgets( filebuffer , sizeof(filebuffer) , fp_dsc ) == NULL )
 			break;
 		
-		lineno++;
+		(*p_lineno)++;
 		
-		ptr = strchr( filebuffer , '#' ) ;
-		if( ptr )
-			(*ptr) = '\0' ;
+		for( ptr = filebuffer , quotas = 0 ; (*ptr) ; ptr++ )
+		{
+			if( quotas == 0 )
+			{
+				if( (*ptr) == '#' )
+				{
+					(*ptr) = '\0' ;
+					break;
+				}
+				else if( (*ptr) == '\'' || (*ptr) == '"' )
+				{
+					quotas = (*ptr) ;
+				}
+			}
+			else
+			{
+				if( (*ptr) == quotas )
+					quotas = 0 ;
+			}
+		}
+		if( quotas )
+		{
+			fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , (*p_lineno) , filebuffer );
+			return -1;
+		}
 		
 		ClearLeft( filebuffer );
 		ClearRight( filebuffer );
@@ -67,7 +90,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 					ptr = strtok2( & base ) ;
 					if( ptr == NULL )
 					{
-						fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+						fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , (*p_lineno) , filebuffer_bak );
 						return -1;
 					}
 					strncpy( psi_next->struct_name , ptr , sizeof(psi_next->struct_name)-1 );
@@ -81,7 +104,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 						ptr2 = strtok2( & base ) ;
 						if( ptr2 == NULL )
 						{
-							fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+							fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , (*p_lineno) , filebuffer_bak );
 							return -1;
 						}
 						
@@ -91,7 +114,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 						}
 						else
 						{
-							fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+							fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , (*p_lineno) , filebuffer_bak );
 							return -1;
 						}
 					}
@@ -105,7 +128,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 						fprintabs( stdout , depth ); printf( "STRUCT %s\n" , psi_next->struct_name );
 					}
 					
-					struct_len = ReadDscFile( pcmdparam , depth , p_offset , dsc_pathfilename , 1 , fp_dsc , lineno , psi_next ) ;
+					struct_len = ReadDscFile( pcmdparam , depth , p_offset , dsc_pathfilename , 1 , fp_dsc , p_lineno , psi_next ) ;
 					if( struct_len < 0 )
 						return struct_len;
 					
@@ -117,7 +140,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 				}
 				else
 				{
-					fprintf( stderr , "*** ERROR : %s:%ld : invalid keyword [%s]\n" , dsc_pathfilename , lineno , ptr );
+					fprintf( stderr , "*** ERROR : %s:%ld : invalid keyword [%s]\n" , dsc_pathfilename , (*p_lineno) , ptr );
 					return -1;
 				}
 				
@@ -126,7 +149,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 			case 1 :
 				if( STRCMP( filebuffer , != , "{" ) )
 				{
-					fprintf( stderr , "*** ERROR : %s:%ld : invalid keyword [%s]\n" , dsc_pathfilename , lineno , filebuffer );
+					fprintf( stderr , "*** ERROR : %s:%ld : invalid keyword [%s]\n" , dsc_pathfilename , (*p_lineno) , filebuffer );
 					return -1;
 				}
 				
@@ -147,28 +170,30 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 				ptr = strtok2( & base ) ;
 				if( ptr == NULL )
 				{
-					fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+					fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , (*p_lineno) , filebuffer_bak );
 					return -1;
 				}
 				
 				if( STRCMP( ptr , == , "INCLUDE" ) )
 				{
 					FILE	*include_fp_dsc = NULL ;
+					int	lineno ;
 					
 					ptr = strtok2( & base ) ;
 					if( ptr == NULL )
 					{
-						fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+						fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , (*p_lineno) , filebuffer_bak );
 						return -1;
 					}
 					
 					include_fp_dsc = fopen( ptr , "r" ) ;
 					if( include_fp_dsc == NULL )
 					{
-						fprintf( stderr , "*** ERROR : %s:%ld : file[%s] can't read\n" , dsc_pathfilename , lineno , ptr );
+						fprintf( stderr , "*** ERROR : %s:%ld : file[%s] can't read\n" , dsc_pathfilename , (*p_lineno) , ptr );
 						return -1;
 					}
-					struct_len = ReadDscFile( pcmdparam , depth , p_offset , ptr , 2 , include_fp_dsc , 0 , pstruct ) ;
+					lineno = 0 ;
+					struct_len = ReadDscFile( pcmdparam , depth , p_offset , ptr , 2 , include_fp_dsc , & lineno , pstruct ) ;
 					fclose( include_fp_dsc );
 					if( struct_len < 0 )
 						return struct_len;
@@ -176,7 +201,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 					
 					continue;
 				}
-				if( STRCMP( ptr , == , "STRUCT" ) )
+				else if( STRCMP( ptr , == , "STRUCT" ) )
 				{
 					psi_sub = (struct StructInfo *)malloc( sizeof(struct StructInfo) ) ;
 					if( psi_sub == NULL )
@@ -189,7 +214,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 					ptr = strtok2( & base ) ;
 					if( ptr == NULL )
 					{
-						fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+						fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , (*p_lineno) , filebuffer_bak );
 						return -1;
 					}
 					strncpy( psi_sub->struct_name , ptr , sizeof(psi_sub->struct_name)-1 );
@@ -203,7 +228,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 						ptr2 = strtok2( & base ) ;
 						if( ptr2 == NULL )
 						{
-							fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+							fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , (*p_lineno) , filebuffer_bak );
 							return -1;
 						}
 						
@@ -213,7 +238,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 						}
 						else
 						{
-							fprintf( stderr , "*** ERROR : %s:%ld : invalid keyword [%s]\n" , dsc_pathfilename , lineno , ptr );
+							fprintf( stderr , "*** ERROR : %s:%ld : invalid keyword [%s]\n" , dsc_pathfilename , (*p_lineno) , ptr );
 							return -1;
 						}
 					}
@@ -227,7 +252,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 						fprintabs( stdout , depth ); printf( "STRUCT %s\n" , psi_sub->struct_name );
 					}
 					
-					struct_len = ReadDscFile( pcmdparam , depth + 1 , p_offset , dsc_pathfilename , 1 , fp_dsc , lineno , psi_sub ) ;
+					struct_len = ReadDscFile( pcmdparam , depth + 1 , p_offset , dsc_pathfilename , 1 , fp_dsc , p_lineno , psi_sub ) ;
 					if( struct_len < 0 )
 						return struct_len;
 					
@@ -250,19 +275,57 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 					
 					continue;
 				}
-				
-				if( STRCMP( ptr , == , "CREATE_SQL" ) )
+				else if( STRCMP( ptr , == , "H" ) )
+				{
+					struct HeaderOutput	*line = NULL ;
+					
+					line = (struct HeaderOutput *)malloc( sizeof(struct HeaderOutput) ) ;
+					if( line == NULL )
+					{
+						fprintf( stderr , "*** ERROR : : alloc failed , errno[%d]\n" , errno );
+						return -1;
+					}
+					memset( line , 0x00 , sizeof(struct HeaderOutput) );
+					
+					ptr2 = strtok2( & base ) ;
+					if( ptr2 == NULL )
+					{
+						fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , (*p_lineno) , filebuffer_bak );
+						return -1;
+					}
+					
+					line->content = strdup( ptr2 ) ;
+					if( line->content == NULL )
+					{
+						fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , (*p_lineno) , filebuffer_bak );
+						return -1;
+					}
+					
+					if( pstruct->first_line == NULL )
+					{
+						pstruct->first_line = line ;
+						pstruct->last_line = line ;
+					}
+					else
+					{
+						pstruct->last_line->next_line = line ;
+						pstruct->last_line = line ;
+					}
+					
+					continue;
+				}
+				else if( STRCMP( ptr , == , "CREATE_SQL" ) )
 				{
 					if( pstruct->create_sql_count >= sizeof(pstruct->create_sql) / sizeof(pstruct->create_sql[0]) )
 					{
-						fprintf( stderr , "*** ERROR : %s:%ld : too many create sql\n" , dsc_pathfilename , lineno );
+						fprintf( stderr , "*** ERROR : %s:%ld : too many create sql\n" , dsc_pathfilename , (*p_lineno) );
 						return -1;
 					}
 					
 					ptr2 = strtok2( & base ) ;
 					if( ptr2 == NULL )
 					{
-						fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+						fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , (*p_lineno) , filebuffer_bak );
 						return -1;
 					}
 					strncpy( pstruct->create_sql[pstruct->create_sql_count] , ptr2 , sizeof(pstruct->create_sql[pstruct->create_sql_count])-1 );
@@ -274,14 +337,14 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 				{
 					if( pstruct->drop_sql_count >= sizeof(pstruct->drop_sql) / sizeof(pstruct->drop_sql[0]) )
 					{
-						fprintf( stderr , "*** ERROR : %s:%ld : too many drop sql\n" , dsc_pathfilename , lineno );
+						fprintf( stderr , "*** ERROR : %s:%ld : too many drop sql\n" , dsc_pathfilename , (*p_lineno) );
 						return -1;
 					}
 					
 					ptr2 = strtok2( & base ) ;
 					if( ptr2 == NULL )
 					{
-						fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+						fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , (*p_lineno) , filebuffer_bak );
 						return -1;
 					}
 					strncpy( pstruct->drop_sql[pstruct->drop_sql_count] , ptr2 , sizeof(pstruct->drop_sql[pstruct->drop_sql_count])-1 );
@@ -293,14 +356,14 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 				{
 					if( pstruct->sqlaction_count >= sizeof(pstruct->sqlaction) / sizeof(pstruct->sqlaction[0]) )
 					{
-						fprintf( stderr , "*** ERROR : %s:%ld : too many drop sql\n" , dsc_pathfilename , lineno );
+						fprintf( stderr , "*** ERROR : %s:%ld : too many drop sql\n" , dsc_pathfilename , (*p_lineno) );
 						return -1;
 					}
 					
 					ptr2 = strtok2( & base ) ;
 					if( ptr2 == NULL )
 					{
-						fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+						fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , (*p_lineno) , filebuffer_bak );
 						return -1;
 					}
 					
@@ -321,7 +384,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 					}
 					else
 					{
-						fprintf( stderr , "*** ERROR : %s:%ld : invalid sqlaction [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+						fprintf( stderr , "*** ERROR : %s:%ld : invalid sqlaction [%s]\n" , dsc_pathfilename , (*p_lineno) , filebuffer_bak );
 						return -1;
 					}
 					
@@ -374,7 +437,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 				ptr3 = strtok2( & base ) ;
 				if( ptr2 == NULL || ptr3 == NULL )
 				{
-					fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+					fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , (*p_lineno) , filebuffer_bak );
 					return -1;
 				}
 				strncpy( pfld->field_type , ptr , sizeof(pfld->field_type)-1 );
@@ -416,7 +479,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 				}
 				else
 				{
-					fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+					fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , (*p_lineno) , filebuffer_bak );
 					return -1;
 				}
 				
@@ -431,7 +494,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 						ptr2 = strtok2( & base ) ;
 						if( ptr2 == NULL )
 						{
-							fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , lineno , filebuffer_bak );
+							fprintf( stderr , "*** ERROR : %s:%ld : invalid line [%s]\n" , dsc_pathfilename , (*p_lineno) , filebuffer_bak );
 							return -1;
 						}
 						
