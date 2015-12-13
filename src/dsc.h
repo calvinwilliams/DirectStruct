@@ -121,6 +121,31 @@ struct FieldInfo
 	struct StructInfo	*struct_list ;
 } ;
 
+struct HeaderOutput
+{
+	char			*content ;
+	struct HeaderOutput	*next_line ;
+} ;
+
+struct CreateSqlOutput
+{
+	char			*content ;
+	struct CreateSqlOutput	*next_line ;
+} ;
+
+struct DropSqlOutput
+{
+	char			*content ;
+	struct DropSqlOutput	*next_line ;
+} ;
+
+struct SqlActionOutput
+{
+	char			*content ;
+	char			*funcname ;
+	struct SqlActionOutput	*next_line ;
+} ;
+
 struct StructInfo
 {
 	char			struct_name[ 64 + 1 ] ;
@@ -128,13 +153,14 @@ struct StructInfo
 	int			field_count ;
 	int			array_size ;
 	
-	char			create_sql[10][ 1024 + 1 ] ;
-	int			create_sql_count ;
-	char			drop_sql[10][ 1024 + 1 ] ;
-	int			drop_sql_count ;
-	char			sqlaction[50][ 1024 + 1 ] ;
-	char			sqlaction_funcname[50][ 1024 + 1 ] ;
-	int			sqlaction_count ;
+	struct HeaderOutput	*first_line ;
+	struct HeaderOutput	*last_line ;
+	struct CreateSqlOutput	*first_create_sql_line ;
+	struct CreateSqlOutput	*last_create_sql_line ;
+	struct DropSqlOutput	*first_drop_sql_line ;
+	struct DropSqlOutput	*last_drop_sql_line ;
+	struct SqlActionOutput	*first_sqlaction_line ;
+	struct SqlActionOutput	*last_sqlaction_line ;
 	int			sqlconn ;
 	
 	struct FieldInfo	*field_list ;
@@ -168,7 +194,7 @@ struct EnumInfo
  * ReadDscFile
  */
 
-int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset , char *dsc_pathfilename , int flag , FILE *fp_dsc , long lineno , struct StructInfo *pmsginfo );
+int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset , char *dsc_pathfilename , int flag , FILE *fp_dsc , int *p_lineno , struct StructInfo *pmsginfo );
 
 /*
  * GenerateCCode
@@ -176,7 +202,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 
 int GenerateCCode( struct CommandParameter *pcmdparam , struct StructInfo *pmsginfo , FILE *fp_dsc_h , FILE *fp_dsc_c , FILE *fp_dsc_LOG_c );
 int GenerateSqlCode( struct CommandParameter *pcp , struct StructInfo *pstruct , FILE *fp_dsc_create_sql , FILE *fp_dsc_drop_sql );
-int GenerateECCode_PQSQL( struct CommandParameter *pcp , struct StructInfo *pstruct , FILE *fp_dsc_ESQL_eh , FILE *fp_dsc_ESQL_ec );
+int GenerateECCode_PGSQL( struct CommandParameter *pcp , struct StructInfo *pstruct , FILE *fp_dsc_ESQL_eh , FILE *fp_dsc_ESQL_ec );
 int GenerateECCode_ORACLE( struct CommandParameter *pcp , struct StructInfo *pstruct , FILE *fp_dsc_ESQL_eh , FILE *fp_dsc_ESQL_ec );
 
 #endif

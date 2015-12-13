@@ -11,7 +11,7 @@ int test_sqlaction()
 {
 	userinfo		u ;
 	
-	DSCDBCONN( "127.0.0.1" , 15432 , "calvin" , "calvin" , "calvin" );
+	DSCDBCONN( "127.0.0.1" , 18432 , "calvin" , "calvin" , "calvin" );
 	if( SQLCODE )
 	{
 		printf( "CONNECT failed[%d][%s]\n" , SQLCODE , SQLSTATE );

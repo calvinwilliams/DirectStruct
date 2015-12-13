@@ -1,3 +1,27 @@
+ver 1.6.0	2015-12-13	calvin
+		ADD
+		* First tag "H" append output to header file in IDL files
+		* No limited using first tag "CREATE_SQL","DROP_SQL","SQLACTION" in IDL files
+		FIXED
+		* incorrect error line no on parse IDL files
+
+ver 1.5.0	2015-11-29	calvin
+		* Some adjustion in generate codes
+		* Add json dump funcation by alloc memory internally
+		Alloc memory internally , application free memory
+			base = NULL ;
+			nret = DSCSERIALIZE_JSON_DUP_BankJsonTransaction( & st , NULL , & ptr , NULL , NULL ) ;
+		|| alloc initial size internally
+			base = NULL ;
+			buf_size = 1024 ;
+			nret = DSCSERIALIZE_JSON_DUP_BankJsonTransaction( & st , NULL , & ptr , & buf_size , NULL ) ;
+		|| application alloc memory , realloc on needs internally ; len output fill-length actually
+			base = malloc( 1024 ) ;
+			buf_size = 1024 ;
+			len = buf_size - 1 ;
+			nret = DSCSERIALIZE_JSON_DUP_BankJsonTransaction( & st , NULL , & ptr , & buf_size , & len ) ;
+		|| reserving space on len < buf_size - 1 ; len output fill-length actually
+
 ver 1.4.5	2015-05-22	calvin
 		* Fixed a bug on multi-loop too
 

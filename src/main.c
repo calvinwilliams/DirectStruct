@@ -11,7 +11,7 @@
 static void version()
 {
 	printf( "dsc v%s - DirectSrtuct Compiler\n" , __DIRECTSTRUCT_VERSION );
-	printf( "Copyright by calvin<calvinwilliams.c@gmail.com> 2014\n" );
+	printf( "Copyright by calvin<calvinwilliams@163.com><calvinwilliams.c@gmail.com> 2014,2015\n" );
 }
 
 static void usage()

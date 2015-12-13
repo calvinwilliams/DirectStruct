@@ -8,15 +8,16 @@
  * Licensed under the LGPL v2.1, see the file LICENSE in base directory.
  */
 
-char	__DIRECTSTRUCT_VERSION_1_4_5[] = "1.4.5" ;
-char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_4_5 ;
+char	__DIRECTSTRUCT_VERSION_1_6_0[] = "1.6.0" ;
+char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_6_0 ;
 
 int dsc( struct CommandParameter *pcmdparam )
 {
 	FILE			*fp_dsc = NULL ;
+	int			offset ;
+	int			lineno ;
 	struct StructInfo	si ;
 	int			struct_len ;
-	int			offset ;
 	
 	char			output_pathfilename[ 256 + 1 ] ;
 	
@@ -29,8 +30,9 @@ int dsc( struct CommandParameter *pcmdparam )
 		return -1;
 	}
 	offset = 0 ;
+	lineno = 0 ;
 	memset( & si , 0x00 , sizeof(struct StructInfo) );
-	struct_len = ReadDscFile( pcmdparam , 0 , & offset , pcmdparam->pathfilename , 0 , fp_dsc , 0 , & si ) ;
+	struct_len = ReadDscFile( pcmdparam , 0 , & offset , pcmdparam->pathfilename , 0 , fp_dsc , & lineno , & si ) ;
 	fclose( fp_dsc );
 	if( struct_len < 0 )
 		return -struct_len;
@@ -134,7 +136,7 @@ int dsc( struct CommandParameter *pcmdparam )
 			return -1;
 		}
 		
-		nret = GenerateECCode_PQSQL( pcmdparam , & si , fp_dsc_ESQL_eh , fp_dsc_ESQL_ec ) ;
+		nret = GenerateECCode_PGSQL( pcmdparam , & si , fp_dsc_ESQL_eh , fp_dsc_ESQL_ec ) ;
 		if( nret )
 			return -nret;
 		

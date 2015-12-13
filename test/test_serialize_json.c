@@ -9,11 +9,12 @@
 int test_serialize_json()
 {
 	BankJsonTransaction	trans ;
-	char			buf[ 10240 + 1 ] ;
-	int			len ;
-	int			nret = 0 ;
-	
+	char			buf[ 1416 + 1 ] ;
 	char			*p = NULL ;
+	int			len ;
+	char			*base = NULL ;
+	int			buf_size ;
+	int			nret = 0 ;
 	
 	/* client code */
 	DSCINIT_BankJsonTransaction( & trans );
@@ -128,6 +129,56 @@ int test_serialize_json()
 	}
 	
 	DSCLOG_BankJsonTransaction( & trans );
+
+	base = NULL ;
+	nret = DSCSERIALIZE_JSON_DUP_BankJsonTransaction( & trans , "GBK" , & base , NULL , NULL ) ;
+	if( nret )
+	{
+		printf( "DSCSERIALIZE_JSON_DUP_BankJsonTransaction failed[%d]\n" , nret );
+		return nret;
+	}
+	else
+	{
+		printf( "DSCSERIALIZE_JSON_DUP_BankJsonTransaction ok\n" );
+	}
+	
+	printf( "DUP base[%d][%s]\n" , strlen(base) , base );
+	
+	free( base );
+	
+	base = NULL ;
+	buf_size = 100 ;
+	len = 0 ;
+	nret = DSCSERIALIZE_JSON_DUP_BankJsonTransaction( & trans , "GBK" , & base , & buf_size , & len ) ;
+	if( nret )
+	{
+		printf( "DSCSERIALIZE_JSON_DUP_BankJsonTransaction failed[%d]\n" , nret );
+		return nret;
+	}
+	else
+	{
+		printf( "DSCSERIALIZE_JSON_DUP_BankJsonTransaction ok , len[%d]\n" , len );
+	}
+	
+	printf( "DUP base[%d][%d][%.*s]\n" , buf_size , len , len , base );
+	
+	memset( base , 0x00 , buf_size );
+	base[0] = ' ' ;
+	len = buf_size-1 - 1 ;
+	nret = DSCSERIALIZE_JSON_DUP_COMPACT_BankJsonTransaction( & trans , "GBK" , & base , & buf_size , & len ) ;
+	if( nret )
+	{
+		printf( "DSCSERIALIZE_JSON_DUP_COMPACT_BankJsonTransaction failed[%d]\n" , nret );
+		return nret;
+	}
+	else
+	{
+		printf( "DSCSERIALIZE_JSON_DUP_COMPACT_BankJsonTransaction ok , len[%d]\n" , len );
+	}
+	
+	printf( "DUP_COMPACT base[%d][%d][%.*s]\n" , buf_size , len , len , base );
+	
+	free( base );
 	
 	return 0;
 }
