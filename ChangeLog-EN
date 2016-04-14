@@ -1,3 +1,6 @@
+ver 1.6.2	2016-04-14	calvin
+		* Fixed format-spec "%lld" for long long on Linux
+
 ver 1.6.1	2015-12-13	calvin
 		FIXED
 		* More than two structs in one .dsc file

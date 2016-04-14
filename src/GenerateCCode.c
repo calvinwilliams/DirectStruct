@@ -3049,7 +3049,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 	fprintf( fp_dsc_h , "#define ulonglong	unsigned long long\n" );
 	fprintf( fp_dsc_h , "#define LL(_ll_)	_ll_##LL\n" );
 	fprintf( fp_dsc_h , "#define ULL(_ll_)	_ll_##ULL\n" );
-	fprintf( fp_dsc_h , "#define LONGLONG_FORMAT_SPEC	\"%%ll\"\n" );
+	fprintf( fp_dsc_h , "#define LONGLONG_FORMAT_SPEC	\"%%lld\"\n" );
 	fprintf( fp_dsc_h , "#define ATOLL	atoll\n" );
 	fprintf( fp_dsc_h , "#endif\n" );
 	fprintf( fp_dsc_h , "#if ( defined _AIX )\n" );
