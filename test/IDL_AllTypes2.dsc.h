@@ -37,7 +37,7 @@
 #define ulonglong	unsigned long long
 #define LL(_ll_)	_ll_##LL
 #define ULL(_ll_)	_ll_##ULL
-#define LONGLONG_FORMAT_SPEC	"%ll"
+#define LONGLONG_FORMAT_SPEC	"%lld"
 #define ATOLL	atoll
 #endif
 #if ( defined _AIX )
