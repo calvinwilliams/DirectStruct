@@ -2,6 +2,7 @@ STRUCT	BankJsonTransaction
 {
 	INT	1	version				DEFAULT		1
 	INCLUDE IDL_ResponseHeader.dsc
+	STRING	4	null_string
 	STRUCT QueryTransactionDetails
 	{
 		STRUCT AddonMessages

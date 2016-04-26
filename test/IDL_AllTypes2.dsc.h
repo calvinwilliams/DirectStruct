@@ -17,10 +17,13 @@
 #endif
 
 #ifndef DSCTRUE
-#define DSCTRUE	(char)'t'
+#define DSCTRUE	(unsigned char)'t'
 #endif
 #ifndef DSCFALSE
-#define DSCFALSE	(char)'f'
+#define DSCFALSE	(unsigned char)'f'
+#endif
+#ifndef DSCNULL
+#define DSCNULL	(unsigned char)127
 #endif
 
 #if ( defined __unix ) | ( defined __linux__ )

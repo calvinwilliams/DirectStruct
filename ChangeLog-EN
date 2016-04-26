@@ -1,3 +1,6 @@
+ver 1.6.3	2016-04-26	calvin
+		* Update with fasterjson v1.1.6
+
 ver 1.6.2	2016-04-14	calvin
 		* Fixed format-spec "%lld" for long long on Linux
 

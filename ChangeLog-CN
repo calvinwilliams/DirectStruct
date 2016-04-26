@@ -1,3 +1,6 @@
+ver 1.6.3	2016-04-26	calvin
+		* 随fasterjson v1.1.6更新
+
 ver 1.6.2	2016-04-14	calvin
 		* Linux下的long long类型的输出格式化符修正为%lld，感谢tanli
 

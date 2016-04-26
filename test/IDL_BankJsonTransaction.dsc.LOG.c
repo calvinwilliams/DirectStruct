@@ -17,6 +17,7 @@ int FUNCNAME_DSCLOG_BankJsonTransaction( BankJsonTransaction *pst )
 {
 	int	index[10] = { 0 } ; index[0] = 0 ;
 	PREFIX_DSCLOG_BankJsonTransaction "BankJsonTransaction.version[%d]" NEWLINE_DSCLOG_BankJsonTransaction , pst->version );
+	PREFIX_DSCLOG_BankJsonTransaction "BankJsonTransaction.null_string[%s]" NEWLINE_DSCLOG_BankJsonTransaction , pst->null_string );
 	PREFIX_DSCLOG_BankJsonTransaction "BankJsonTransaction.sign_flag[%c]" NEWLINE_DSCLOG_BankJsonTransaction , pst->sign_flag );
 		PREFIX_DSCLOG_BankJsonTransaction "BankJsonTransaction.ResponseHeader.transaction_code[%s]" NEWLINE_DSCLOG_BankJsonTransaction , pst->ResponseHeader.transaction_code );
 		PREFIX_DSCLOG_BankJsonTransaction "BankJsonTransaction.ResponseHeader.trans_jnlsno[%d]" NEWLINE_DSCLOG_BankJsonTransaction , pst->ResponseHeader.trans_jnlsno );

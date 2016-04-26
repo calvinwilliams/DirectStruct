@@ -9,7 +9,7 @@
 int test_serialize_json()
 {
 	BankJsonTransaction	trans ;
-	char			buf[ 1416 + 1 ] ;
+	char			buf[ 4096 + 1 ] ;
 	char			*p = NULL ;
 	int			len ;
 	char			*base = NULL ;
@@ -22,6 +22,7 @@ int test_serialize_json()
 	strcpy( trans.ResponseHeader.transaction_code , "P0101" );
 	trans.ResponseHeader.trans_jnlsno = 12345678 ;
 	trans.ResponseHeader.response_code = 0 ;
+	trans.null_string[0] = DSCNULL ;
 	strcpy( trans.ResponseHeader.response_desc , "OK" );
 	strcpy( trans.QueryTransactionDetails.AddonMessages.AddonMessage[1].message_text , "Check channel passed" );
 	strcpy( trans.QueryTransactionDetails.AddonMessages.AddonMessage[0].message_text , "Check account passed" );
