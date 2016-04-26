@@ -1801,9 +1801,16 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON( struct CommandParameter *pcp , int
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs );
 				if( pfield->field_name[0] != '_' )
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"\\\"%s\\\" : \"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
+				fprintf( fp_dsc_c , "\tif(%s%s[0]==127)\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\t{\n" );
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"null\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" );
+				fprintf( fp_dsc_c , "\t}\n" );
+				fprintf( fp_dsc_c , "\telse\n" );
+				fprintf( fp_dsc_c , "\t{\n" );
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"\\\"\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" );
 				fprintf( fp_dsc_c , "\tJSONESCAPE_EXPAND(%s%s,strlen(%s%s),buf,len,remain_len); if(len<0)return -7; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name , pathname,pfield->field_name );
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"\\\"\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" );
+				fprintf( fp_dsc_c , "\t}\n" );
 			}
 			else if( STRCMP( pfield->field_type , == , "BOOL" ) )
 			{
@@ -2030,9 +2037,16 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( struct CommandParameter *p
 			{
 				if( pfield->field_name[0] != '_' )
 						fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"\\\"%s\\\":\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
+				fprintf( fp_dsc_c , "\tif(%s%s[0]==127)\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\t{\n" );
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"null\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" );
+				fprintf( fp_dsc_c , "\t}\n" );
+				fprintf( fp_dsc_c , "\telse\n" );
+				fprintf( fp_dsc_c , "\t{\n" );
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"\\\"\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" );
 				fprintf( fp_dsc_c , "\tJSONESCAPE_EXPAND(%s%s,strlen(%s%s),buf,len,remain_len); if(len<0)return -7; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name , pathname,pfield->field_name );
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"\\\"\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" );
+				fprintf( fp_dsc_c , "\t}\n" );
 			}
 			else if( STRCMP( pfield->field_type , == , "BOOL" ) )
 			{
@@ -2290,9 +2304,16 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP( struct CommandParameter *pcp ,
 				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs );
 				if( pfield->field_name[0] != '_' )
 					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\" : \");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				fprintf( fp_dsc_c , "\tif(%s%s[0]==127)\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\t{\n" );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"null\");"DUP_CHECK"} if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" );
+				fprintf( fp_dsc_c , "\t}\n" );
+				fprintf( fp_dsc_c , "\telse\n" );
+				fprintf( fp_dsc_c , "\t{\n" );
 				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
 				fprintf( fp_dsc_c , "\twhile(1){JSONESCAPE_EXPAND(%s%s,strlen(%s%s),buf,len,remain_len);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name , pathname,pfield->field_name );
 				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
+				fprintf( fp_dsc_c , "\t}\n" );
 			}
 			else if( STRCMP( pfield->field_type , == , "BOOL" ) )
 			{
@@ -2519,9 +2540,16 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP_COMPACT( struct CommandParamete
 			{
 				if( pfield->field_name[0] != '_' )
 						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\":\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				fprintf( fp_dsc_c , "\tif(%s%s[0]==127)\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\t{\n" );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"null\");"DUP_CHECK"} if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" );
+				fprintf( fp_dsc_c , "\t}\n" );
+				fprintf( fp_dsc_c , "\telse\n" );
+				fprintf( fp_dsc_c , "\t{\n" );
 				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
 				fprintf( fp_dsc_c , "\twhile(1){JSONESCAPE_EXPAND(%s%s,strlen(%s%s),buf,len,remain_len);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name , pathname,pfield->field_name );
 				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
+				fprintf( fp_dsc_c , "\t}\n" );
 			}
 			else if( STRCMP( pfield->field_type , == , "BOOL" ) )
 			{
@@ -3029,10 +3057,13 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 	fprintf( fp_dsc_h , "#endif\n" );
 	fprintf( fp_dsc_h , "\n" );
 	fprintf( fp_dsc_h , "#ifndef DSCTRUE\n" );
-	fprintf( fp_dsc_h , "#define DSCTRUE	(char)'t'\n" );
+	fprintf( fp_dsc_h , "#define DSCTRUE	(unsigned char)'t'\n" );
 	fprintf( fp_dsc_h , "#endif\n" );
 	fprintf( fp_dsc_h , "#ifndef DSCFALSE\n" );
-	fprintf( fp_dsc_h , "#define DSCFALSE	(char)'f'\n" );
+	fprintf( fp_dsc_h , "#define DSCFALSE	(unsigned char)'f'\n" );
+	fprintf( fp_dsc_h , "#endif\n" );
+	fprintf( fp_dsc_h , "#ifndef DSCNULL\n" );
+	fprintf( fp_dsc_h , "#define DSCNULL	(unsigned char)127\n" );
 	fprintf( fp_dsc_h , "#endif\n" );
 	fprintf( fp_dsc_h , "\n" );
 	fprintf( fp_dsc_h , "#if ( defined __unix ) | ( defined __linux__ )\n" );
