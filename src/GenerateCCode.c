@@ -2874,7 +2874,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_JSON_LEAF( struct CommandParameter *pc
 			{
 				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	/* %s */\n" , pfield->field_name );
 				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	if( jpath_len == %d && strncmp( jpath , \"%s/%s\" , jpath_len ) == 0 )\n" , (int)(strlen(jsonpathname)+1+strlen(converted_field_name)) , jsonpathname,converted_field_name );
-				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{JSONUNESCAPE_FOLD(content,content_len,%s%s,len,sizeof(%s%s)-1); if(len<0)return -7;%s}\n" , pathname,pfield->field_name , pathname,pfield->field_name , converted_jsonpathname );
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{JSONUNESCAPE_FOLD(content,content_len,%s%s,len,sizeof(%s%s)-1); if(len<0){_DSC_errline=__LINE__;return -7;}%s}\n" , pathname,pfield->field_name , pathname,pfield->field_name , converted_jsonpathname );
 			}
 			else if( STRCMP( pfield->field_type , == , "BOOL" ) )
 			{
@@ -3515,6 +3515,9 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_JSON_DUP_COMPACT_%s( %s *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len );\n" , next_struct->struct_name , next_struct->struct_name );
 			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCDESERIALIZE_JSON_COMPACT_%s( char *encoding , char *buf , int *p_len , %s *pst );\n" , next_struct->struct_name , next_struct->struct_name );
 		}	
+		
+		fprintf( fp_dsc_h , "\n" );
+		fprintf( fp_dsc_h , "int DSCGetErrorLine_%s();\n" , next_struct->struct_name );
 	}
 	
 	fprintf( fp_dsc_h , "\n" );
@@ -3527,6 +3530,8 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 	for( next_struct = pstruct->next_struct ; next_struct ; next_struct = next_struct->next_struct )
 	{
 		/* Generate DSCINIT_*() */
+		fprintf( fp_dsc_c , "\n" );
+		fprintf( fp_dsc_c , "static int		_DSC_errline = 0 ;\n" );
 		fprintf( fp_dsc_c , "\n" );
 		fprintf( fp_dsc_c , "int DSCINIT_%s( %s *pst )\n" , next_struct->struct_name , next_struct->struct_name );
 		fprintf( fp_dsc_c , "{\n" );
@@ -4015,6 +4020,12 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_LOG_c , "	return 0;\n" );
 			fprintf( fp_dsc_LOG_c , "}\n" );
 		}
+		
+		fprintf( fp_dsc_c , "int DSCGetErrorLine_%s()\n" , next_struct->struct_name );
+		fprintf( fp_dsc_c , "{\n" );
+		fprintf( fp_dsc_c , "	return _DSC_errline;\n" );
+		fprintf( fp_dsc_c , "}\n" );
+		fprintf( fp_dsc_c , "\n" );
 	}
 	
 	return 0;

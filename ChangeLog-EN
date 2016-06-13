@@ -1,3 +1,6 @@
+ver 1.6.4	2016-06-13	calvin
+		* Add generate function DSCGetErrorLine_%s
+
 ver 1.6.3	2016-04-26	calvin
 		* Update with fasterjson v1.1.6
 

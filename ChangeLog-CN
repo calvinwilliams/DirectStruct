@@ -1,3 +1,6 @@
+ver 1.6.4	2016-06-13	calvin
+		* 新增函数DSCGetErrorLine_%s用于自动生成代码报错时提示错误
+
 ver 1.6.3	2016-04-26	calvin
 		* 随fasterjson v1.1.6更新
 
