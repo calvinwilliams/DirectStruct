@@ -4846,15 +4846,19 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_h , "\n" );
 			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_JSON_%s( %s *pst , char *encoding , char *buf , int *p_len );\n" , next_struct->struct_name , next_struct->struct_name );
 			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_JSON_DUP_%s( %s *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_JSON_DUP_%s_V( void *pv , char *encoding , char **pp_base , int *p_buf_size , int *p_len );\n" , next_struct->struct_name );
 			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCDESERIALIZE_JSON_%s( char *encoding , char *buf , int *p_len , %s *pst );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCDESERIALIZE_JSON_%s_V( char *encoding , char *buf , int *p_len , void *pv );\n" , next_struct->struct_name );
 		}	
 		
 		if( pcp->output_c_json_compact_flag == 1 )
 		{
 			fprintf( fp_dsc_h , "\n" );
 			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_JSON_COMPACT_%s( %s *pst , char *encoding , char *buf , int *p_len );\n" , next_struct->struct_name , next_struct->struct_name );
-			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_JSON_DUP_COMPACT_%s( %s *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_JSON_COMPACT_DUP_%s( %s *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_JSON_COMPACT_DUP_%s_V( void *pv , char *encoding , char **pp_base , int *p_buf_size , int *p_len );\n" , next_struct->struct_name );
 			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCDESERIALIZE_JSON_COMPACT_%s( char *encoding , char *buf , int *p_len , %s *pst );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCDESERIALIZE_JSON_COMPACT_%s_V( char *encoding , char *buf , int *p_len , void *pv );\n" , next_struct->struct_name );
 		}	
 		
 		fprintf( fp_dsc_h , "\n" );
@@ -5183,6 +5187,11 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "	\n" );
 			fprintf( fp_dsc_c , "	return 0;\n" );
 			fprintf( fp_dsc_c , "}\n" );
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCSERIALIZE_JSON_DUP_%s_V( void *pv , char *encoding , char **pp_base , int *p_buf_size , int *p_len )\n" , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	return DSCSERIALIZE_JSON_DUP_%s( (%s*)pv , encoding , pp_base , p_buf_size , p_len );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "}\n" );
 		}
 		
 		if( pcp->output_c_json_compact_flag == 1 )
@@ -5206,7 +5215,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "	return 0;\n" );
 			fprintf( fp_dsc_c , "}\n" );
 			fprintf( fp_dsc_c , "\n" );
-			fprintf( fp_dsc_c , "int DSCSERIALIZE_JSON_DUP_COMPACT_%s( %s *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len )\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "int DSCSERIALIZE_JSON_COMPACT_DUP_%s( %s *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len )\n" , next_struct->struct_name , next_struct->struct_name );
 			fprintf( fp_dsc_c , "{\n" );
 			fprintf( fp_dsc_c , "	int	buf_size ;\n" );
 			fprintf( fp_dsc_c , "	int	remain_len ;\n" );
@@ -5257,6 +5266,11 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "		(*p_len) = buf_size-1 - buf_begin_offset - remain_len ;\n" );
 			fprintf( fp_dsc_c , "	\n" );
 			fprintf( fp_dsc_c , "	return 0;\n" );
+			fprintf( fp_dsc_c , "}\n" );
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCSERIALIZE_JSON_COMPACT_DUP_%s_V( void *pv , char *encoding , char **pp_base , int *p_buf_size , int *p_len )\n" , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	return DSCSERIALIZE_JSON_COMPACT_DUP_%s( (%s*)pv , encoding , pp_base , p_buf_size , p_len );\n" , next_struct->struct_name , next_struct->struct_name );
 			fprintf( fp_dsc_c , "}\n" );
 		}
 		
@@ -5316,6 +5330,11 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "	\n" );
 			fprintf( fp_dsc_c , "	return 0;\n" );
 			fprintf( fp_dsc_c , "}\n" );
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCDESERIALIZE_JSON_%s_V( char *encoding , char *buf , int *p_len , void *pv )\n" , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	return DSCDESERIALIZE_JSON_%s( encoding , buf , p_len , (%s*)pv );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "}\n" );
 		}
 		if( pcp->output_c_json_compact_flag == 1 )
 		{	
@@ -5330,6 +5349,11 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "		return nret;\n" );
 			fprintf( fp_dsc_c , "	\n" );
 			fprintf( fp_dsc_c , "	return 0;\n" );
+			fprintf( fp_dsc_c , "}\n" );
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCDESERIALIZE_JSON_COMPACT_%s_V( char *encoding , char *buf , int *p_len , void *pv )\n" , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	return DSCDESERIALIZE_JSON_COMPACT_%s( encoding , buf , p_len , (%s*)pv );\n" , next_struct->struct_name , next_struct->struct_name );
 			fprintf( fp_dsc_c , "}\n" );
 		}
 		

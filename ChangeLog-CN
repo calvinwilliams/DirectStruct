@@ -1,3 +1,8 @@
+ver 1.8.0	2017-02-05	calvin
+		* 新增自动生成函数
+		  DSCSERIALIZE_JSON_DUP_xxx_V,DSCDESERIALIZE_JSON_xxx_V
+		  DSCSERIALIZE_JSON_COMPACT_DUP_xxx_V,DSCDESERIALIZE_JSON_COMPACT_xxx_V
+
 ver 1.7.0	2016-12-30	calvin
 		* 源码文件结构调整
 		* 新增定义类型AMOUNT，对应C语言类型double，对应数据库表类型NUMERIC（NUMERIC( (定义长度-8)/2*4 , 2 )）

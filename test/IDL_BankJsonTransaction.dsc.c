@@ -537,6 +537,11 @@ int DSCSERIALIZE_JSON_DUP_BankJsonTransaction( BankJsonTransaction *pst , char *
 	return 0;
 }
 
+int DSCSERIALIZE_JSON_DUP_BankJsonTransaction_V( void *pv , char *encoding , char **pp_base , int *p_buf_size , int *p_len )
+{
+	return DSCSERIALIZE_JSON_DUP_BankJsonTransaction( (BankJsonTransaction*)pv , encoding , pp_base , p_buf_size , p_len );
+}
+
 int DSCSERIALIZE_JSON_COMPACT_BankJsonTransaction( BankJsonTransaction *pst , char *encoding , char *buf , int *p_len )
 {
 	int	remain_len ;
@@ -746,7 +751,7 @@ int DSCSERIALIZE_JSON_COMPACT_BankJsonTransaction( BankJsonTransaction *pst , ch
 	return 0;
 }
 
-int DSCSERIALIZE_JSON_DUP_COMPACT_BankJsonTransaction( BankJsonTransaction *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len )
+int DSCSERIALIZE_JSON_COMPACT_DUP_BankJsonTransaction( BankJsonTransaction *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len )
 {
 	int	buf_size ;
 	int	remain_len ;
@@ -991,6 +996,11 @@ int DSCSERIALIZE_JSON_DUP_COMPACT_BankJsonTransaction( BankJsonTransaction *pst 
 	return 0;
 }
 
+int DSCSERIALIZE_JSON_COMPACT_DUP_BankJsonTransaction_V( void *pv , char *encoding , char **pp_base , int *p_buf_size , int *p_len )
+{
+	return DSCSERIALIZE_JSON_COMPACT_DUP_BankJsonTransaction( (BankJsonTransaction*)pv , encoding , pp_base , p_buf_size , p_len );
+}
+
 funcCallbackOnJsonNode CallbackOnJsonNode_BankJsonTransaction ;
 int CallbackOnJsonNode_BankJsonTransaction( int type , char *jpath , int jpath_len , int jpath_size , char *node , int node_len , char *content , int content_len , void *p )
 {
@@ -1095,6 +1105,11 @@ int DSCDESERIALIZE_JSON_BankJsonTransaction( char *encoding , char *buf , int *p
 	return 0;
 }
 
+int DSCDESERIALIZE_JSON_BankJsonTransaction_V( char *encoding , char *buf , int *p_len , void *pv )
+{
+	return DSCDESERIALIZE_JSON_BankJsonTransaction( encoding , buf , p_len , (BankJsonTransaction*)pv );
+}
+
 int DSCDESERIALIZE_JSON_COMPACT_BankJsonTransaction( char *encoding , char *buf , int *p_len , BankJsonTransaction *pst )
 {
 	char	jpath[ 1024 + 1 ] ;
@@ -1105,6 +1120,11 @@ int DSCDESERIALIZE_JSON_COMPACT_BankJsonTransaction( char *encoding , char *buf 
 		return nret;
 	
 	return 0;
+}
+
+int DSCDESERIALIZE_JSON_COMPACT_BankJsonTransaction_V( char *encoding , char *buf , int *p_len , void *pv )
+{
+	return DSCDESERIALIZE_JSON_COMPACT_BankJsonTransaction( encoding , buf , p_len , (BankJsonTransaction*)pv );
 }
 int DSCGetErrorLine_BankJsonTransaction()
 {

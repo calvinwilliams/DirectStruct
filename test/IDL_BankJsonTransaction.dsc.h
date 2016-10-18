@@ -153,11 +153,15 @@ _WINDLL_FUNC int DSCINIT_BankJsonTransaction( BankJsonTransaction *pst );
 
 _WINDLL_FUNC int DSCSERIALIZE_JSON_BankJsonTransaction( BankJsonTransaction *pst , char *encoding , char *buf , int *p_len );
 _WINDLL_FUNC int DSCSERIALIZE_JSON_DUP_BankJsonTransaction( BankJsonTransaction *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len );
+_WINDLL_FUNC int DSCSERIALIZE_JSON_DUP_BankJsonTransaction_V( void *pv , char *encoding , char **pp_base , int *p_buf_size , int *p_len );
 _WINDLL_FUNC int DSCDESERIALIZE_JSON_BankJsonTransaction( char *encoding , char *buf , int *p_len , BankJsonTransaction *pst );
+_WINDLL_FUNC int DSCDESERIALIZE_JSON_BankJsonTransaction_V( char *encoding , char *buf , int *p_len , void *pv );
 
 _WINDLL_FUNC int DSCSERIALIZE_JSON_COMPACT_BankJsonTransaction( BankJsonTransaction *pst , char *encoding , char *buf , int *p_len );
-_WINDLL_FUNC int DSCSERIALIZE_JSON_DUP_COMPACT_BankJsonTransaction( BankJsonTransaction *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len );
+_WINDLL_FUNC int DSCSERIALIZE_JSON_COMPACT_DUP_BankJsonTransaction( BankJsonTransaction *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len );
+_WINDLL_FUNC int DSCSERIALIZE_JSON_COMPACT_DUP_BankJsonTransaction_V( void *pv , char *encoding , char **pp_base , int *p_buf_size , int *p_len );
 _WINDLL_FUNC int DSCDESERIALIZE_JSON_COMPACT_BankJsonTransaction( char *encoding , char *buf , int *p_len , BankJsonTransaction *pst );
+_WINDLL_FUNC int DSCDESERIALIZE_JSON_COMPACT_BankJsonTransaction_V( char *encoding , char *buf , int *p_len , void *pv );
 
 int DSCGetErrorLine_BankJsonTransaction();
 

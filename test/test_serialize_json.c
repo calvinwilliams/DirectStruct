@@ -166,15 +166,15 @@ int test_serialize_json()
 	memset( base , 0x00 , buf_size );
 	base[0] = ' ' ;
 	len = buf_size-1 - 1 ;
-	nret = DSCSERIALIZE_JSON_DUP_COMPACT_BankJsonTransaction( & trans , "GBK" , & base , & buf_size , & len ) ;
+	nret = DSCSERIALIZE_JSON_COMPACT_DUP_BankJsonTransaction( & trans , "GBK" , & base , & buf_size , & len ) ;
 	if( nret )
 	{
-		printf( "DSCSERIALIZE_JSON_DUP_COMPACT_BankJsonTransaction failed[%d]\n" , nret );
+		printf( "DSCSERIALIZE_JSON_COMPACT_DUP_BankJsonTransaction failed[%d]\n" , nret );
 		return nret;
 	}
 	else
 	{
-		printf( "DSCSERIALIZE_JSON_DUP_COMPACT_BankJsonTransaction ok , len[%d]\n" , len );
+		printf( "DSCSERIALIZE_JSON_COMPACT_DUP_BankJsonTransaction ok , len[%d]\n" , len );
 	}
 	
 	printf( "DUP_COMPACT base[%d][%d][%.*s]\n" , buf_size , len , len , base );
