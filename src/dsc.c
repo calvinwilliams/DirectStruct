@@ -8,8 +8,8 @@
  * Licensed under the LGPL v2.1, see the file LICENSE in base directory.
  */
 
-char	__DIRECTSTRUCT_VERSION_1_6_4[] = "1.6.4" ;
-char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_6_4 ;
+char	__DIRECTSTRUCT_VERSION_1_6_5[] = "1.6.5" ;
+char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_6_5 ;
 
 int dsc( struct CommandParameter *pcmdparam )
 {
