@@ -3106,7 +3106,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 	fprintf( fp_dsc_h , "#define NATOC(_base_,_len_,_result_)	{_result_=_base_[0];}\n" );
 	fprintf( fp_dsc_h , "#endif\n" );
 	fprintf( fp_dsc_h , "#ifndef NATOI1\n" );
-	fprintf( fp_dsc_h , "#define NATOI1(_base_,_len_,_result_)	{char buf[3+1];memset(buf,0x00,sizeof(buf));strncpy(buf,_base_,5);_result_=(char)atoi(buf);}\n" );
+	fprintf( fp_dsc_h , "#define NATOI1(_base_,_len_,_result_)	{char buf[3+1];memset(buf,0x00,sizeof(buf));strncpy(buf,_base_,3);_result_=(char)atoi(buf);}\n" );
 	fprintf( fp_dsc_h , "#endif\n" );
 	fprintf( fp_dsc_h , "#ifndef NATOS\n" );
 	fprintf( fp_dsc_h , "#define NATOS(_base_,_len_,_result_)	{char buf[5+1];memset(buf,0x00,sizeof(buf));strncpy(buf,_base_,5);_result_=(short)atol(buf);}\n" );
