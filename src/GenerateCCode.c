@@ -1531,7 +1531,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_XML_LEAF( struct CommandParameter *pcp
 				{
 					fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	/* %s */\n" , pfield->field_name );
 					fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	if( xpath_len == %d && strncmp( xpath , \"%s/%s\" , xpath_len ) == 0 )\n" , (int)(strlen(xmlpathname)+1+strlen(pfield->field_name)) , xmlpathname,pfield->field_name );
-					fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{NATOC(content,content_len,%s%s);}\n" , pathname,pfield->field_name );
+					fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{NATOI1(content,content_len,%s%s);}\n" , pathname,pfield->field_name );
 				}
 				else if( pfield->field_len == 2 )
 				{
@@ -1558,7 +1558,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_XML_LEAF( struct CommandParameter *pcp
 				{
 					fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	/* %s */\n" , pfield->field_name );
 					fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	if( xpath_len == %d && strncmp( xpath , \"%s/%s\" , xpath_len ) == 0 )\n" , (int)(strlen(xmlpathname)+1+strlen(pfield->field_name)) , xmlpathname,pfield->field_name );
-					fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{NATOC(content,content_len,%s%s);}\n" , pathname,pfield->field_name );
+					fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{NATOI1(content,content_len,%s%s);}\n" , pathname,pfield->field_name );
 				}
 				else if( pfield->field_len == 2 )
 				{
@@ -2789,7 +2789,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_JSON_LEAF( struct CommandParameter *pc
 				{
 					fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	/* %s */\n" , pfield->field_name );
 					fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	if( jpath_len == %d && strncmp( jpath , \"%s/%s\" , jpath_len ) == 0 )\n" , (int)(strlen(jsonpathname)+1+strlen(converted_field_name)) , jsonpathname,converted_field_name );
-					fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{NATOC(content,content_len,%s%s);%s}\n" , pathname,pfield->field_name , converted_jsonpathname );
+					fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{NATOI1(content,content_len,%s%s);%s}\n" , pathname,pfield->field_name , converted_jsonpathname );
 				}
 				else if( pfield->field_len == 2 )
 				{
@@ -2816,7 +2816,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_JSON_LEAF( struct CommandParameter *pc
 				{
 					fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	/* %s */\n" , pfield->field_name );
 					fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	if( jpath_len == %d && strncmp( jpath , \"%s/%s\" , jpath_len ) == 0 )\n" , (int)(strlen(jsonpathname)+1+strlen(converted_field_name)) , jsonpathname,converted_field_name );
-					fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{NATOC(content,content_len,%s%s);%s}\n" , pathname,pfield->field_name , converted_jsonpathname );
+					fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{NATOI1(content,content_len,%s%s);%s}\n" , pathname,pfield->field_name , converted_jsonpathname );
 				}
 				else if( pfield->field_len == 2 )
 				{
@@ -3103,7 +3103,10 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 	fprintf( fp_dsc_h , "#endif\n" );
 	fprintf( fp_dsc_h , "\n" );
 	fprintf( fp_dsc_h , "#ifndef NATOC\n" );
-	fprintf( fp_dsc_h , "#define NATOC(_base_,_len_,_result_)	{char buf[3+1];memset(buf,0x00,sizeof(buf));strncpy(buf,_base_,3);_result_=(char)atoi(buf);}\n" );
+	fprintf( fp_dsc_h , "#define NATOC(_base_,_len_,_result_)	{_result_=_base_[0];}\n" );
+	fprintf( fp_dsc_h , "#endif\n" );
+	fprintf( fp_dsc_h , "#ifndef NATOI1\n" );
+	fprintf( fp_dsc_h , "#define NATOI1(_base_,_len_,_result_)	{char buf[3+1];memset(buf,0x00,sizeof(buf));strncpy(buf,_base_,5);_result_=(char)atoi(buf);}\n" );
 	fprintf( fp_dsc_h , "#endif\n" );
 	fprintf( fp_dsc_h , "#ifndef NATOS\n" );
 	fprintf( fp_dsc_h , "#define NATOS(_base_,_len_,_result_)	{char buf[5+1];memset(buf,0x00,sizeof(buf));strncpy(buf,_base_,5);_result_=(short)atol(buf);}\n" );
