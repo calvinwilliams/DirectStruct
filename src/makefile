@@ -8,22 +8,12 @@
 ###### 源文件配置区
 #@ c_FILE
 c_FILE		=	\
-			main.c \
 			dsc.c \
-			ReadDscFile.c \
-			GenerateCCode.c \
-			GenerateECCode.c \
-			GenerateSqlCode.c \
-			util.c \
 
 ###### 目标文件、安装目录配置区
-include ../makeinstall
+include makeinstall
 BIN		=	dsc
 BININST		=	$(_BININST)
-HDER		= \
-			dsc.h \
-
-HDERINST	=	$(_HDERINST)
 
 ###### 编译选项
 CFLAGS		=	$(_CFLAGS) \
