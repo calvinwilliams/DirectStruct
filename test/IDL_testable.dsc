@@ -4,6 +4,7 @@ STRUCT	testable
 	INT	4	n4
 	FLOAT	4	f4
 	FLOAT	8	f8
+	AMOUNT	16	a8
 	STRING	32	str32
 	STRING	1024	str1024
 	BOOL	1	b1

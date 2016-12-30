@@ -11,6 +11,9 @@
 #include <string.h>
 #include <errno.h>
 
+char	__DIRECTSTRUCT_VERSION_1_7_0[] = "1.7.0" ;
+char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_7_0 ;
+
 #ifndef STRCMP
 #define STRCMP(_a_,_C_,_b_) ( strcmp(_a_,_b_) _C_ 0 )
 #define STRNCMP(_a_,_C_,_b_,_n_) ( strncmp(_a_,_b_,_n_) _C_ 0 )
@@ -48,34 +51,9 @@
 #define STRNICMP(_a_,_C_,_b_,_n_) ( strnicmp(_a_,_b_,_n_) _C_ 0 )
 #endif
 
-#if 0
-/*
- * util
- */
-#endif
-
 #if ( defined _WIN32 )
 char *strtok_r (char *s, const char *delim, char **save_ptr);
 #endif
-
-#if 0
-char *strtok2( char **base );
-int ClearLeft( char *str );
-int ClearRight( char *str );
-char *StringNoEnter( char *str );
-void fprintabs( FILE *fp , int depth );
-#endif
-
-#if 0
-/*
- * main
- */
-
-extern char	*__DIRECTSTRUCT_VERSION ;
-#endif
-
-char	__DIRECTSTRUCT_VERSION_1_6_5[] = "1.6.5" ;
-char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_6_5 ;
 
 struct CommandParameter
 {
@@ -94,18 +72,6 @@ struct CommandParameter
 	int	output_ec_pgsql_flag ;
 	int	output_ec_oracle_flag ;
 } ;
-
-#if 0
-/*
- * dsc
- */
-
-int dsc( struct CommandParameter *pcmdparam );
-
-/*
- * ReadDscFile
- */
-#endif
 
 #define DSC_MAXDEPTH		10
 
@@ -197,23 +163,6 @@ struct EnumInfo
 	struct EnumInfo		*next_enum ;
 } ;
 */
-
-#if 0
-/*
- * ReadDscFile
- */
-
-int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset , char *dsc_pathfilename , int flag , FILE *fp_dsc , int *p_lineno , struct StructInfo *first_struct );
-
-/*
- * GenerateCCode
- */
-
-int GenerateCCode( struct CommandParameter *pcmdparam , struct StructInfo *first_struct , FILE *fp_dsc_h , FILE *fp_dsc_c , FILE *fp_dsc_LOG_c );
-int GenerateSqlCode( struct CommandParameter *pcp , struct StructInfo *pstruct , FILE *fp_dsc_create_sql , FILE *fp_dsc_drop_sql );
-int GenerateECCode_PGSQL( struct CommandParameter *pcp , struct StructInfo *pstruct , FILE *fp_dsc_ESQL_eh , FILE *fp_dsc_ESQL_ec );
-int GenerateECCode_ORACLE( struct CommandParameter *pcp , struct StructInfo *pstruct , FILE *fp_dsc_ESQL_eh , FILE *fp_dsc_ESQL_ec );
-#endif
 
 #if ( defined _WIN32 )
 static char* __rawmemchr (s, c_in)
@@ -1116,6 +1065,12 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 						&&
 						pfld->field_len == 1
 					)
+					||
+					(
+						STRCMP( pfld->field_type , == , "AMOUNT" )
+						&&
+						( pfld->field_len > 8 && (pfld->field_len-8) % 2 == 0 )
+					)
 				)
 				{
 					;
@@ -1269,6 +1224,10 @@ int GenerateCCode_h( struct CommandParameter *pcp , int depth , struct StructInf
 					fprintabs( fp_dsc_h , depth ); fprintf( fp_dsc_h , "	double	%s ;\n" , pfield->field_name );
 				}
 			}
+			else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+			{
+				fprintabs( fp_dsc_h , depth ); fprintf( fp_dsc_h , "	double	%s ;\n" , pfield->field_name );
+			}
 			else if( STRCMP( pfield->field_type , == , "CHAR" ) )
 			{
 				fprintabs( fp_dsc_h , depth ); fprintf( fp_dsc_h , "	char	%s ;\n" , pfield->field_name );
@@ -1408,6 +1367,10 @@ static int GenerateCCode_c_DSCINIT( struct CommandParameter *pcp , int depth , s
 					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname,pfield->field_name , pfield->init_default );
 				}
 			}
+			else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+			{
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname,pfield->field_name , pfield->init_default );
+			}
 			else if( STRCMP( pfield->field_type , == , "CHAR" ) )
 			{
 				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	%s%s = %s ;\n" , pathname,pfield->field_name , pfield->init_default );
@@ -1524,6 +1487,10 @@ static int GenerateCCode_c_DSCNETORDER( struct CommandParameter *pcp , int depth
 					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	__HTONLF(%s%s);\n" , pathname,pfield->field_name );
 				}
 			}
+			else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+			{
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	__HTONLF(%s%s);\n" , pathname,pfield->field_name );
+			}
 		}
 		
 		if( pstruct->first_sub_struct )
@@ -1619,6 +1586,10 @@ static int GenerateCCode_c_DSCHOSTORDER( struct CommandParameter *pcp , int dept
 				{
 					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	__NTOHLF(%s%s);\n" , pathname,pfield->field_name );
 				}
+			}
+			else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+			{
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	__NTOHLF(%s%s);\n" , pathname,pfield->field_name );
 			}
 		}
 		
@@ -1743,6 +1714,12 @@ static int GenerateCCode_c_DSCSERIALIZE_COMPACT( struct CommandParameter *pcp , 
 					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{ double d=%s%s; __HTONLF(d); memcpy( ptr , (char*)&d , 8 ); }\n" , pathname,pfield->field_name );
 					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
 				}
+			}
+			else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+			{
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfield->field_name );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{ double d=%s%s; __HTONLF(d); memcpy( ptr , (char*)&d , 8 ); }\n" , pathname,pfield->field_name );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
 			}
 			else if( STRCMP( pfield->field_type , == , "CHAR" ) )
 			{
@@ -1901,6 +1878,12 @@ static int GenerateCCode_c_DSCDESERIALIZE_COMPACT( struct CommandParameter *pcp 
 					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
 				}
 			}
+			else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+			{
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfield->field_name );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 8 ); __NTOHLF(%s%s);\n" , pathname,pfield->field_name , pathname,pfield->field_name );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
+			}
 			else if( STRCMP( pfield->field_type , == , "CHAR" ) )
 			{
 				if( pfield->field_len == 1 )
@@ -2053,6 +2036,12 @@ static int GenerateCCode_c_DSCSERIALIZE_COMPRESS( struct CommandParameter *pcp ,
 					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{ double d=%s%s; __HTONLF(d); memcpy( ptr , (char*)&d , 8 ); }\n" , pathname,pfield->field_name );
 					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
 				}
+			}
+			else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+			{
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfield->field_name );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{ double d=%s%s; __HTONLF(d); memcpy( ptr , (char*)&d , 8 ); }\n" , pathname,pfield->field_name );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
 			}
 			else if( STRCMP( pfield->field_type , == , "CHAR" ) )
 			{
@@ -2210,6 +2199,12 @@ static int GenerateCCode_c_DSCDESERIALIZE_COMPRESS( struct CommandParameter *pcp
 					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 8 ); __NTOHLF(%s%s);\n" , pathname,pfield->field_name , pathname,pfield->field_name );
 					fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
 				}
+			}
+			else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+			{
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	/* %s */\n" , pfield->field_name );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	memcpy( (char*)&(%s%s) , ptr , 8 ); __NTOHLF(%s%s);\n" , pathname,pfield->field_name , pathname,pfield->field_name );
+				fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	len+=8; ptr+=8;\n" );
 			}
 			else if( STRCMP( pfield->field_type , == , "CHAR" ) )
 			{
@@ -2377,6 +2372,12 @@ static int GenerateCCode_c_DSCSERIALIZE_XML( struct CommandParameter *pcp , int 
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
 			}
+			else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+			{
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%lf\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
+			}
 			else if( STRCMP( pfield->field_type , == , "CHAR" ) )
 			{
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
@@ -2531,6 +2532,12 @@ static int GenerateCCode_c_DSCSERIALIZE_XML_COMPACT( struct CommandParameter *pc
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%lf\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
+			}
+			else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+			{
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%lf\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 			}
 			else if( STRCMP( pfield->field_type , == , "CHAR" ) )
 			{
@@ -2778,6 +2785,12 @@ static int GenerateCCode_c_DSCDESERIALIZE_XML_LEAF( struct CommandParameter *pcp
 					fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{NATOLF(content,content_len,%s%s);}\n" , pathname,pfield->field_name );
 				}
 			}
+			else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+			{
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	/* %s */\n" , pfield->field_name );
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	if( xpath_len == %d && strncmp( xpath , \"%s/%s\" , xpath_len ) == 0 )\n" , (int)(strlen(xmlpathname)+1+strlen(pfield->field_name)) , xmlpathname,pfield->field_name );
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{NATOLF(content,content_len,%s%s);}\n" , pathname,pfield->field_name );
+			}
 			else if( STRCMP( pfield->field_type , == , "CHAR" ) )
 			{
 				if( pfield->field_len == 1 )
@@ -2965,6 +2978,13 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON( struct CommandParameter *pcp , int
 						fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"\\\"%s\\\" : \"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%lf\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 				}
+			}
+			else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+			{
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs );
+				if( pfield->field_name[0] != '_' )
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"\\\"%s\\\" : \"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%lf\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 			}
 			else if( STRCMP( pfield->field_type , == , "CHAR" ) )
 			{
@@ -3204,6 +3224,12 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( struct CommandParameter *p
 						fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"\\\"%s\\\":\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%lf\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 				}
+			}
+			else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+			{
+				if( pfield->field_name[0] != '_' )
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"\\\"%s\\\":\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%lf\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 			}
 			else if( STRCMP( pfield->field_type , == , "CHAR" ) )
 			{
@@ -3469,6 +3495,13 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP( struct CommandParameter *pcp ,
 					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%lf\",%s%s);"DUP_CHECK"} remain_len-=len;\n" , pathname,pfield->field_name );
 				}
 			}
+			else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs );
+				if( pfield->field_name[0] != '_' )
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\" : \");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%lf\",%s%s);"DUP_CHECK"} remain_len-=len;\n" , pathname,pfield->field_name );
+			}
 			else if( STRCMP( pfield->field_type , == , "CHAR" ) )
 			{
 				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs );
@@ -3707,6 +3740,12 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP_COMPACT( struct CommandParamete
 						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\":\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
 					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%lf\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 				}
+			}
+			else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+			{
+				if( pfield->field_name[0] != '_' )
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\":\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%lf\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 			}
 			else if( STRCMP( pfield->field_type , == , "CHAR" ) )
 			{
@@ -4036,6 +4075,12 @@ static int GenerateCCode_c_DSCDESERIALIZE_JSON_LEAF( struct CommandParameter *pc
 					fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{NATOLF(content,content_len,%s%s);%s}\n" , pathname,pfield->field_name , converted_jsonpathname );
 				}
 			}
+			else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+			{
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	/* %s */\n" , pfield->field_name );
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	if( jpath_len == %d && strncmp( jpath , \"%s/%s\" , jpath_len ) == 0 )\n" , (int)(strlen(jsonpathname)+1+strlen(converted_field_name)) , jsonpathname,converted_field_name );
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{NATOLF(content,content_len,%s%s);%s}\n" , pathname,pfield->field_name , converted_jsonpathname );
+			}
 			else if( STRCMP( pfield->field_type , == , "CHAR" ) )
 			{
 				if( pfield->field_len == 1 )
@@ -4172,6 +4217,10 @@ static int GenerateCCode_LOG_c( struct CommandParameter *pcp , int depth , struc
 				{
 					fprintabs( fp_dsc_LOG_c , depth ); fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%lf]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname,pfield->field_name , grandfather_pmsginfo->struct_name , pathname,pfield->field_name );
 				}
+			}
+			else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+			{
+				fprintabs( fp_dsc_LOG_c , depth ); fprintf( fp_dsc_LOG_c , "	PREFIX_DSCLOG_%s \"%s%s[%%lf]\" NEWLINE_DSCLOG_%s , %s%s );\n" , grandfather_pmsginfo->struct_name , LOG_pathname,pfield->field_name , grandfather_pmsginfo->struct_name , pathname,pfield->field_name );
 			}
 			else if( STRCMP( pfield->field_type , == , "CHAR" ) )
 			{
@@ -4713,12 +4762,12 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 	/* Generate *.dsc.c */
 	fprintf( fp_dsc_c , "/* It had generated by DirectStruct v%s */\n" , __DIRECTSTRUCT_VERSION );
 	fprintf( fp_dsc_c , "#include \"%s.h\"\n" , pcp->pathfilename );
+	fprintf( fp_dsc_c , "\n" );
+	fprintf( fp_dsc_c , "static int		_DSC_errline = 0 ;\n" );
 	
 	for( next_struct = pstruct->next_struct ; next_struct ; next_struct = next_struct->next_struct )
 	{
 		/* Generate DSCINIT_*() */
-		fprintf( fp_dsc_c , "\n" );
-		fprintf( fp_dsc_c , "static int		_DSC_errline = 0 ;\n" );
 		fprintf( fp_dsc_c , "\n" );
 		fprintf( fp_dsc_c , "int DSCINIT_%s( %s *pst )\n" , next_struct->struct_name , next_struct->struct_name );
 		fprintf( fp_dsc_c , "{\n" );
@@ -5270,6 +5319,10 @@ int GenerateSqlCode_sql_create( struct StructInfo *pstruct , FILE *fp_dsc_create
 				flag = 0 ;
 			}
 		}
+		else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+		{
+			fprintf( fp_dsc_create_sql , "	%s	NUMERIC(%d,2)" , pfield->field_name , (pfield->field_len-8)/2*4 );
+		}
 		else if( STRCMP( pfield->field_type , == , "STRING" ) )
 		{
 			fprintf( fp_dsc_create_sql , "	%s	CHARACTER VARYING(%d)" , pfield->field_name , pfield->field_len );
@@ -5406,6 +5459,10 @@ static int GenerateECCode_eh_SQL( struct CommandParameter *pcp , struct StructIn
 			{
 				fprintf( fp_dsc_ESQL_eh , "	extern double %s_%s ;	extern short %s_%s_id ;\n" , pstruct->struct_name , pfield->field_name , pstruct->struct_name , pfield->field_name );
 			}
+		}
+		else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+		{
+			fprintf( fp_dsc_ESQL_eh , "	extern double %s_%s ;	extern short %s_%s_id ;\n" , pstruct->struct_name , pfield->field_name , pstruct->struct_name , pfield->field_name );
 		}
 		else if( STRCMP( pfield->field_type , == , "STRING" ) )
 		{
@@ -6238,6 +6295,10 @@ static int GenerateECCode_ec_SQL( struct CommandParameter *pcp , struct StructIn
 				fprintf( fp_dsc_ESQL_ec , "	double %s_%s ;	short %s_%s_id ;\n" , pstruct->struct_name , pfield->field_name , pstruct->struct_name , pfield->field_name );
 			}
 		}
+		else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+		{
+			fprintf( fp_dsc_ESQL_ec , "	double %s_%s ;	short %s_%s_id ;\n" , pstruct->struct_name , pfield->field_name , pstruct->struct_name , pfield->field_name );
+		}
 		else if( STRCMP( pfield->field_type , == , "STRING" ) )
 		{
 			fprintf( fp_dsc_ESQL_ec , "	char %s_%s[ %d + 1 ] ;	short %s_%s_id ;\n" , pstruct->struct_name , pfield->field_name , pfield->field_len , pstruct->struct_name , pfield->field_name );
@@ -6293,6 +6354,11 @@ static int GenerateECCode_ec_SQL( struct CommandParameter *pcp , struct StructIn
 				fprintf( fp_dsc_ESQL_ec , "	%s_%s_id = 0 ;\n" , pstruct->struct_name , pfield->field_name );
 			}
 		}
+		else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+		{
+			fprintf( fp_dsc_ESQL_ec , "	%s_%s = 0.00 ;\n" , pstruct->struct_name , pfield->field_name );
+			fprintf( fp_dsc_ESQL_ec , "	%s_%s_id = 0 ;\n" , pstruct->struct_name , pfield->field_name );
+		}
 		else if( STRCMP( pfield->field_type , == , "STRING" ) )
 		{
 			fprintf( fp_dsc_ESQL_ec , "	memset( %s_%s , 0x00 , sizeof(%s_%s) );\n" , pstruct->struct_name , pfield->field_name , pstruct->struct_name , pfield->field_name );
@@ -6345,6 +6411,10 @@ static int GenerateECCode_ec_SQL( struct CommandParameter *pcp , struct StructIn
 				fprintf( fp_dsc_ESQL_ec , "	pst->%s = %s_%s ;\n" , pfield->field_name , pstruct->struct_name , pfield->field_name );
 			}
 		}
+		else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+		{
+			fprintf( fp_dsc_ESQL_ec , "	pst->%s = %s_%s ;\n" , pfield->field_name , pstruct->struct_name , pfield->field_name );
+		}
 		else if( STRCMP( pfield->field_type , == , "STRING" ) )
 		{
 			fprintf( fp_dsc_ESQL_ec , "	strcpy( pst->%s , %s_%s );\n" , pfield->field_name , pstruct->struct_name , pfield->field_name );
@@ -6394,6 +6464,10 @@ static int GenerateECCode_ec_SQL( struct CommandParameter *pcp , struct StructIn
 			{
 				fprintf( fp_dsc_ESQL_ec , "	%s_%s = pst->%s ;\n" , pstruct->struct_name , pfield->field_name , pfield->field_name );
 			}
+		}
+		else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+		{
+			fprintf( fp_dsc_ESQL_ec , "	%s_%s = pst->%s ;\n" , pstruct->struct_name , pfield->field_name , pfield->field_name );
 		}
 		else if( STRCMP( pfield->field_type , == , "STRING" ) )
 		{
