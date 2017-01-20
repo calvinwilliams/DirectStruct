@@ -29,6 +29,7 @@ EXEC SQL BEGIN DECLARE SECTION ;
 	extern int testable_n4 ;	extern short testable_n4_id ;
 	extern float testable_f4 ;	extern short testable_f4_id ;
 	extern double testable_f8 ;	extern short testable_f8_id ;
+	extern double testable_n8 ;	extern short testable_n8_id ;
 	extern double testable_a8 ;	extern short testable_a8_id ;
 	extern char testable_str32[ 32 + 1 ] ;	extern short testable_str32_id ;
 	extern char testable_str1024[ 1024 + 1 ] ;	extern short testable_str1024_id ;
@@ -40,6 +41,7 @@ EXEC SQL END DECLARE SECTION ;
 	n4 , \
 	f4 , \
 	f8 , \
+	n8 , \
 	a8 , \
 	str32 , \
 	str1024 , \
@@ -50,6 +52,7 @@ EXEC SQL END DECLARE SECTION ;
 	:testable_n4 , \
 	:testable_f4 , \
 	:testable_f8 , \
+	:testable_n8 , \
 	:testable_a8 , \
 	:testable_str32 , \
 	:testable_str1024 , \
@@ -60,6 +63,7 @@ EXEC SQL END DECLARE SECTION ;
 	:testable_n4 :testable_n4_id , \
 	:testable_f4 :testable_f4_id , \
 	:testable_f8 :testable_f8_id , \
+	:testable_n8 :testable_n8_id , \
 	:testable_a8 :testable_a8_id , \
 	:testable_str32 :testable_str32_id , \
 	:testable_str1024 :testable_str1024_id , \

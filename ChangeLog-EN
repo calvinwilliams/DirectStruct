@@ -1,6 +1,7 @@
 ver 1.7.0	2016-12-30	calvin
 		* Adujst source file
 		* Add type 'AMOUNT' , double for C language , NUMERIC for SQL : NUMERIC( (len-8)/2*4 , 2 )
+		* Add type 'NUMERIC' , double for C language , NUMERIC for SQL ; define length format "(all digits length),(decimal part digits length)"
 
 ver 1.6.5	2016-10-22	calvin
 		* Adujst processing with type 'CHAR' and 'INT 1'

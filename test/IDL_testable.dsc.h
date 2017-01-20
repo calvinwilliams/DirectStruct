@@ -93,6 +93,7 @@ typedef struct
 	int	n4 ;
 	float	f4 ;
 	double	f8 ;
+	double	n8 ;
 	double	a8 ;
 	char	str32[ 32 + 1 ] ;
 	char	str1024[ 1024 + 1 ] ;

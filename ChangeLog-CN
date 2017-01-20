@@ -1,6 +1,7 @@
 ver 1.7.0	2016-12-30	calvin
 		* 源码文件结构调整
 		* 新增定义类型AMOUNT，对应C语言类型double，对应数据库表类型NUMERIC（NUMERIC( (定义长度-8)/2*4 , 2 )）
+		* 新增定义类型NUMERIC，对应C语言类型double，对应数据库表类型NUMERIC；定义长度格式为"(数字总长度),(小数部分数字长度)"
 
 ver 1.6.5	2016-10-22	calvin
 		* 调整了CHAR,INT 1类型的所有处理
