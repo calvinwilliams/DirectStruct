@@ -1,3 +1,16 @@
+ver 1.8.1	2017-02-06	calvin
+		* Fixed a bug about json-pack function at double type
+
+ver 1.8.0	2017-02-05	calvin
+		* Add generate functions
+		  DSCSERIALIZE_JSON_DUP_xxx_V,DSCDESERIALIZE_JSON_xxx_V
+		  DSCSERIALIZE_JSON_COMPACT_DUP_xxx_V,DSCDESERIALIZE_JSON_COMPACT_xxx_V
+
+ver 1.7.0	2016-12-30	calvin
+		* Adujst source file
+		* Add type 'AMOUNT' , double for C language , NUMERIC for SQL : NUMERIC( (len-8)/2*4 , 2 )
+		* Add type 'NUMERIC' , double for C language , NUMERIC for SQL ; define length format "(all digits length),(decimal part digits length)"
+
 ver 1.6.5	2016-10-22	calvin
 		* Adujst processing with type 'CHAR' and 'INT 1'
 
