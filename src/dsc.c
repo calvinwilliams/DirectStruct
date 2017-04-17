@@ -11,8 +11,8 @@
 #include <string.h>
 #include <errno.h>
 
-char	__DIRECTSTRUCT_VERSION_1_7_0[] = "1.7.0" ;
-char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_7_0 ;
+char	__DIRECTSTRUCT_VERSION_1_9_0[] = "1.9.0" ;
+char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_9_0 ;
 
 #ifndef STRCMP
 #define STRCMP(_a_,_C_,_b_) ( strcmp(_a_,_b_) _C_ 0 )
@@ -87,6 +87,7 @@ struct FieldInfo
 	int			field_len2 ;
 	int			field_offset ;
 	char			field_name[ 64 + 1 ] ;
+	char			field_desc[ 256 + 1 ] ;
 	
 	char			init_default[ 1024 + 1 ] ;
 	int			null_or_notnull ;
@@ -124,6 +125,7 @@ struct SqlActionOutput
 struct StructInfo
 {
 	char			struct_name[ 64 + 1 ] ;
+	char			struct_desc[ 256 + 1 ] ;
 	int			struct_length ;
 	int			field_count ;
 	int			array_size ;
@@ -531,6 +533,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 	char			filebuffer[ 4096 + 1 ] ;
 	char			filebuffer_bak[ 4096 + 1 ] ;
 	char			quotas ;
+	char			desc[ 256 + 1 ] ;
 	char			*base = NULL ;
 	char			*ptr = NULL ;
 	char			*ptr2 = NULL ;
@@ -557,12 +560,18 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 		
 		(*p_lineno)++;
 		
+		memset( desc , 0x00 , sizeof(desc) );
 		for( ptr = filebuffer , quotas = 0 ; (*ptr) ; ptr++ )
 		{
 			if( quotas == 0 )
 			{
 				if( (*ptr) == '#' )
 				{
+					strncpy( desc , ptr+1 , sizeof(desc)-1 );
+					ClearLeft( desc );
+					ClearRight( desc );
+					StringNoEnter( desc );
+					
 					(*ptr) = '\0' ;
 					break;
 				}
@@ -613,6 +622,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 						return -1;
 					}
 					strncpy( psi_next->struct_name , ptr , sizeof(psi_next->struct_name)-1 );
+					strcpy( psi_next->struct_desc , desc );
 					
 					while(1)
 					{
@@ -640,11 +650,11 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 					
 					if( psi_next->array_size > 0 )
 					{
-						fprintabs( stdout , depth ); printf( "STRUCT %s ARRAY %d\n" , psi_next->struct_name , psi_next->array_size );
+						fprintabs( stdout , depth ); printf( "STRUCT %s ARRAY %d DESC %s\n" , psi_next->struct_name , psi_next->array_size , psi_next->struct_desc );
 					}
 					else
 					{
-						fprintabs( stdout , depth ); printf( "STRUCT %s\n" , psi_next->struct_name );
+						fprintabs( stdout , depth ); printf( "STRUCT %s DESC %s\n" , psi_next->struct_name , psi_next->struct_desc );
 					}
 					
 					struct_len = ReadDscFile( pcmdparam , depth , p_offset , dsc_pathfilename , 1 , fp_dsc , p_lineno , psi_next ) ;
@@ -747,6 +757,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 						return -1;
 					}
 					strncpy( psi_sub->struct_name , ptr , sizeof(psi_sub->struct_name)-1 );
+					strcpy( psi_sub->struct_desc , desc );
 					
 					while(1)
 					{
@@ -774,11 +785,11 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 					
 					if( psi_sub->array_size > 0 )
 					{
-						fprintabs( stdout , depth ); printf( "STRUCT %s ARRAY %d\n" , psi_sub->struct_name , psi_sub->array_size );
+						fprintabs( stdout , depth ); printf( "STRUCT %s ARRAY %d DESC %s\n" , psi_sub->struct_name , psi_sub->array_size , psi_sub->struct_desc );
 					}
 					else
 					{
-						fprintabs( stdout , depth ); printf( "STRUCT %s\n" , psi_sub->struct_name );
+						fprintabs( stdout , depth ); printf( "STRUCT %s DESC %s\n" , psi_sub->struct_name , psi_sub->struct_desc );
 					}
 					
 					struct_len = ReadDscFile( pcmdparam , depth + 1 , p_offset , dsc_pathfilename , 1 , fp_dsc , p_lineno , psi_sub ) ;
@@ -1040,6 +1051,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 				if( ptr8 )
 					pfld->field_len2 = atoi(ptr8+1) ;
 				strncpy( pfld->field_name , ptr3 , sizeof(pfld->field_name)-1 );
+				strcpy( pfld->field_desc , desc );
 				
 				if(	(
 						( STRCMP( pfld->field_type , == , "INT" ) || STRCMP( pfld->field_type , == , "UINT" ) )
@@ -1133,7 +1145,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 				
 				pfld->field_offset = (*p_offset) ;
 				
-				fprintabs( stdout , depth ); printf( "	%s %d %s\n" , pfld->field_type , pfld->field_len , pfld->field_name );
+				fprintabs( stdout , depth ); printf( "	%s %d %s %s\n" , pfld->field_type , pfld->field_len , pfld->field_name , pfld->field_desc );
 				
 				pstruct->struct_length += pfld->field_len ;
 				pstruct->field_count++;
@@ -5503,6 +5515,18 @@ int GenerateSqlCode_sql_create( struct StructInfo *pstruct , FILE *fp_dsc_create
 	}
 	fprintf( fp_dsc_create_sql , ") ;\n" );
 	
+	if( pstruct->struct_desc[0] )
+	{
+		fprintf( fp_dsc_create_sql , "COMMENT ON TABLE %s IS '%s' ;\n" , pstruct->struct_name , pstruct->struct_desc );
+	}
+	for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
+	{
+		if( pfield->field_desc[0] )
+		{
+			fprintf( fp_dsc_create_sql , "COMMENT ON COLUMN %s.%s IS '%s' ;\n" , pstruct->struct_name , pfield->field_name , pfield->field_desc );
+		}
+	}
+	
 	if( pstruct->first_create_sql_line )
 	{
 		fprintf( fp_dsc_create_sql , "\n" );
@@ -5517,9 +5541,22 @@ int GenerateSqlCode_sql_create( struct StructInfo *pstruct , FILE *fp_dsc_create
 
 int GenerateSqlCode_sql_drop( struct StructInfo *pstruct , FILE *fp_dsc_drop_sql )
 {
+	struct FieldInfo	*pfield = NULL ;
 	struct DropSqlOutput	*drop_sql_line = NULL ;
 	
 	fprintf( fp_dsc_drop_sql , "-- It had generated by DirectStruct v%s\n" , __DIRECTSTRUCT_VERSION );
+	
+	if( pstruct->struct_desc[0] )
+	{
+		fprintf( fp_dsc_drop_sql , "COMMENT ON TABLE %s IS NULL ;\n" , pstruct->struct_name );
+	}
+	for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
+	{
+		if( pfield->field_desc[0] )
+		{
+			fprintf( fp_dsc_drop_sql , "COMMENT ON COLUMN %s.%s IS NULL ;\n" , pstruct->struct_name , pfield->field_name );
+		}
+	}
 	
 	if( pstruct->first_drop_sql_line )
 	{
