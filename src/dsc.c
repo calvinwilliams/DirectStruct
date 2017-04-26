@@ -11,8 +11,8 @@
 #include <string.h>
 #include <errno.h>
 
-char	__DIRECTSTRUCT_VERSION_1_9_0[] = "1.9.0" ;
-char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_9_0 ;
+char	__DIRECTSTRUCT_VERSION_1_9_1[] = "1.9.1" ;
+char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_9_1 ;
 
 #ifndef STRCMP
 #define STRCMP(_a_,_C_,_b_) ( strcmp(_a_,_b_) _C_ 0 )
@@ -4892,7 +4892,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_c , "\n" );
 		fprintf( fp_dsc_c , "int DSCINIT_%s( %s *pst )\n" , next_struct->struct_name , next_struct->struct_name );
 		fprintf( fp_dsc_c , "{\n" );
-		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+		fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0]++; index[0] = 0 ;\n" , DSC_MAXDEPTH );
 		fprintf( fp_dsc_c , "	memset( pst , 0x00 , sizeof(%s) );\n" , next_struct->struct_name );
 		nret = GenerateCCode_c_DSCINIT( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
 		if( nret )
@@ -4906,7 +4906,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "\n" );
 			fprintf( fp_dsc_c , "int DSCNETORDER_%s( %s *pst )\n" , next_struct->struct_name , next_struct->struct_name );
 			fprintf( fp_dsc_c , "{\n" );
-			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0]++; index[0] = 0 ;\n" , DSC_MAXDEPTH );
 			nret = GenerateCCode_c_DSCNETORDER( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
 			if( nret )
 				return nret;
@@ -4917,7 +4917,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "\n" );
 			fprintf( fp_dsc_c , "int DSCHOSTORDER_%s( %s *pst )\n" , next_struct->struct_name , next_struct->struct_name );
 			fprintf( fp_dsc_c , "{\n" );
-			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0]++; index[0] = 0 ;\n" , DSC_MAXDEPTH );
 			nret = GenerateCCode_c_DSCHOSTORDER( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
 			if( nret )
 				return nret;
@@ -4933,7 +4933,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "{\n" );
 			fprintf( fp_dsc_c , "	char	*ptr = buf ;\n" );
 			fprintf( fp_dsc_c , "	int	len = 0 ;\n" );
-			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0]++; index[0] = 0 ;\n" , DSC_MAXDEPTH );
 			fprintf( fp_dsc_c , "	\n" );
 			nret = GenerateCCode_c_DSCSERIALIZE_COMPACT( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
 			if( nret )
@@ -4950,7 +4950,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "{\n" );
 			fprintf( fp_dsc_c , "	char	*ptr = buf ;\n" );
 			fprintf( fp_dsc_c , "	int	len = 0 ;\n" );
-			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0]++; index[0] = 0 ;\n" , DSC_MAXDEPTH );
 			fprintf( fp_dsc_c , "	\n" );
 			nret = GenerateCCode_c_DSCDESERIALIZE_COMPACT( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
 			if( nret )
@@ -4970,7 +4970,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "{\n" );
 			fprintf( fp_dsc_c , "	char	*ptr = buf ;\n" );
 			fprintf( fp_dsc_c , "	int	len = 0 ;\n" );
-			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0]++; index[0] = 0 ;\n" , DSC_MAXDEPTH );
 			nret = GenerateCCode_c_DSCSERIALIZE_COMPRESS( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
 			if( nret )
 				return nret;
@@ -4986,7 +4986,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "{\n" );
 			fprintf( fp_dsc_c , "	char	*ptr = buf ;\n" );
 			fprintf( fp_dsc_c , "	int	len = 0 ;\n" );
-			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0]++; index[0] = 0 ;\n" , DSC_MAXDEPTH );
 			nret = GenerateCCode_c_DSCDESERIALIZE_COMPRESS( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
 			if( nret )
 				return nret;
@@ -5012,7 +5012,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "	int	remain_len ;\n" );
 			fprintf( fp_dsc_c , "	int	len ;\n" );
 			fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
-			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0]++; index[0] = 0 ;\n" , DSC_MAXDEPTH );
 			fprintf( fp_dsc_c , "	remain_len = (*p_len) ;\n" );
 			fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
 			fprintf( fp_dsc_c , "	len=SNPRINTF(buf,remain_len,\"<?xml version=\\\"1.0\\\" encoding=\\\"%%s\\\"?>\\n\",encoding); if(len<0)return -1; buf+=len; remain_len-=len;\n" );
@@ -5035,7 +5035,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "	int	remain_len ;\n" );
 			fprintf( fp_dsc_c , "	int	len ;\n" );
 			fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
-			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0]++; index[0] = 0 ;\n" , DSC_MAXDEPTH );
 			fprintf( fp_dsc_c , "	remain_len = (*p_len) ;\n" );
 			fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
 			fprintf( fp_dsc_c , "	len=SNPRINTF(buf,remain_len,\"<?xml version=\\\"1.0\\\" encoding=\\\"%%s\\\"?>\",encoding); if(len<0)return -1; buf+=len; remain_len-=len;\n" );
@@ -5059,7 +5059,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "int CallbackOnXmlNode_%s( int type , char *xpath , int xpath_len , int xpath_size , char *node , int node_len , char *properties , int properties_len , char *content , int content_len , void *p )\n" , next_struct->struct_name );
 			fprintf( fp_dsc_c , "{\n" );
 			fprintf( fp_dsc_c , "	%s	*pst = (%s*)p ;\n" , next_struct->struct_name , next_struct->struct_name );
-			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0]++; index[0] = 0 ;\n" , DSC_MAXDEPTH );
 			fprintf( fp_dsc_c , "	\n" );
 			fprintf( fp_dsc_c , "	if( type & FASTERXML_NODE_BRANCH )\n" );
 			fprintf( fp_dsc_c , "	{\n" );
@@ -5135,7 +5135,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "	int	remain_len ;\n" );
 			fprintf( fp_dsc_c , "	int	len ;\n" );
 			fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
-			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0]++; index[0] = 0 ;\n" , DSC_MAXDEPTH );
 			fprintf( fp_dsc_c , "	remain_len = (*p_len) ;\n" );
 			fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
 			nret = GenerateCCode_c_DSCSERIALIZE_JSON( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
@@ -5155,7 +5155,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "	int	buf_begin_offset ;\n" );
 			fprintf( fp_dsc_c , "	int	len ;\n" );
 			fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
-			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0]++; index[0] = 0 ;\n" , DSC_MAXDEPTH );
 			fprintf( fp_dsc_c , "	if( (*pp_base) == NULL )\n" );
 			fprintf( fp_dsc_c , "	{\n" );
 			fprintf( fp_dsc_c , "		char	*tmp = NULL ;\n" );
@@ -5215,7 +5215,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "	int	remain_len ;\n" );
 			fprintf( fp_dsc_c , "	int	len ;\n" );
 			fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
-			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0]++; index[0] = 0 ;\n" , DSC_MAXDEPTH );
 			fprintf( fp_dsc_c , "	remain_len = (*p_len) ;\n" );
 			fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
 			nret = GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
@@ -5296,7 +5296,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "int CallbackOnJsonNode_%s( int type , char *jpath , int jpath_len , int jpath_size , char *node , int node_len , char *content , int content_len , void *p )\n" , next_struct->struct_name );
 			fprintf( fp_dsc_c , "{\n" );
 			fprintf( fp_dsc_c , "	%s	*pst = (%s*)p ;\n" , next_struct->struct_name , next_struct->struct_name );
-			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0]++; index[0] = 0 ;\n" , DSC_MAXDEPTH );
 			fprintf( fp_dsc_c , "	int	len ;\n" );
 			fprintf( fp_dsc_c , "	\n" );
 			fprintf( fp_dsc_c , "	index[0] = 0 ;\n" );
@@ -5389,7 +5389,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_LOG_c , "\n" );
 			fprintf( fp_dsc_LOG_c , "int FUNCNAME_DSCLOG_%s( %s *pst )\n" , next_struct->struct_name , next_struct->struct_name );
 			fprintf( fp_dsc_LOG_c , "{\n" );
-			fprintf( fp_dsc_LOG_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_LOG_c , "	int	index[%d] = { 0 } ; index[0]++; index[0] = 0 ;\n" , DSC_MAXDEPTH );
 			SNPRINTF( LOG_pathname , sizeof(LOG_pathname)-1 , "%s." , next_struct->struct_name );
 			nret = GenerateCCode_LOG_c( pcp , 0 , next_struct , next_struct , 1 , fp_dsc_LOG_c , LOG_pathname , "pst->" ) ;
 			if( nret )

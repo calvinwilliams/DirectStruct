@@ -1,3 +1,6 @@
+ver 1.9.1	2017-04-26	calvin
+		* Fixed a problem about unuse varible warning on higher version gcc
+
 ver 1.9.0	2017-04-17	calvin
 		* add 'COMMENT' statements in SQL
 
