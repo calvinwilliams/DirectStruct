@@ -424,6 +424,7 @@ int CallbackOnXmlNode_BankXmlTransaction( int type , char *xpath , int xpath_len
 {
 	BankXmlTransaction	*pst = (BankXmlTransaction*)p ;
 	int	index[10] = { 0 } ; index[0]++; index[0] = 0 ;
+	int	len = 0 ;
 	
 	if( type & FASTERXML_NODE_BRANCH )
 	{
@@ -449,8 +450,8 @@ int CallbackOnXmlNode_BankXmlTransaction( int type , char *xpath , int xpath_len
 		{NATOI1(content,content_len,pst->version);}
 			/* transaction_code */
 			if( xpath_len == 51 && strncmp( xpath , "/BankXmlTransaction/ResponseHeader/transaction_code" , xpath_len ) == 0 )
-			{XMLUNESCAPE_FOLD(content,content_len,pst->ResponseHeader.transaction_code);
-			{if( content_len > sizeof(pst->ResponseHeader.transaction_code)-1 ) return -7;}}
+			{XMLUNESCAPE_FOLD(content,content_len,pst->ResponseHeader.transaction_code,len,sizeof(pst->ResponseHeader.transaction_code));
+			{if( len < 0 ) return -7;}}
 			/* trans_jnlsno */
 			if( xpath_len == 47 && strncmp( xpath , "/BankXmlTransaction/ResponseHeader/trans_jnlsno" , xpath_len ) == 0 )
 			{NATOI(content,content_len,pst->ResponseHeader.trans_jnlsno);}
@@ -459,16 +460,16 @@ int CallbackOnXmlNode_BankXmlTransaction( int type , char *xpath , int xpath_len
 			{NATOI(content,content_len,pst->ResponseHeader.response_code);}
 			/* response_desc */
 			if( xpath_len == 48 && strncmp( xpath , "/BankXmlTransaction/ResponseHeader/response_desc" , xpath_len ) == 0 )
-			{XMLUNESCAPE_FOLD(content,content_len,pst->ResponseHeader.response_desc);
-			{if( content_len > sizeof(pst->ResponseHeader.response_desc)-1 ) return -7;}}
+			{XMLUNESCAPE_FOLD(content,content_len,pst->ResponseHeader.response_desc,len,sizeof(pst->ResponseHeader.response_desc));
+			{if( len < 0 ) return -7;}}
 					/* message_text */
 					if( xpath_len == 83 && strncmp( xpath , "/BankXmlTransaction/QueryTransactionDetails/AddonMessages/AddonMessage/message_text" , xpath_len ) == 0 )
-					{XMLUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.AddonMessages.AddonMessage[pst->QueryTransactionDetails.AddonMessages._AddonMessage_count].message_text);
-					{if( content_len > sizeof(pst->QueryTransactionDetails.AddonMessages.AddonMessage[pst->QueryTransactionDetails.AddonMessages._AddonMessage_count].message_text)-1 ) return -7;}}
+					{XMLUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.AddonMessages.AddonMessage[pst->QueryTransactionDetails.AddonMessages._AddonMessage_count].message_text,len,sizeof(pst->QueryTransactionDetails.AddonMessages.AddonMessage[pst->QueryTransactionDetails.AddonMessages._AddonMessage_count].message_text));
+					{if( len < 0 ) return -7;}}
 				/* title_text */
 				if( xpath_len == 77 && strncmp( xpath , "/BankXmlTransaction/QueryTransactionDetails/TransactionDetailTitle/title_text" , xpath_len ) == 0 )
-				{XMLUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.TransactionDetailTitle.title_text);
-				{if( content_len > sizeof(pst->QueryTransactionDetails.TransactionDetailTitle.title_text)-1 ) return -7;}}
+				{XMLUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.TransactionDetailTitle.title_text,len,sizeof(pst->QueryTransactionDetails.TransactionDetailTitle.title_text));
+				{if( len < 0 ) return -7;}}
 				/* page_no */
 				if( xpath_len == 74 && strncmp( xpath , "/BankXmlTransaction/QueryTransactionDetails/TransactionDetailTitle/page_no" , xpath_len ) == 0 )
 				{NATOS(content,content_len,pst->QueryTransactionDetails.TransactionDetailTitle.page_no);}
@@ -477,20 +478,20 @@ int CallbackOnXmlNode_BankXmlTransaction( int type , char *xpath , int xpath_len
 				{NATOS(content,content_len,pst->QueryTransactionDetails.TransactionDetailTitle.page_size);}
 					/* trans_date */
 					if( xpath_len == 91 && strncmp( xpath , "/BankXmlTransaction/QueryTransactionDetails/TransactionDetails/TransactionDetail/trans_date" , xpath_len ) == 0 )
-					{XMLUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].trans_date);
-					{if( content_len > sizeof(pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].trans_date)-1 ) return -7;}}
+					{XMLUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].trans_date,len,sizeof(pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].trans_date));
+					{if( len < 0 ) return -7;}}
 					/* trans_time */
 					if( xpath_len == 91 && strncmp( xpath , "/BankXmlTransaction/QueryTransactionDetails/TransactionDetails/TransactionDetail/trans_time" , xpath_len ) == 0 )
-					{XMLUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].trans_time);
-					{if( content_len > sizeof(pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].trans_time)-1 ) return -7;}}
+					{XMLUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].trans_time,len,sizeof(pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].trans_time));
+					{if( len < 0 ) return -7;}}
 					/* outlet_id */
 					if( xpath_len == 90 && strncmp( xpath , "/BankXmlTransaction/QueryTransactionDetails/TransactionDetails/TransactionDetail/outlet_id" , xpath_len ) == 0 )
-					{XMLUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].outlet_id);
-					{if( content_len > sizeof(pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].outlet_id)-1 ) return -7;}}
+					{XMLUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].outlet_id,len,sizeof(pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].outlet_id));
+					{if( len < 0 ) return -7;}}
 					/* card_no */
 					if( xpath_len == 88 && strncmp( xpath , "/BankXmlTransaction/QueryTransactionDetails/TransactionDetails/TransactionDetail/card_no" , xpath_len ) == 0 )
-					{XMLUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].card_no);
-					{if( content_len > sizeof(pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].card_no)-1 ) return -7;}}
+					{XMLUNESCAPE_FOLD(content,content_len,pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].card_no,len,sizeof(pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].card_no));
+					{if( len < 0 ) return -7;}}
 					/* trans_amount */
 					if( xpath_len == 93 && strncmp( xpath , "/BankXmlTransaction/QueryTransactionDetails/TransactionDetails/TransactionDetail/trans_amount" , xpath_len ) == 0 )
 					{NATOF(content,content_len,pst->QueryTransactionDetails.TransactionDetails.TransactionDetail[pst->QueryTransactionDetails.TransactionDetails._TransactionDetail_count].trans_amount);}
@@ -511,6 +512,11 @@ int DSCDESERIALIZE_XML_BankXmlTransaction( char *encoding , char *buf , int *p_l
 	return 0;
 }
 
+int DSCDESERIALIZE_XML_BankXmlTransaction_V( char *encoding , char *buf , int *p_len , void *pv )
+{
+	return DSCDESERIALIZE_XML_BankXmlTransaction( encoding , buf , p_len , (BankXmlTransaction*)pv );
+}
+
 int DSCDESERIALIZE_XML_COMPACT_BankXmlTransaction( char *encoding , char *buf , int *p_len , BankXmlTransaction *pst )
 {
 	char	xpath[ 1024 + 1 ] ;
@@ -521,6 +527,11 @@ int DSCDESERIALIZE_XML_COMPACT_BankXmlTransaction( char *encoding , char *buf , 
 		return nret;
 	
 	return 0;
+}
+
+int DSCDESERIALIZE_XML_COMPACT_BankXmlTransaction_V( char *encoding , char *buf , int *p_len , void *pv )
+{
+	return DSCDESERIALIZE_XML_COMPACT_BankXmlTransaction( encoding , buf , p_len , (BankXmlTransaction*)pv );
 }
 int DSCGetErrorLine_BankXmlTransaction()
 {

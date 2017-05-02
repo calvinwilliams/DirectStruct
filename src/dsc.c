@@ -11,8 +11,8 @@
 #include <string.h>
 #include <errno.h>
 
-char	__DIRECTSTRUCT_VERSION_1_9_1[] = "1.9.1" ;
-char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_9_1 ;
+char	__DIRECTSTRUCT_VERSION_1_10_0[] = "1.10.0" ;
+char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_10_0 ;
 
 #ifndef STRCMP
 #define STRCMP(_a_,_C_,_b_) ( strcmp(_a_,_b_) _C_ 0 )
@@ -5170,14 +5170,20 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		{
 			fprintf( fp_dsc_h , "\n" );
 			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_XML_%s( %s *pst , char *encoding , char *buf , int *p_len );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_XML_DUP_%s( %s *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_XML_DUP_%s_V( void *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len );\n" , next_struct->struct_name );
 			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCDESERIALIZE_XML_%s( char *encoding , char *buf , int *p_len , %s *pst );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCDESERIALIZE_XML_%s_V( char *encoding , char *buf , int *p_len , void *pst );\n" , next_struct->struct_name );
 		}	
 		
 		if( pcp->output_c_xml_compact_flag == 1 )
 		{
 			fprintf( fp_dsc_h , "\n" );
 			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_XML_COMPACT_%s( %s *pst , char *encoding , char *buf , int *p_len );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_XML_COMPACT_DUP_%s( %s *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCSERIALIZE_XML_COMPACT_DUP_%s_V( void *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len );\n" , next_struct->struct_name );
 			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCDESERIALIZE_XML_COMPACT_%s( char *encoding , char *buf , int *p_len , %s *pst );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_h , "_WINDLL_FUNC int DSCDESERIALIZE_XML_COMPACT_%s_V( char *encoding , char *buf , int *p_len , void *pst );\n" , next_struct->struct_name );
 		}	
 		
 		if( pcp->output_c_json_flag == 1 || pcp->output_c_json_compact_flag == 1 )
@@ -5553,6 +5559,11 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "	\n" );
 			fprintf( fp_dsc_c , "	return 0;\n" );
 			fprintf( fp_dsc_c , "}\n" );
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCDESERIALIZE_XML_%s_V( char *encoding , char *buf , int *p_len , void *pv )\n" , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	return DSCDESERIALIZE_XML_%s( encoding , buf , p_len , (%s*)pv );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "}\n" );
 		}
 		if( pcp->output_c_xml_compact_flag == 1 )
 		{
@@ -5567,6 +5578,11 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "		return nret;\n" );
 			fprintf( fp_dsc_c , "	\n" );
 			fprintf( fp_dsc_c , "	return 0;\n" );
+			fprintf( fp_dsc_c , "}\n" );
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCDESERIALIZE_XML_COMPACT_%s_V( char *encoding , char *buf , int *p_len , void *pv )\n" , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	return DSCDESERIALIZE_XML_COMPACT_%s( encoding , buf , p_len , (%s*)pv );\n" , next_struct->struct_name , next_struct->struct_name );
 			fprintf( fp_dsc_c , "}\n" );
 		}
 		

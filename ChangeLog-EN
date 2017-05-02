@@ -1,3 +1,9 @@
+ver 1.10.0	2017-05-02	calvin
+		* Add generate functions
+		  DSCSERIALIZE_XML_DUP_xxx_V,DSCDESERIALIZE_XML_xxx_V
+		  DSCSERIALIZE_XML_COMPACT_DUP_xxx_V,DSCDESERIALIZE_XML_COMPACT_xxx_V
+		* Add some unuseful code for ignoring warnning on some complier
+
 ver 1.9.1	2017-04-26	calvin
 		* Fixed a problem about unuse varible warning on higher version gcc
 
