@@ -76,7 +76,7 @@ test_trans	:	test_trans.o IDL_CommHead.dsc.o IDL_BankTransaction.dsc.o
 	$(CC) -o $@ test_trans.o IDL_CommHead.dsc.o IDL_BankTransaction.dsc.o $(LFLAGS)
 
 IDL_BankXmlTransaction.dsc.o	:	IDL_BankXmlTransaction.dsc.c
-	$(CC) -I$(HOME)/exinc/fasterxml -I. -c IDL_BankXmlTransaction.dsc.c
+	$(CC) -I$(HOME)/include/fasterxml -I. -c IDL_BankXmlTransaction.dsc.c
 
 test_serialize_xml	:	test_serialize_xml.o IDL_BankXmlTransaction.dsc.o
 	$(CC) -o $@ test_serialize_xml.o IDL_BankXmlTransaction.dsc.o $(LFLAGS) -L$(HOME)/lib -lfasterxml

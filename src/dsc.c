@@ -1651,6 +1651,27 @@ static int GenerateCCode_c_DSCHOSTORDER( struct CommandParameter *pcp , int dept
 	return 0;
 }
 
+#define DUP_CHECK	\
+			"if(len<0||remain_len<=len)" \
+			"{" \
+				"char *tmp=NULL;" \
+				"int buf_offset=buf-(*pp_base);" \
+				"int new_buf_size;" \
+				"if(buf_size<1024*1024*1024)" \
+					"new_buf_size=buf_size*2;" \
+				"else " \
+					"new_buf_size=buf_size+10*1024*1024;" \
+				"tmp=(char*)realloc(*pp_base,new_buf_size);" \
+				"if(tmp==NULL)" \
+					"return -2;" \
+				"else " \
+					"(*pp_base)=tmp,buf=(*pp_base)+buf_offset,remain_len+=new_buf_size-buf_size,buf_size=new_buf_size,memset(buf,0x00,remain_len+1);" \
+			"}" \
+			"else " \
+			"{" \
+				"break;" \
+			"}" \
+
 static int GenerateCCode_c_DSCSERIALIZE_COMPACT( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname )
 {
 	struct StructInfo	*pstruct = NULL ;
@@ -2341,7 +2362,6 @@ static int GenerateCCode_c_DSCSERIALIZE_XML( struct CommandParameter *pcp , int 
 	{
 		if( pstruct->array_size > 0 )
 		{
-			/*fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	for( index[%d] = 0 ; index[%d] < %d ; index[%d]++ )\n" , depth , depth , pstruct->array_size , depth );*/
 			fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	for( index[%d] = 0 ; index[%d]<%s_%s_count ; index[%d]++ )\n" , depth , depth , up_pathname , pstruct->struct_name , depth );
 			fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{\n" );
 		}
@@ -2371,25 +2391,25 @@ static int GenerateCCode_c_DSCSERIALIZE_XML( struct CommandParameter *pcp , int 
 				if( pfield->field_len == 1 )
 				{
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%d\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%d\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
 				else if( pfield->field_len == 2 )
 				{
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%hd\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%hd\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
 				else if( pfield->field_len == 4 )
 				{
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%d\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%d\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
 				else if( pfield->field_len == 8 )
 				{
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,LONGLONG_FORMAT_SPEC,%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,LONGLONG_FORMAT_SPEC,%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
 			}
@@ -2398,25 +2418,25 @@ static int GenerateCCode_c_DSCSERIALIZE_XML( struct CommandParameter *pcp , int 
 				if( pfield->field_len == 1 )
 				{
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%u\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%u\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
 				else if( pfield->field_len == 2 )
 				{
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%hu\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%hu\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
 				else if( pfield->field_len == 4 )
 				{
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%u\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%u\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
 				else if( pfield->field_len == 8 )
 				{
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,LONGLONG_FORMAT_SPEC,%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,LONGLONG_FORMAT_SPEC,%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
 			}
@@ -2425,44 +2445,44 @@ static int GenerateCCode_c_DSCSERIALIZE_XML( struct CommandParameter *pcp , int 
 				if( pfield->field_len == 4 )
 				{
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%f\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%f\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
 				else if( pfield->field_len == 8 )
 				{
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%lf\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%lf\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
 			}
 			else if( STRCMP( pfield->field_type , == , "NUMERIC" ) )
 			{
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
-				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%.%dlf\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pfield->field_len2 , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%.%dlf\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_len2 , pathname,pfield->field_name );
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 			}
 			else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
 			{
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
-				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%.2lf\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%.2lf\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 			}
 			else if( STRCMP( pfield->field_type , == , "CHAR" ) )
 			{
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
-				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%c\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%c\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 			}
 			else if( STRCMP( pfield->field_type , == , "UCHAR" ) )
 			{
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
-				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%c\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%c\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 			}
 			else if( STRCMP( pfield->field_type , == , "STRING" ) )
 			{
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
-				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%s\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\tXMLESCAPE_EXPAND(%s%s,strlen(%s%s),buf,len,remain_len); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name , pathname,pfield->field_name );
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 			}
 			else if( STRCMP( pfield->field_type , == , "BOOL" ) )
@@ -2470,7 +2490,7 @@ static int GenerateCCode_c_DSCSERIALIZE_XML( struct CommandParameter *pcp , int 
 				if( pfield->field_len == 1 )
 				{
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
-					fprintf( fp_dsc_c , "\tif(%s%s==DSCTRUE)len=SNPRINTF(buf,remain_len,\"true\");else len=SNPRINTF(buf,remain_len,\"false\"); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\tif(%s%s==DSCTRUE)len=SNPRINTF(buf,remain_len,\"true\");else len=SNPRINTF(buf,remain_len,\"false\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
 			}
@@ -2508,7 +2528,6 @@ static int GenerateCCode_c_DSCSERIALIZE_XML_COMPACT( struct CommandParameter *pc
 	{
 		if( pstruct->array_size > 0 )
 		{
-			/*fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	for( index[%d] = 0 ; index[%d] < %d ; index[%d]++ )\n" , depth , depth , pstruct->array_size , depth );*/
 			fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	for( index[%d] = 0 ; index[%d]<%s_%s_count ; index[%d]++ )\n" , depth , depth , up_pathname , pstruct->struct_name , depth );
 			fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{\n" );
 		}
@@ -2538,25 +2557,25 @@ static int GenerateCCode_c_DSCSERIALIZE_XML_COMPACT( struct CommandParameter *pc
 				if( pfield->field_len == 1 )
 				{
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%d\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%d\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
 				else if( pfield->field_len == 2 )
 				{
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%hd\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%hd\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
 				else if( pfield->field_len == 4 )
 				{
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%d\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%d\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
 				else if( pfield->field_len == 8 )
 				{
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,LONGLONG_FORMAT_SPEC,%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,LONGLONG_FORMAT_SPEC,%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
 			}
@@ -2565,25 +2584,25 @@ static int GenerateCCode_c_DSCSERIALIZE_XML_COMPACT( struct CommandParameter *pc
 				if( pfield->field_len == 1 )
 				{
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%u\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%u\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
 				else if( pfield->field_len == 2 )
 				{
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%hu\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%hu\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
 				else if( pfield->field_len == 4 )
 				{
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%u\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%u\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
 				else if( pfield->field_len == 8 )
 				{
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,LONGLONG_FORMAT_SPEC,%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,LONGLONG_FORMAT_SPEC,%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
 			}
@@ -2592,44 +2611,44 @@ static int GenerateCCode_c_DSCSERIALIZE_XML_COMPACT( struct CommandParameter *pc
 				if( pfield->field_len == 4 )
 				{
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%f\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%f\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
 				else if( pfield->field_len == 8 )
 				{
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
-					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%lf\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%lf\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
 			}
 			else if( STRCMP( pfield->field_type , == , "NUMERIC" ) )
 			{
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
-				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%.%dlf\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pfield->field_len2 , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%.%dlf\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_len2 , pathname,pfield->field_name );
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 			}
 			else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
 			{
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
-				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%.2lf\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%.2lf\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 			}
 			else if( STRCMP( pfield->field_type , == , "CHAR" ) )
 			{
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
-				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%c\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%c\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 			}
 			else if( STRCMP( pfield->field_type , == , "UCHAR" ) )
 			{
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
-				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%c\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%c\",%s%s); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 			}
 			else if( STRCMP( pfield->field_type , == , "STRING" ) )
 			{
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
-				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%%s\",%s%s); XMLESCAPE_EXPAND(buf,len,remain_len); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\tXMLESCAPE_EXPAND(%s%s,strlen(%s%s),buf,len,remain_len); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name , pathname,pfield->field_name );
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 			}
 			else if( STRCMP( pfield->field_type , == , "BOOL" ) )
@@ -2637,7 +2656,7 @@ static int GenerateCCode_c_DSCSERIALIZE_XML_COMPACT( struct CommandParameter *pc
 				if( pfield->field_len == 1 )
 				{
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
-					fprintf( fp_dsc_c , "\tif(%s%s==DSCTRUE)len=SNPRINTF(buf,remain_len,\"true\");else len=SNPRINTF(buf,remain_len,\"false\"); if(len<0||remain_len<len)return -1;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\tif(%s%s==DSCTRUE)len=SNPRINTF(buf,remain_len,\"true\");else len=SNPRINTF(buf,remain_len,\"false\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
 				}
 			}
@@ -2651,6 +2670,341 @@ static int GenerateCCode_c_DSCSERIALIZE_XML_COMPACT( struct CommandParameter *pc
 		}
 		
 		fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pstruct->struct_name );
+		
+		if( pstruct->array_size > 0 )
+		{
+			fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "}\n" );
+		}
+		
+		if( only_once )
+			break;
+	}
+	
+	return 0;
+}
+
+static int GenerateCCode_c_DSCSERIALIZE_XML_DUP( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname )
+{
+	struct StructInfo	*pstruct = NULL ;
+	char			pathname[ 1024 + 1 ] ;
+	struct FieldInfo	*pfield = NULL ;
+	char			tabs[ DSC_MAXDEPTH ] ;
+	int			nret = 0 ;
+	
+	memset( tabs , '\t' , DSC_MAXDEPTH );
+	
+	for( pstruct = first_struct ; pstruct ; pstruct = pstruct->next_struct )
+	{
+		if( pstruct->array_size > 0 )
+		{
+			fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	for( index[%d] = 0 ; index[%d]<%s_%s_count ; index[%d]++ )\n" , depth , depth , up_pathname , pstruct->struct_name , depth );
+			fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{\n" );
+		}
+		
+		if( depth == 0 )
+		{
+			strcpy( pathname  , up_pathname );
+		}
+		else
+		{
+			if( pstruct->array_size == 0 )
+			{
+				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s." , up_pathname , pstruct->struct_name );
+			}
+			else
+			{
+				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s[index[%d]]." , up_pathname , pstruct->struct_name , depth );
+			}
+		}
+		
+		fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s<%s>\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth,tabs , pstruct->struct_name );
+		
+		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
+		{
+			if( STRCMP( pfield->field_type , == , "INT" ) )
+			{
+				if( pfield->field_len == 1 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%d\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				}
+				else if( pfield->field_len == 2 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%hd\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				}
+				else if( pfield->field_len == 4 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%d\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				}
+				else if( pfield->field_len == 8 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,LONGLONG_FORMAT_SPEC,%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				}
+			}
+			else if( STRCMP( pfield->field_type , == , "UINT" ) )
+			{
+				if( pfield->field_len == 1 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%u\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				}
+				else if( pfield->field_len == 2 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%hu\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				}
+				else if( pfield->field_len == 4 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%u\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				}
+				else if( pfield->field_len == 8 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,LONGLONG_FORMAT_SPEC,%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				}
+			}
+			else if( STRCMP( pfield->field_type , == , "FLOAT" ) )
+			{
+				if( pfield->field_len == 4 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%f\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				}
+				else if( pfield->field_len == 8 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%lf\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				}
+			}
+			else if( STRCMP( pfield->field_type , == , "NUMERIC" ) )
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%.%dlf\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_len2 , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+			}
+			else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%.2lf\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+			}
+			else if( STRCMP( pfield->field_type , == , "CHAR" ) )
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%c\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+			}
+			else if( STRCMP( pfield->field_type , == , "UCHAR" ) )
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%c\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+			}
+			else if( STRCMP( pfield->field_type , == , "STRING" ) )
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){XMLESCAPE_EXPAND(%s%s,strlen(%s%s),buf,len,remain_len);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+			}
+			else if( STRCMP( pfield->field_type , == , "BOOL" ) )
+			{
+				if( pfield->field_len == 1 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){if(%s%s==DSCTRUE)len=SNPRINTF(buf,remain_len,\"true\");else len=SNPRINTF(buf,remain_len,\"false\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				}
+			}
+		}
+		
+		if( pstruct->first_sub_struct )
+		{
+			nret = GenerateCCode_c_DSCSERIALIZE_XML_DUP( pcp , depth + 1 , pstruct->first_sub_struct , 0 , fp_dsc_c , pathname ) ;
+			if( nret )
+				return nret;
+		}
+		
+		fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s</%s>\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth,tabs , pstruct->struct_name );
+		
+		if( pstruct->array_size > 0 )
+		{
+			fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	}\n" );
+		}
+		
+		if( only_once )
+			break;
+	}
+	
+	return 0;
+}
+
+static int GenerateCCode_c_DSCSERIALIZE_XML_COMPACT_DUP( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname )
+{
+	struct StructInfo	*pstruct = NULL ;
+	char			pathname[ 1024 + 1 ] ;
+	struct FieldInfo	*pfield = NULL ;
+	int			nret = 0 ;
+	
+	for( pstruct = first_struct ; pstruct ; pstruct = pstruct->next_struct )
+	{
+		if( pstruct->array_size > 0 )
+		{
+			fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	for( index[%d] = 0 ; index[%d]<%s_%s_count ; index[%d]++ )\n" , depth , depth , up_pathname , pstruct->struct_name , depth );
+			fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{\n" );
+		}
+		
+		if( depth == 0 )
+		{
+			strcpy( pathname  , up_pathname );
+		}
+		else
+		{
+			if( pstruct->array_size == 0 )
+			{
+				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s." , up_pathname , pstruct->struct_name );
+			}
+			else
+			{
+				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s[index[%d]]." , up_pathname , pstruct->struct_name , depth );
+			}
+		}
+		
+		fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pstruct->struct_name );
+		
+		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
+		{
+			if( STRCMP( pfield->field_type , == , "INT" ) )
+			{
+				if( pfield->field_len == 1 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%d\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				}
+				else if( pfield->field_len == 2 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%hd\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				}
+				else if( pfield->field_len == 4 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%d\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				}
+				else if( pfield->field_len == 8 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,LONGLONG_FORMAT_SPEC,%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				}
+			}
+			else if( STRCMP( pfield->field_type , == , "UINT" ) )
+			{
+				if( pfield->field_len == 1 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%u\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				}
+				else if( pfield->field_len == 2 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%hu\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				}
+				else if( pfield->field_len == 4 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%u\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				}
+				else if( pfield->field_len == 8 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,LONGLONG_FORMAT_SPEC,%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				}
+			}
+			else if( STRCMP( pfield->field_type , == , "FLOAT" ) )
+			{
+				if( pfield->field_len == 4 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%f\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				}
+				else if( pfield->field_len == 8 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%lf\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				}
+			}
+			else if( STRCMP( pfield->field_type , == , "NUMERIC" ) )
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%.%dlf\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_len2 , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+			}
+			else if( STRCMP( pfield->field_type , == , "AMOUNT" ) )
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%.2lf\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+			}
+			else if( STRCMP( pfield->field_type , == , "CHAR" ) )
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%c\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+			}
+			else if( STRCMP( pfield->field_type , == , "UCHAR" ) )
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%%c\",%s%s);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+			}
+			else if( STRCMP( pfield->field_type , == , "STRING" ) )
+			{
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){XMLESCAPE_EXPAND(%s%s,strlen(%s%s),buf,len,remain_len);"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+			}
+			else if( STRCMP( pfield->field_type , == , "BOOL" ) )
+			{
+				if( pfield->field_len == 1 )
+				{
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){if(%s%s==DSCTRUE)len=SNPRINTF(buf,remain_len,\"true\");else len=SNPRINTF(buf,remain_len,\"false\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pathname,pfield->field_name );
+					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
+				}
+			}
+		}
+		
+		if( pstruct->first_sub_struct )
+		{
+			nret = GenerateCCode_c_DSCSERIALIZE_XML_COMPACT_DUP( pcp , depth + 1 , pstruct->first_sub_struct , 0 , fp_dsc_c , pathname ) ;
+			if( nret )
+				return nret;
+		}
+		
+		fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pstruct->struct_name );
 		
 		if( pstruct->array_size > 0 )
 		{
@@ -2894,8 +3248,8 @@ static int GenerateCCode_c_DSCDESERIALIZE_XML_LEAF( struct CommandParameter *pcp
 			{
 				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	/* %s */\n" , pfield->field_name );
 				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	if( xpath_len == %d && strncmp( xpath , \"%s/%s\" , xpath_len ) == 0 )\n" , (int)(strlen(xmlpathname)+1+strlen(pfield->field_name)) , xmlpathname,pfield->field_name );
-				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{XMLUNESCAPE_FOLD(content,content_len,%s%s);\n" , pathname,pfield->field_name );
-				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{if( content_len > sizeof(%s%s)-1 ) return -7;}}\n" , pathname,pfield->field_name );
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{XMLUNESCAPE_FOLD(content,content_len,%s%s,len,sizeof(%s%s));\n" , pathname,pfield->field_name , pathname,pfield->field_name );
+				fprintabs( fp_dsc_c , depth+1 ); fprintf( fp_dsc_c , "	{if( len < 0 ) return -7;}}\n" );
 			}
 			else if( STRCMP( pfield->field_type , == , "BOOL" ) )
 			{
@@ -3430,27 +3784,6 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( struct CommandParameter *p
 	return 0;
 }
 
-#define DUP_CHECK	\
-			"if(len<0||remain_len<=len)" \
-			"{" \
-				"char *tmp=NULL;" \
-				"int buf_offset=buf-(*pp_base);" \
-				"int new_buf_size;" \
-				"if(buf_size<1024*1024*1024)" \
-					"new_buf_size=buf_size*2;" \
-				"else " \
-					"new_buf_size=buf_size+10*1024*1024;" \
-				"tmp=(char*)realloc(*pp_base,new_buf_size);" \
-				"if(tmp==NULL)" \
-					"return -2;" \
-				"else " \
-					"(*pp_base)=tmp,buf=(*pp_base)+buf_offset,remain_len+=new_buf_size-buf_size,buf_size=new_buf_size,memset(buf,0x00,remain_len+1);" \
-			"}" \
-			"else " \
-			"{" \
-				"break;" \
-			"}" \
-
 static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname )
 {
 	struct StructInfo	*pstruct = NULL ;
@@ -3717,7 +4050,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP( struct CommandParameter *pcp ,
 	return 0;
 }
 
-static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP_COMPACT( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname )
+static int GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT_DUP( struct CommandParameter *pcp , int depth , struct StructInfo *first_struct , int only_once , FILE *fp_dsc_c , char *up_pathname )
 {
 	struct StructInfo	*pstruct = NULL ;
 	char			pathname[ 1024 + 1 ] ;
@@ -3903,7 +4236,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP_COMPACT( struct CommandParamete
 		
 		if( pstruct->first_sub_struct )
 		{
-			nret = GenerateCCode_c_DSCSERIALIZE_JSON_DUP_COMPACT( pcp , depth+1 , pstruct->first_sub_struct , 0 , fp_dsc_c , pathname ) ;
+			nret = GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT_DUP( pcp , depth+1 , pstruct->first_sub_struct , 0 , fp_dsc_c , pathname ) ;
 			if( nret )
 				return nret;
 		}
@@ -5024,6 +5357,64 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "	\n" );
 			fprintf( fp_dsc_c , "	return 0;\n" );
 			fprintf( fp_dsc_c , "}\n" );
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCSERIALIZE_XML_DUP_%s( %s *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len )\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	int	buf_size ;\n" );
+			fprintf( fp_dsc_c , "	int	remain_len ;\n" );
+			fprintf( fp_dsc_c , "	char	*buf = NULL ;\n" );
+			fprintf( fp_dsc_c , "	int	buf_begin_offset ;\n" );
+			fprintf( fp_dsc_c , "	int	len ;\n" );
+			fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0]++; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	if( (*pp_base) == NULL )\n" );
+			fprintf( fp_dsc_c , "	{\n" );
+			fprintf( fp_dsc_c , "		char	*tmp = NULL ;\n" );
+			fprintf( fp_dsc_c , "		if( p_buf_size && (*p_buf_size) > 0 )\n" );
+			fprintf( fp_dsc_c , "		{\n" );
+			fprintf( fp_dsc_c , "			buf_size = (*p_buf_size) ;\n" );
+			fprintf( fp_dsc_c , "			tmp = (char*)malloc( buf_size ) ;\n" );
+			fprintf( fp_dsc_c , "			if( tmp == NULL )\n" );
+			fprintf( fp_dsc_c , "				return -2;\n" );
+			fprintf( fp_dsc_c , "			memset( tmp , 0x00 , buf_size );\n" );
+			fprintf( fp_dsc_c , "			(*pp_base) = tmp ;\n" );
+			fprintf( fp_dsc_c , "			remain_len = buf_size - 1 ;\n" );
+			fprintf( fp_dsc_c , "		}\n" );
+			fprintf( fp_dsc_c , "		else\n" );
+			fprintf( fp_dsc_c , "		{\n" );
+			fprintf( fp_dsc_c , "			buf_size = 1024 ;\n" );
+			fprintf( fp_dsc_c , "			tmp = (char*)malloc( buf_size ) ;\n" );
+			fprintf( fp_dsc_c , "			if( tmp == NULL )\n" );
+			fprintf( fp_dsc_c , "				return -2;\n" );
+			fprintf( fp_dsc_c , "			memset( tmp , 0x00 , buf_size );\n" );
+			fprintf( fp_dsc_c , "			(*pp_base) = tmp ;\n" );
+			fprintf( fp_dsc_c , "			remain_len = buf_size - 1 ;\n" );
+			fprintf( fp_dsc_c , "		}\n" );
+			fprintf( fp_dsc_c , "	}\n" );
+			fprintf( fp_dsc_c , "	else\n" );
+			fprintf( fp_dsc_c , "	{\n" );
+			fprintf( fp_dsc_c , "		buf_size = (*p_buf_size) ;\n" );
+			fprintf( fp_dsc_c , "		remain_len = (*p_len) ;\n" );
+			fprintf( fp_dsc_c , "	}\n" );
+			fprintf( fp_dsc_c , "	buf_begin_offset = buf_size-1 - remain_len ;\n" );
+			fprintf( fp_dsc_c , "	buf = (*pp_base) + buf_begin_offset ;\n" );
+			fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
+			nret = GenerateCCode_c_DSCSERIALIZE_XML_DUP( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
+			if( nret )
+				return nret;
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	if( p_buf_size )\n" );
+			fprintf( fp_dsc_c , "		(*p_buf_size) = buf_size ;\n" );
+			fprintf( fp_dsc_c , "	if( p_len )\n" );
+			fprintf( fp_dsc_c , "		(*p_len) = buf_size-1 - buf_begin_offset - remain_len ;\n" );
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	return 0;\n" );
+			fprintf( fp_dsc_c , "}\n" );
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCSERIALIZE_XML_DUP_%s_V( void *pv , char *encoding , char **pp_base , int *p_buf_size , int *p_len )\n" , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	return DSCSERIALIZE_XML_DUP_%s( (%s*)pv , encoding , pp_base , p_buf_size , p_len );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "}\n" );
 		}
 		
 		if( pcp->output_c_xml_compact_flag == 1 )
@@ -5047,6 +5438,64 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "	\n" );
 			fprintf( fp_dsc_c , "	return 0;\n" );
 			fprintf( fp_dsc_c , "}\n" );
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCSERIALIZE_XML_COMPACT_DUP_%s( %s *pst , char *encoding , char **pp_base , int *p_buf_size , int *p_len )\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	int	buf_size ;\n" );
+			fprintf( fp_dsc_c , "	int	remain_len ;\n" );
+			fprintf( fp_dsc_c , "	char	*buf = NULL ;\n" );
+			fprintf( fp_dsc_c , "	int	buf_begin_offset ;\n" );
+			fprintf( fp_dsc_c , "	int	len ;\n" );
+			fprintf( fp_dsc_c , "	char	tabs[%d+1] ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	if( (*pp_base) == NULL )\n" );
+			fprintf( fp_dsc_c , "	{\n" );
+			fprintf( fp_dsc_c , "		char	*tmp = NULL ;\n" );
+			fprintf( fp_dsc_c , "		if( p_buf_size && (*p_buf_size) > 0 )\n" );
+			fprintf( fp_dsc_c , "		{\n" );
+			fprintf( fp_dsc_c , "			buf_size = (*p_buf_size) ;\n" );
+			fprintf( fp_dsc_c , "			tmp = (char*)malloc( buf_size ) ;\n" );
+			fprintf( fp_dsc_c , "			if( tmp == NULL )\n" );
+			fprintf( fp_dsc_c , "				return -2;\n" );
+			fprintf( fp_dsc_c , "			memset( tmp , 0x00 , buf_size );\n" );
+			fprintf( fp_dsc_c , "			(*pp_base) = tmp ;\n" );
+			fprintf( fp_dsc_c , "			remain_len = buf_size - 1 ;\n" );
+			fprintf( fp_dsc_c , "		}\n" );
+			fprintf( fp_dsc_c , "		else\n" );
+			fprintf( fp_dsc_c , "		{\n" );
+			fprintf( fp_dsc_c , "			buf_size = 1024 ;\n" );
+			fprintf( fp_dsc_c , "			tmp = (char*)malloc( buf_size ) ;\n" );
+			fprintf( fp_dsc_c , "			if( tmp == NULL )\n" );
+			fprintf( fp_dsc_c , "				return -2;\n" );
+			fprintf( fp_dsc_c , "			memset( tmp , 0x00 , buf_size );\n" );
+			fprintf( fp_dsc_c , "			(*pp_base) = tmp ;\n" );
+			fprintf( fp_dsc_c , "			remain_len = buf_size - 1 ;\n" );
+			fprintf( fp_dsc_c , "		}\n" );
+			fprintf( fp_dsc_c , "	}\n" );
+			fprintf( fp_dsc_c , "	else\n" );
+			fprintf( fp_dsc_c , "	{\n" );
+			fprintf( fp_dsc_c , "		buf_size = (*p_buf_size) ;\n" );
+			fprintf( fp_dsc_c , "		remain_len = (*p_len) ;\n" );
+			fprintf( fp_dsc_c , "	}\n" );
+			fprintf( fp_dsc_c , "	buf_begin_offset = buf_size-1 - remain_len ;\n" );
+			fprintf( fp_dsc_c , "	buf = (*pp_base) + buf_begin_offset ;\n" );
+			fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
+			nret = GenerateCCode_c_DSCSERIALIZE_XML_COMPACT_DUP( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
+			if( nret )
+				return nret;
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	if( p_buf_size )\n" );
+			fprintf( fp_dsc_c , "		(*p_buf_size) = buf_size ;\n" );
+			fprintf( fp_dsc_c , "	if( p_len )\n" );
+			fprintf( fp_dsc_c , "		(*p_len) = buf_size-1 - buf_begin_offset - remain_len ;\n" );
+			fprintf( fp_dsc_c , "	\n" );
+			fprintf( fp_dsc_c , "	return 0;\n" );
+			fprintf( fp_dsc_c , "}\n" );
+			fprintf( fp_dsc_c , "\n" );
+			fprintf( fp_dsc_c , "int DSCSERIALIZEXML_COMPACT_DUP_%s_V( void *pv , char *encoding , char **pp_base , int *p_buf_size , int *p_len )\n" , next_struct->struct_name );
+			fprintf( fp_dsc_c , "{\n" );
+			fprintf( fp_dsc_c , "	return DSCSERIALIZE_XML_COMPACT_DUP_%s( (%s*)pv , encoding , pp_base , p_buf_size , p_len );\n" , next_struct->struct_name , next_struct->struct_name );
+			fprintf( fp_dsc_c , "}\n" );
 		}
 		
 		if( pcp->output_c_xml_flag == 1 || pcp->output_c_xml_compact_flag == 1 )
@@ -5060,6 +5509,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "{\n" );
 			fprintf( fp_dsc_c , "	%s	*pst = (%s*)p ;\n" , next_struct->struct_name , next_struct->struct_name );
 			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ; index[0]++; index[0] = 0 ;\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	int	len = 0 ;\n" );
 			fprintf( fp_dsc_c , "	\n" );
 			fprintf( fp_dsc_c , "	if( type & FASTERXML_NODE_BRANCH )\n" );
 			fprintf( fp_dsc_c , "	{\n" );
@@ -5268,7 +5718,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "	buf_begin_offset = buf_size-1 - remain_len ;\n" );
 			fprintf( fp_dsc_c , "	buf = (*pp_base) + buf_begin_offset ;\n" );
 			fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
-			nret = GenerateCCode_c_DSCSERIALIZE_JSON_DUP_COMPACT( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
+			nret = GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT_DUP( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
 			if( nret )
 				return nret;
 			fprintf( fp_dsc_c , "	\n" );
