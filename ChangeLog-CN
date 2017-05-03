@@ -1,3 +1,15 @@
+ver 1.10.0	2017-05-02	calvin
+		* 新增自动生成函数
+		  DSCSERIALIZE_XML_DUP_xxx_V,DSCDESERIALIZE_XML_xxx_V
+		  DSCSERIALIZE_XML_COMPACT_DUP_xxx_V,DSCDESERIALIZE_XML_COMPACT_xxx_V
+		* 添加了一些无用代码避免在某些版本编译器中报警告
+
+ver 1.9.1	2017-04-26	calvin
+		* 修正了高版本gcc编译器检查未使用变量警告
+
+ver 1.9.0	2017-04-17	calvin
+		* 新增生成数据库表和字段COMMENT语句
+
 ver 1.8.1	2017-02-06	calvin
 		* 修正double类族的json打包函数问题
 

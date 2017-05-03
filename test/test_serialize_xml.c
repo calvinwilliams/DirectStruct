@@ -9,9 +9,10 @@
 int test_serialize_xml()
 {
 	BankXmlTransaction	trans ;
-	char		buf[ 40960 + 1 ] ;
-	int		len ;
-	int		nret = 0 ;
+	char			buf[ 40960 + 1 ] ;
+	char			*pbuf = NULL ;
+	int			len ;
+	int			nret = 0 ;
 	
 	/* client code */
 	DSCINIT_BankXmlTransaction( & trans );
@@ -106,6 +107,72 @@ int test_serialize_xml()
 	{
 		printf( "DSCDESERIALIZE_XML_BankXmlTransaction ok\n" );
 	}
+	
+	DSCLOG_BankXmlTransaction( & trans );
+	
+	pbuf = NULL ;
+	nret = DSCSERIALIZE_XML_DUP_BankXmlTransaction( & trans , "GBK" , & pbuf , NULL , & len ) ;
+	if( nret )
+	{
+		printf( "DSCSERIALIZE_XML_DUP_BankXmlTransaction failed[%d]\n" , nret );
+		return nret;
+	}
+	else
+	{
+		printf( "DSCSERIALIZE_XML_DUP_BankXmlTransaction ok , len[%d]\n" , len );
+	}
+	
+	printf( "[%s]\n" , pbuf );
+	
+	/* ... client send communication struct to server ... */
+	
+	/* server code */
+	memset( & trans , 0x00 , sizeof(BankXmlTransaction) );
+	nret = DSCDESERIALIZE_XML_BankXmlTransaction( NULL , pbuf , & len , & trans ) ;
+	if( nret )
+	{
+		printf( "DSCDESERIALIZE_XML_BankXmlTransaction failed[%d]\n" , nret );
+		return nret;
+	}
+	else
+	{
+		printf( "DSCDESERIALIZE_XML_BankXmlTransaction ok\n" );
+	}
+	
+	free( pbuf );
+	
+	DSCLOG_BankXmlTransaction( & trans );
+	
+	pbuf = NULL ;
+	nret = DSCSERIALIZE_XML_COMPACT_DUP_BankXmlTransaction( & trans , "GBK" , & pbuf , NULL , & len ) ;
+	if( nret )
+	{
+		printf( "DSCSERIALIZE_XML_COMPACT_DUP_BankXmlTransaction failed[%d]\n" , nret );
+		return nret;
+	}
+	else
+	{
+		printf( "DSCSERIALIZE_XML_COMPACT_DUP_BankXmlTransaction ok , len[%d]\n" , len );
+	}
+	
+	printf( "[%s]\n" , pbuf );
+	
+	/* ... client send communication struct to server ... */
+	
+	/* server code */
+	memset( & trans , 0x00 , sizeof(BankXmlTransaction) );
+	nret = DSCDESERIALIZE_XML_BankXmlTransaction( NULL , pbuf , & len , & trans ) ;
+	if( nret )
+	{
+		printf( "DSCDESERIALIZE_XML_BankXmlTransaction failed[%d]\n" , nret );
+		return nret;
+	}
+	else
+	{
+		printf( "DSCDESERIALIZE_XML_BankXmlTransaction ok\n" );
+	}
+	
+	free( pbuf );
 	
 	DSCLOG_BankXmlTransaction( & trans );
 	
