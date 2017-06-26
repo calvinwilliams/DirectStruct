@@ -28,5 +28,5 @@ STRUCT	userinfo
 	SQLACTION	"INSERT INTO userinfo" db_master
 	SQLACTION	"UPDATE userinfo SET * WHERE user_id =" db_master
 	SQLACTION	"DELETE FROM userinfo WHERE user_id >=" db_master
-	SQLACTION	"CURSOR mycursor11 SELECT user_name FROM userinfo WHERE user_id >=" db_slave
+	# SQLACTION	"CURSOR mycursor11 SELECT user_name FROM userinfo WHERE user_id >=" db_slave
 }

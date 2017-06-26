@@ -372,51 +372,6 @@ void DSCSQLACTION_DELETE_FROM_userinfo_WHERE_user_id_GE_AT_db_master( userinfo *
 	return;
 }
 
-void DSCSQLACTION_OPEN_CURSOR_mycursor11_SELECT_user_name_FROM_userinfo_WHERE_user_id_GE_AT_db_slave( userinfo *pst )
-{
-	DSCSTOV_userinfo( pst );
-	
-	EXEC SQL
-		AT	db_slave
-		DECLARE	userinfo_mycursor11 CURSOR FOR
-		SELECT	user_name
-		FROM	userinfo
-		WHERE	user_id >= :userinfo_user_id
-		;
-	if( SQLCODE )
-		return;
-	
-	EXEC SQL
-		OPEN	userinfo_mycursor11
-		;
-	if( SQLCODE )
-		return;
-	
-	return;
-}
-
-void DSCSQLACTION_FETCH_CURSOR_mycursor11( userinfo *pst )
-{
-	EXEC SQL
-		FETCH	userinfo_mycursor11
-		INTO	:userinfo_user_name :userinfo_user_name_id
-		;
-	if( SQLCODE )
-		return;
-	
-	DSCVTOS_userinfo( pst );
-	
-	return;
-}
-
-void DSCSQLACTION_CLOSE_CURSOR_mycursor11()
-{
-	EXEC SQL
-		CLOSE	userinfo_mycursor11
-		;
-	return;
-}
-
 EXEC SQL BEGIN DECLARE SECTION ;
 	char    DBNAME[ 1024 + 1 ] ;
 	char    DBUSER[ 128 + 1 ] ;

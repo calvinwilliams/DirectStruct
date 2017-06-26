@@ -73,9 +73,6 @@ void DSCSQLACTION_SELECT_A_FROM_userinfo_WHERE_user_id_E_AND_user_name_E_AT_db_s
 void DSCSQLACTION_INSERT_INTO_userinfo_AT_db_master( userinfo *pst );
 void DSCSQLACTION_UPDATE_userinfo_SET_A_WHERE_user_id_E_AT_db_master( userinfo *pst );
 void DSCSQLACTION_DELETE_FROM_userinfo_WHERE_user_id_GE_AT_db_master( userinfo *pst );
-void DSCSQLACTION_OPEN_CURSOR_mycursor11_SELECT_user_name_FROM_userinfo_WHERE_user_id_GE_AT_db_slave( userinfo *pst );
-void DSCSQLACTION_FETCH_CURSOR_mycursor11( userinfo *pst );
-void DSCSQLACTION_CLOSE_CURSOR_mycursor11();
 void DSCDBCONN( char *host , int port , char *dbname , char *user , char *pass );
 void DSCDBDISCONN();
 void DSCDBBEGINWORK();
