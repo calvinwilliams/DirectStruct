@@ -4840,8 +4840,10 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 	fprintf( fp_dsc_h , "#ifndef longlong\n" );
 	fprintf( fp_dsc_h , "#define longlong	long long\n" );
 	fprintf( fp_dsc_h , "#define ulonglong	unsigned long long\n" );
+	fprintf( fp_dsc_h , "#ifndef LL\n" );
 	fprintf( fp_dsc_h , "#define LL(_ll_)	_ll_##LL\n" );
 	fprintf( fp_dsc_h , "#define ULL(_ll_)	_ll_##ULL\n" );
+	fprintf( fp_dsc_h , "#endif\n" );
 	fprintf( fp_dsc_h , "#define LONGLONG_FORMAT_SPEC	\"%%lld\"\n" );
 	fprintf( fp_dsc_h , "#define ATOLL	atoll\n" );
 	fprintf( fp_dsc_h , "#endif\n" );
@@ -4854,8 +4856,10 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 	fprintf( fp_dsc_h , "#ifndef longlong\n" );
 	fprintf( fp_dsc_h , "#define longlong	__int64\n" );
 	fprintf( fp_dsc_h , "#define ulonglong	unsigned __int64\n" );
+	fprintf( fp_dsc_h , "#ifndef LL\n" );
 	fprintf( fp_dsc_h , "#define LL(_ll_)	_ll_\n" );
 	fprintf( fp_dsc_h , "#define ULL(_ll_)	_ll_\n" );
+	fprintf( fp_dsc_h , "#endif\n" );
 	fprintf( fp_dsc_h , "#define LONGLONG_FORMAT_SPEC	\"%%I64\"\n" );
 	fprintf( fp_dsc_h , "#define ATOLL	_atoi64\n" );
 	fprintf( fp_dsc_h , "#define __BIG_ENDIAN	4321\n" );
