@@ -11,8 +11,8 @@
 #include <string.h>
 #include <errno.h>
 
-char	__DIRECTSTRUCT_VERSION_1_10_0[] = "1.10.0" ;
-char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_10_0 ;
+char	__DIRECTSTRUCT_VERSION_1_11_0[] = "1.11.0" ;
+char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_11_0 ;
 
 #ifndef STRCMP
 #define STRCMP(_a_,_C_,_b_) ( strcmp(_a_,_b_) _C_ 0 )
@@ -103,6 +103,12 @@ struct HeaderOutput
 	struct HeaderOutput	*next_line ;
 } ;
 
+struct SqlConnectionName
+{
+	char				*connection_name ;
+	struct SqlConnectionName	*next_line ;
+} ;
+
 struct CreateSqlOutput
 {
 	char			*content ;
@@ -120,6 +126,7 @@ struct SqlActionOutput
 	char			*content ;
 	char			*funcname ;
 	struct SqlActionOutput	*next_line ;
+	char			*connection_name ;
 } ;
 
 struct StructInfo
@@ -132,6 +139,8 @@ struct StructInfo
 	
 	struct HeaderOutput	*first_line ;
 	struct HeaderOutput	*last_line ;
+	struct SqlConnectionName	*first_connection_name_line ;
+	struct SqlConnectionName	*last_connection_name_line ;
 	struct CreateSqlOutput	*first_create_sql_line ;
 	struct CreateSqlOutput	*last_create_sql_line ;
 	struct DropSqlOutput	*first_drop_sql_line ;
@@ -548,7 +557,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 	
 	if( depth > DSC_MAXDEPTH - 1 )
 	{
-		fprintf( stderr , "*** ERROR : : too many sub structs\n" );
+		fprintf( stderr , "*** ERROR : too many sub structs\n" );
 		return -1;
 	}
 	
@@ -745,7 +754,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 					psi_sub = (struct StructInfo *)malloc( sizeof(struct StructInfo) ) ;
 					if( psi_sub == NULL )
 					{
-						fprintf( stderr , "*** ERROR : : alloc failed , errno[%d]\n" , errno );
+						fprintf( stderr , "*** ERROR : alloc failed , errno[%d]\n" , errno );
 						return -1;
 					}
 					memset( psi_sub , 0x00 , sizeof(struct StructInfo) );
@@ -822,7 +831,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 					line = (struct HeaderOutput *)malloc( sizeof(struct HeaderOutput) ) ;
 					if( line == NULL )
 					{
-						fprintf( stderr , "*** ERROR : : alloc failed , errno[%d]\n" , errno );
+						fprintf( stderr , "*** ERROR : alloc failed , errno[%d]\n" , errno );
 						return -1;
 					}
 					memset( line , 0x00 , sizeof(struct HeaderOutput) );
@@ -861,7 +870,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 					line = (struct CreateSqlOutput *)malloc( sizeof(struct CreateSqlOutput) ) ;
 					if( line == NULL )
 					{
-						fprintf( stderr , "*** ERROR : : alloc failed , errno[%d]\n" , errno );
+						fprintf( stderr , "*** ERROR : alloc failed , errno[%d]\n" , errno );
 						return -1;
 					}
 					memset( line , 0x00 , sizeof(struct CreateSqlOutput) );
@@ -900,7 +909,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 					line = (struct DropSqlOutput *)malloc( sizeof(struct DropSqlOutput) ) ;
 					if( line == NULL )
 					{
-						fprintf( stderr , "*** ERROR : : alloc failed , errno[%d]\n" , errno );
+						fprintf( stderr , "*** ERROR : alloc failed , errno[%d]\n" , errno );
 						return -1;
 					}
 					memset( line , 0x00 , sizeof(struct DropSqlOutput) );
@@ -939,7 +948,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 					line = (struct SqlActionOutput *)malloc( sizeof(struct SqlActionOutput) ) ;
 					if( line == NULL )
 					{
-						fprintf( stderr , "*** ERROR : : alloc failed , errno[%d]\n" , errno );
+						fprintf( stderr , "*** ERROR : alloc failed , errno[%d]\n" , errno );
 						return -1;
 					}
 					memset( line , 0x00 , sizeof(struct SqlActionOutput) );
@@ -979,11 +988,48 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 						return -1;
 					}
 					
-					line->funcname = strdup( ptr2 ) ;
-					if( line->funcname == NULL )
+					ptr3 = strtok2( & base ) ;
+					if( ptr3 )
 					{
-						fprintf( stderr , "*** ERROR : %s:%d : invalid line [%s]\n" , dsc_pathfilename , (*p_lineno) , filebuffer_bak );
-						return -1;
+						struct SqlConnectionName	*pconnection = NULL ;
+						
+						for( pconnection = pstruct->first_connection_name_line ; pconnection ; pconnection = pconnection->next_line )
+						{
+							if( pconnection->connection_name && STRCMP( pconnection->connection_name , == , ptr3 ) )
+								break;
+						}
+						if( pconnection == NULL )
+						{
+							fprintf( stderr , "*** ERROR : connection name[%s] not found\n" , ptr3 );
+							return -1;
+						}
+						
+						line->connection_name = strdup( ptr3 ) ;
+						if( line->connection_name == NULL )
+						{
+							fprintf( stderr , "*** ERROR : alloc failed , errno[%d]\n" , errno );
+							return -1;
+						}
+					}
+					
+					if( line->connection_name == NULL )
+					{
+						line->funcname = strdup( ptr2 ) ;
+						if( line->funcname == NULL )
+						{
+							fprintf( stderr , "*** ERROR : %s:%d : invalid line [%s]\n" , dsc_pathfilename , (*p_lineno) , filebuffer_bak );
+							return -1;
+						}
+					}
+					else
+					{
+						line->funcname = (char*)malloc( strlen(ptr2) + 4 + strlen(line->connection_name) + 1 ) ;
+						if( line->funcname == NULL )
+						{
+							fprintf( stderr , "*** ERROR : %s:%d : invalid line [%s]\n" , dsc_pathfilename , (*p_lineno) , filebuffer_bak );
+							return -1;
+						}
+						sprintf( line->funcname , "%s_AT_%s" , ptr2 , line->connection_name );
 					}
 					
 					ptr6 = line->funcname ;
@@ -1026,14 +1072,47 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 				}
 				else if( STRCMP( ptr , == , "SQLCONN" ) )
 				{
+					struct SqlConnectionName	*line = NULL ;
+					
 					pstruct->sqlconn = 1 ;
+					
+					line = (struct SqlConnectionName *)malloc( sizeof(struct SqlConnectionName) ) ;
+					if( line == NULL )
+					{
+						fprintf( stderr , "*** ERROR : alloc failed , errno[%d]\n" , errno );
+						return -1;
+					}
+					memset( line , 0x00 , sizeof(struct SqlConnectionName) );
+					
+					ptr2 = strtok2( & base ) ;
+					if( ptr2 )
+					{
+						line->connection_name = strdup( ptr2 ) ;
+						if( line->connection_name == NULL )
+						{
+							fprintf( stderr , "*** ERROR : %s:%d : invalid line [%s]\n" , dsc_pathfilename , (*p_lineno) , filebuffer_bak );
+							return -1;
+						}
+					}
+					
+					if( pstruct->first_connection_name_line == NULL )
+					{
+						pstruct->first_connection_name_line = line ;
+						pstruct->last_connection_name_line = line ;
+					}
+					else
+					{
+						pstruct->last_connection_name_line->next_line = line ;
+						pstruct->last_connection_name_line = line ;
+					}
+					
 					continue;
 				}
 				
 				pfld = (struct FieldInfo *)malloc( sizeof(struct FieldInfo) ) ;
 				if( pfld == NULL )
 				{
-					fprintf( stderr , "*** ERROR : : alloc failed , errno[%d]\n" , errno );
+					fprintf( stderr , "*** ERROR : alloc failed , errno[%d]\n" , errno );
 					return -1;
 				}
 				memset( pfld , 0x00 , sizeof(struct FieldInfo) );
@@ -4761,8 +4840,10 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 	fprintf( fp_dsc_h , "#ifndef longlong\n" );
 	fprintf( fp_dsc_h , "#define longlong	long long\n" );
 	fprintf( fp_dsc_h , "#define ulonglong	unsigned long long\n" );
+	fprintf( fp_dsc_h , "#ifndef LL\n" );
 	fprintf( fp_dsc_h , "#define LL(_ll_)	_ll_##LL\n" );
 	fprintf( fp_dsc_h , "#define ULL(_ll_)	_ll_##ULL\n" );
+	fprintf( fp_dsc_h , "#endif\n" );
 	fprintf( fp_dsc_h , "#define LONGLONG_FORMAT_SPEC	\"%%lld\"\n" );
 	fprintf( fp_dsc_h , "#define ATOLL	atoll\n" );
 	fprintf( fp_dsc_h , "#endif\n" );
@@ -4775,8 +4856,10 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 	fprintf( fp_dsc_h , "#ifndef longlong\n" );
 	fprintf( fp_dsc_h , "#define longlong	__int64\n" );
 	fprintf( fp_dsc_h , "#define ulonglong	unsigned __int64\n" );
+	fprintf( fp_dsc_h , "#ifndef LL\n" );
 	fprintf( fp_dsc_h , "#define LL(_ll_)	_ll_\n" );
 	fprintf( fp_dsc_h , "#define ULL(_ll_)	_ll_\n" );
+	fprintf( fp_dsc_h , "#endif\n" );
 	fprintf( fp_dsc_h , "#define LONGLONG_FORMAT_SPEC	\"%%I64\"\n" );
 	fprintf( fp_dsc_h , "#define ATOLL	_atoi64\n" );
 	fprintf( fp_dsc_h , "#define __BIG_ENDIAN	4321\n" );
@@ -6225,30 +6308,34 @@ static int GenerateECCode_eh_SQL( struct CommandParameter *pcp , struct StructIn
 	return 0;
 }
 
-static int GenerateECCode_ec_SQL_ACTION_SELECT( struct StructInfo *pstruct , char *sqlaction , char *sqlaction_funcname , FILE *fp_dsc_ESQL_ec )
+static int GenerateECCode_ec_SQL_ACTION_SELECT( struct StructInfo *pstruct , struct SqlActionOutput *sqlaction_line , FILE *fp_dsc_ESQL_ec )
 {
 	char		*ptr = NULL , *saveptr = NULL ;
 	char		*ptr2 = NULL , *saveptr2 = NULL ;
 	
 	saveptr = NULL ;
-	ptr = strtok_r( strdup( sqlaction ) , " \t" , & saveptr ) ;
+	ptr = strtok_r( strdup( sqlaction_line->content ) , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	
 	fprintf( fp_dsc_ESQL_ec , "\n" );
-	fprintf( fp_dsc_ESQL_ec , "void DSCSQLACTION_%s( %s *pst )\n" , sqlaction_funcname , pstruct->struct_name );
+	fprintf( fp_dsc_ESQL_ec , "void DSCSQLACTION_%s( %s *pst )\n" , sqlaction_line->funcname , pstruct->struct_name );
 	fprintf( fp_dsc_ESQL_ec , "{\n" );
 	fprintf( fp_dsc_ESQL_ec , "	DSCSTOV_%s( pst );\n" , pstruct->struct_name );
 	fprintf( fp_dsc_ESQL_ec , "	\n" );
 	fprintf( fp_dsc_ESQL_ec , "	EXEC SQL\n" );
+	if( sqlaction_line->connection_name )
+	{
+	fprintf( fp_dsc_ESQL_ec , "		AT	%s\n" , sqlaction_line->connection_name );
+	}
 	
 	ptr = strtok_r( NULL , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	
@@ -6264,7 +6351,7 @@ static int GenerateECCode_ec_SQL_ACTION_SELECT( struct StructInfo *pstruct , cha
 		ptr2 = strtok_r( ptr , "," , & saveptr2 ) ;
 		if( ptr2 == NULL )
 		{
-			fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+			fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 			return -1;
 		}
 		
@@ -6281,24 +6368,24 @@ static int GenerateECCode_ec_SQL_ACTION_SELECT( struct StructInfo *pstruct , cha
 	ptr = strtok_r( NULL , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	if( STRCMP( ptr , != , "FROM" ) )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	
 	ptr = strtok_r( NULL , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	if( STRCMP( ptr , != , pstruct->struct_name ) )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	
@@ -6318,14 +6405,14 @@ static int GenerateECCode_ec_SQL_ACTION_SELECT( struct StructInfo *pstruct , cha
 			ptr11 = strtok_r( NULL , " \t" , & saveptr ) ;
 			if( ptr11 == NULL )
 			{
-				fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+				fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 				return -1;
 			}
 			
 			ptr12 = strtok_r( NULL , " \t" , & saveptr ) ;
 			if( ptr12 == NULL )
 			{
-				fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+				fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 				return -1;
 			}
 			
@@ -6336,14 +6423,14 @@ static int GenerateECCode_ec_SQL_ACTION_SELECT( struct StructInfo *pstruct , cha
 				ptr11 = strtok_r( NULL , " \t" , & saveptr ) ;
 				if( ptr11 == NULL )
 				{
-					fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+					fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 					return -1;
 				}
 				
 				ptr12 = strtok_r( NULL , " \t" , & saveptr ) ;
 				if( ptr12 == NULL )
 				{
-					fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+					fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 					return -1;
 				}
 				
@@ -6366,46 +6453,50 @@ static int GenerateECCode_ec_SQL_ACTION_SELECT( struct StructInfo *pstruct , cha
 	return 0;
 }
 
-static int GenerateECCode_ec_SQL_ACTION_INSERT( struct StructInfo *pstruct , char *sqlaction , char *sqlaction_funcname , FILE *fp_dsc_ESQL_ec )
+static int GenerateECCode_ec_SQL_ACTION_INSERT( struct StructInfo *pstruct , struct SqlActionOutput *sqlaction_line , FILE *fp_dsc_ESQL_ec )
 {
 	char		*ptr = NULL , *saveptr = NULL ;
 	
 	saveptr = NULL ;
-	ptr = strtok_r( strdup( sqlaction ) , " \t" , & saveptr ) ;
+	ptr = strtok_r( strdup( sqlaction_line->content ) , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	
 	fprintf( fp_dsc_ESQL_ec , "\n" );
-	fprintf( fp_dsc_ESQL_ec , "void DSCSQLACTION_%s( %s *pst )\n" , sqlaction_funcname , pstruct->struct_name );
+	fprintf( fp_dsc_ESQL_ec , "void DSCSQLACTION_%s( %s *pst )\n" , sqlaction_line->funcname , pstruct->struct_name );
 	fprintf( fp_dsc_ESQL_ec , "{\n" );
 	fprintf( fp_dsc_ESQL_ec , "	DSCSTOV_%s( pst );\n" , pstruct->struct_name );
 	fprintf( fp_dsc_ESQL_ec , "	\n" );
 	fprintf( fp_dsc_ESQL_ec , "	EXEC SQL\n" );
+	if( sqlaction_line->connection_name )
+	{
+	fprintf( fp_dsc_ESQL_ec , "		AT	%s\n" , sqlaction_line->connection_name );
+	}
 	
 	ptr = strtok_r( NULL , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	if( STRCMP( ptr , != , "INTO" ) )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	
 	ptr = strtok_r( NULL , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	if( STRCMP( ptr , != , pstruct->struct_name ) )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	
@@ -6418,36 +6509,40 @@ static int GenerateECCode_ec_SQL_ACTION_INSERT( struct StructInfo *pstruct , cha
 	return 0;
 }
 
-static int GenerateECCode_ec_SQL_ACTION_UPDATE( struct StructInfo *pstruct , char *sqlaction , char *sqlaction_funcname , FILE *fp_dsc_ESQL_ec )
+static int GenerateECCode_ec_SQL_ACTION_UPDATE( struct StructInfo *pstruct , struct SqlActionOutput *sqlaction_line , FILE *fp_dsc_ESQL_ec )
 {
 	char			*ptr = NULL , *saveptr = NULL ;
 	char			*ptr2 = NULL , *saveptr2 = NULL ;
 	struct FieldInfo	*pfield = NULL ;
 	
 	saveptr = NULL ;
-	ptr = strtok_r( strdup( sqlaction ) , " \t" , & saveptr ) ;
+	ptr = strtok_r( strdup( sqlaction_line->content ) , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	
 	fprintf( fp_dsc_ESQL_ec , "\n" );
-	fprintf( fp_dsc_ESQL_ec , "void DSCSQLACTION_%s( %s *pst )\n" , sqlaction_funcname , pstruct->struct_name );
+	fprintf( fp_dsc_ESQL_ec , "void DSCSQLACTION_%s( %s *pst )\n" , sqlaction_line->funcname , pstruct->struct_name );
 	fprintf( fp_dsc_ESQL_ec , "{\n" );
 	fprintf( fp_dsc_ESQL_ec , "	DSCSTOV_%s( pst );\n" , pstruct->struct_name );
 	fprintf( fp_dsc_ESQL_ec , "	\n" );
 	fprintf( fp_dsc_ESQL_ec , "	EXEC SQL\n" );
+	if( sqlaction_line->connection_name )
+	{
+	fprintf( fp_dsc_ESQL_ec , "		AT	%s\n" , sqlaction_line->connection_name );
+	}
 	
 	ptr = strtok_r( NULL , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	if( STRCMP( ptr , != , pstruct->struct_name ) )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	
@@ -6456,19 +6551,19 @@ static int GenerateECCode_ec_SQL_ACTION_UPDATE( struct StructInfo *pstruct , cha
 	ptr = strtok_r( NULL , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	if( STRCMP( ptr , != , "SET" ) )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	
 	ptr = strtok_r( NULL , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	
@@ -6491,7 +6586,7 @@ static int GenerateECCode_ec_SQL_ACTION_UPDATE( struct StructInfo *pstruct , cha
 		ptr2 = strtok_r( ptr , "," , & saveptr2 ) ;
 		if( ptr2 == NULL )
 		{
-			fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+			fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 			return -1;
 		}
 		
@@ -6519,14 +6614,14 @@ static int GenerateECCode_ec_SQL_ACTION_UPDATE( struct StructInfo *pstruct , cha
 			ptr11 = strtok_r( NULL , " \t" , & saveptr ) ;
 			if( ptr11 == NULL )
 			{
-				fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+				fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 				return -1;
 			}
 			
 			ptr12 = strtok_r( NULL , " \t" , & saveptr ) ;
 			if( ptr12 == NULL )
 			{
-				fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+				fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 				return -1;
 			}
 			
@@ -6537,14 +6632,14 @@ static int GenerateECCode_ec_SQL_ACTION_UPDATE( struct StructInfo *pstruct , cha
 				ptr11 = strtok_r( NULL , " \t" , & saveptr ) ;
 				if( ptr11 == NULL )
 				{
-					fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+					fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 					return -1;
 				}
 				
 				ptr12 = strtok_r( NULL , " \t" , & saveptr ) ;
 				if( ptr12 == NULL )
 				{
-					fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+					fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 					return -1;
 				}
 				
@@ -6562,46 +6657,50 @@ static int GenerateECCode_ec_SQL_ACTION_UPDATE( struct StructInfo *pstruct , cha
 	return 0;
 }
 
-static int GenerateECCode_ec_SQL_ACTION_DELETE( struct StructInfo *pstruct , char *sqlaction , char *sqlaction_funcname , FILE *fp_dsc_ESQL_ec )
+static int GenerateECCode_ec_SQL_ACTION_DELETE( struct StructInfo *pstruct , struct SqlActionOutput *sqlaction_line , FILE *fp_dsc_ESQL_ec )
 {
 	char		*ptr = NULL , *saveptr = NULL ;
 	
 	saveptr = NULL ;
-	ptr = strtok_r( strdup( sqlaction ) , " \t" , & saveptr ) ;
+	ptr = strtok_r( strdup( sqlaction_line->content ) , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	
 	fprintf( fp_dsc_ESQL_ec , "\n" );
-	fprintf( fp_dsc_ESQL_ec , "void DSCSQLACTION_%s( %s *pst )\n" , sqlaction_funcname , pstruct->struct_name );
+	fprintf( fp_dsc_ESQL_ec , "void DSCSQLACTION_%s( %s *pst )\n" , sqlaction_line->funcname , pstruct->struct_name );
 	fprintf( fp_dsc_ESQL_ec , "{\n" );
 	fprintf( fp_dsc_ESQL_ec , "	DSCSTOV_%s( pst );\n" , pstruct->struct_name );
 	fprintf( fp_dsc_ESQL_ec , "	\n" );
 	fprintf( fp_dsc_ESQL_ec , "	EXEC SQL\n" );
+	if( sqlaction_line->connection_name )
+	{
+	fprintf( fp_dsc_ESQL_ec , "		AT	%s\n" , sqlaction_line->connection_name );
+	}
 	
 	ptr = strtok_r( NULL , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	if( STRCMP( ptr , != , "FROM" ) )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	
 	ptr = strtok_r( NULL , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	if( STRCMP( ptr , != , pstruct->struct_name ) )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	
@@ -6622,14 +6721,14 @@ static int GenerateECCode_ec_SQL_ACTION_DELETE( struct StructInfo *pstruct , cha
 			ptr11 = strtok_r( NULL , " \t" , & saveptr ) ;
 			if( ptr11 == NULL )
 			{
-				fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+				fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 				return -1;
 			}
 			
 			ptr12 = strtok_r( NULL , " \t" , & saveptr ) ;
 			if( ptr12 == NULL )
 			{
-				fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+				fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 				return -1;
 			}
 			
@@ -6640,14 +6739,14 @@ static int GenerateECCode_ec_SQL_ACTION_DELETE( struct StructInfo *pstruct , cha
 				ptr11 = strtok_r( NULL , " \t" , & saveptr ) ;
 				if( ptr11 == NULL )
 				{
-					fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+					fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 					return -1;
 				}
 				
 				ptr12 = strtok_r( NULL , " \t" , & saveptr ) ;
 				if( ptr12 == NULL )
 				{
-					fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+					fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 					return -1;
 				}
 				
@@ -6665,52 +6764,56 @@ static int GenerateECCode_ec_SQL_ACTION_DELETE( struct StructInfo *pstruct , cha
 	return 0;
 }
 
-static int GenerateECCode_ec_SQL_ACTION_CURSOR( struct StructInfo *pstruct , char *sqlaction , char *sqlaction_funcname , FILE *fp_dsc_ESQL_ec )
+static int GenerateECCode_ec_SQL_ACTION_CURSOR( struct StructInfo *pstruct , struct SqlActionOutput *sqlaction_line , FILE *fp_dsc_ESQL_ec )
 {
 	char		*cursor_name = NULL ;
 	char		*ptr = NULL , *saveptr = NULL ;
 	char		*ptr2 = NULL , *saveptr2 = NULL ;
 	
 	saveptr = NULL ;
-	ptr = strtok_r( strdup( sqlaction ) , " \t" , & saveptr ) ;
+	ptr = strtok_r( strdup( sqlaction_line->content ) , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	
 	ptr = strtok_r( NULL , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	cursor_name = ptr ;
 	
 	fprintf( fp_dsc_ESQL_ec , "\n" );
-	fprintf( fp_dsc_ESQL_ec , "void DSCSQLACTION_OPEN_%s( %s *pst )\n" , sqlaction_funcname , pstruct->struct_name );
+	fprintf( fp_dsc_ESQL_ec , "void DSCSQLACTION_OPEN_%s( %s *pst )\n" , sqlaction_line->funcname , pstruct->struct_name );
 	fprintf( fp_dsc_ESQL_ec , "{\n" );
 	fprintf( fp_dsc_ESQL_ec , "	DSCSTOV_%s( pst );\n" , pstruct->struct_name );
 	fprintf( fp_dsc_ESQL_ec , "	\n" );
 	fprintf( fp_dsc_ESQL_ec , "	EXEC SQL\n" );
+	if( sqlaction_line->connection_name )
+	{
+	fprintf( fp_dsc_ESQL_ec , "		AT	%s\n" , sqlaction_line->connection_name );
+	}
 	fprintf( fp_dsc_ESQL_ec , "		DECLARE	%s_%s CURSOR FOR\n" , pstruct->struct_name , cursor_name );
 	
 	ptr = strtok_r( NULL , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	if( STRCMP( ptr , != , "SELECT" ) )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	
 	ptr = strtok_r( NULL , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	
@@ -6726,19 +6829,19 @@ static int GenerateECCode_ec_SQL_ACTION_CURSOR( struct StructInfo *pstruct , cha
 	ptr = strtok_r( NULL , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	
 	ptr = strtok_r( NULL , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	if( STRCMP( ptr , != , pstruct->struct_name ) )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	
@@ -6757,14 +6860,14 @@ static int GenerateECCode_ec_SQL_ACTION_CURSOR( struct StructInfo *pstruct , cha
 			ptr11 = strtok_r( NULL , " \t" , & saveptr ) ;
 			if( ptr11 == NULL )
 			{
-				fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+				fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 				return -1;
 			}
 			
 			ptr12 = strtok_r( NULL , " \t" , & saveptr ) ;
 			if( ptr12 == NULL )
 			{
-				fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+				fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 				return -1;
 			}
 			
@@ -6778,14 +6881,14 @@ static int GenerateECCode_ec_SQL_ACTION_CURSOR( struct StructInfo *pstruct , cha
 				ptr11 = strtok_r( NULL , " \t" , & saveptr ) ;
 				if( ptr11 == NULL )
 				{
-					fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+					fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 					return -1;
 				}
 				
 				ptr12 = strtok_r( NULL , " \t" , & saveptr ) ;
 				if( ptr12 == NULL )
 				{
-					fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+					fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 					return -1;
 				}
 				
@@ -6828,17 +6931,17 @@ _OUTPUT_CURSOR_REMAIN_SECTIONS :
 	fprintf( fp_dsc_ESQL_ec , "}\n" );
 	
 	saveptr = NULL ;
-	ptr = strtok_r( strdup( sqlaction ) , " \t" , & saveptr ) ;
+	ptr = strtok_r( strdup( sqlaction_line->content ) , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	
 	ptr = strtok_r( NULL , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	
@@ -6851,19 +6954,19 @@ _OUTPUT_CURSOR_REMAIN_SECTIONS :
 	ptr = strtok_r( NULL , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	if( STRCMP( ptr , != , "SELECT" ) )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	
 	ptr = strtok_r( NULL , " \t" , & saveptr ) ;
 	if( ptr == NULL )
 	{
-		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+		fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 		return -1;
 	}
 	
@@ -6877,7 +6980,7 @@ _OUTPUT_CURSOR_REMAIN_SECTIONS :
 		ptr2 = strtok_r( ptr , "," , & saveptr2 ) ;
 		if( ptr2 == NULL )
 		{
-			fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction );
+			fprintf( stderr , "*** ERROR : invalid sqlaction [%s]\n" , sqlaction_line->content );
 			return -1;
 		}
 		
@@ -7180,31 +7283,31 @@ static int GenerateECCode_ec_SQL( struct CommandParameter *pcp , struct StructIn
 	{
 		if( STRNCMP( sqlaction_line->content , == , "CURSOR" , 6 ) )
 		{
-			nret = GenerateECCode_ec_SQL_ACTION_CURSOR( pstruct , sqlaction_line->content , sqlaction_line->funcname , fp_dsc_ESQL_ec ) ;
+			nret = GenerateECCode_ec_SQL_ACTION_CURSOR( pstruct , sqlaction_line , fp_dsc_ESQL_ec ) ;
 			if( nret )
 				return nret;
 		}
 		else if( STRNCMP( sqlaction_line->content , == , "SELECT" , 6 ) )
 		{
-			nret = GenerateECCode_ec_SQL_ACTION_SELECT( pstruct , sqlaction_line->content , sqlaction_line->funcname , fp_dsc_ESQL_ec ) ;
+			nret = GenerateECCode_ec_SQL_ACTION_SELECT( pstruct , sqlaction_line , fp_dsc_ESQL_ec ) ;
 			if( nret )
 				return nret;
 		}
 		else if( STRNCMP( sqlaction_line->content , == , "INSERT" , 6 ) )
 		{
-			nret = GenerateECCode_ec_SQL_ACTION_INSERT( pstruct , sqlaction_line->content , sqlaction_line->funcname , fp_dsc_ESQL_ec ) ;
+			nret = GenerateECCode_ec_SQL_ACTION_INSERT( pstruct , sqlaction_line , fp_dsc_ESQL_ec ) ;
 			if( nret )
 				return nret;
 		}
 		else if( STRNCMP( sqlaction_line->content , == , "UPDATE" , 6 ) )
 		{
-			nret = GenerateECCode_ec_SQL_ACTION_UPDATE( pstruct , sqlaction_line->content , sqlaction_line->funcname , fp_dsc_ESQL_ec ) ;
+			nret = GenerateECCode_ec_SQL_ACTION_UPDATE( pstruct , sqlaction_line , fp_dsc_ESQL_ec ) ;
 			if( nret )
 				return nret;
 		}
 		else if( STRNCMP( sqlaction_line->content , == , "DELETE" , 6 ) )
 		{
-			nret = GenerateECCode_ec_SQL_ACTION_DELETE( pstruct , sqlaction_line->content , sqlaction_line->funcname , fp_dsc_ESQL_ec ) ;
+			nret = GenerateECCode_ec_SQL_ACTION_DELETE( pstruct , sqlaction_line , fp_dsc_ESQL_ec ) ;
 			if( nret )
 				return nret;
 		}
@@ -7212,6 +7315,8 @@ static int GenerateECCode_ec_SQL( struct CommandParameter *pcp , struct StructIn
 	
 	if( pstruct->sqlconn == 1 )
 	{
+		struct SqlConnectionName	*pconnection = NULL ;
+		
 		fprintf( fp_dsc_ESQL_ec , "\n" );
 		fprintf( fp_dsc_ESQL_ec , "EXEC SQL BEGIN DECLARE SECTION ;\n" );
 		fprintf( fp_dsc_ESQL_ec , "	char    DBNAME[ 1024 + 1 ] ;\n" );
@@ -7219,49 +7324,63 @@ static int GenerateECCode_ec_SQL( struct CommandParameter *pcp , struct StructIn
 		fprintf( fp_dsc_ESQL_ec , "	char    DBPASS[ 128 + 1 ] ;\n" );
 		fprintf( fp_dsc_ESQL_ec , "EXEC SQL END DECLARE SECTION ;\n" );
 		
-		fprintf( fp_dsc_ESQL_ec , "\n" );
-		fprintf( fp_dsc_ESQL_ec , "void DSCDBCONN( char *host , int port , char *dbname , char *user , char *pass )\n" );
-		fprintf( fp_dsc_ESQL_ec , "{\n" );
-		if( pcp->output_ec_pgsql_flag == 1 )
+		for( pconnection = pstruct->first_connection_name_line ; pconnection ; pconnection = pconnection->next_line )
 		{
-			fprintf( fp_dsc_ESQL_ec , "	strcpy( DBNAME , dbname );\n" );
-			fprintf( fp_dsc_ESQL_ec , "	if( host )\n" );
-			fprintf( fp_dsc_ESQL_ec , "	{\n" );
-			fprintf( fp_dsc_ESQL_ec , "		strcat( DBNAME , \"@\" );\n" );
-			fprintf( fp_dsc_ESQL_ec , "		strcat( DBNAME , host );\n" );
-			fprintf( fp_dsc_ESQL_ec , "	}\n" );
-			fprintf( fp_dsc_ESQL_ec , "	if( port )\n" );
-			fprintf( fp_dsc_ESQL_ec , "	{\n" );
-			fprintf( fp_dsc_ESQL_ec , "		strcat( DBNAME , \":\" );\n" );
-			fprintf( fp_dsc_ESQL_ec , "		sprintf( DBNAME + strlen(DBNAME) , \"%%d\" , port );\n" );
-			fprintf( fp_dsc_ESQL_ec , "	}\n" );
-			fprintf( fp_dsc_ESQL_ec , "	strcpy( DBUSER , user );\n" );
-			fprintf( fp_dsc_ESQL_ec , "	strcpy( DBPASS , pass );\n" );
+			fprintf( fp_dsc_ESQL_ec , "\n" );
+			if( pconnection->connection_name )
+				fprintf( fp_dsc_ESQL_ec , "void DSCDBCONN_%s( char *host , int port , char *dbname , char *user , char *pass )\n" , pconnection->connection_name );
+			else
+				fprintf( fp_dsc_ESQL_ec , "void DSCDBCONN( char *host , int port , char *dbname , char *user , char *pass )\n" );
+			fprintf( fp_dsc_ESQL_ec , "{\n" );
+			if( pcp->output_ec_pgsql_flag == 1 )
+			{
+				fprintf( fp_dsc_ESQL_ec , "	strcpy( DBNAME , dbname );\n" );
+				fprintf( fp_dsc_ESQL_ec , "	if( host )\n" );
+				fprintf( fp_dsc_ESQL_ec , "	{\n" );
+				fprintf( fp_dsc_ESQL_ec , "		strcat( DBNAME , \"@\" );\n" );
+				fprintf( fp_dsc_ESQL_ec , "		strcat( DBNAME , host );\n" );
+				fprintf( fp_dsc_ESQL_ec , "	}\n" );
+				fprintf( fp_dsc_ESQL_ec , "	if( port )\n" );
+				fprintf( fp_dsc_ESQL_ec , "	{\n" );
+				fprintf( fp_dsc_ESQL_ec , "		strcat( DBNAME , \":\" );\n" );
+				fprintf( fp_dsc_ESQL_ec , "		sprintf( DBNAME + strlen(DBNAME) , \"%%d\" , port );\n" );
+				fprintf( fp_dsc_ESQL_ec , "	}\n" );
+				fprintf( fp_dsc_ESQL_ec , "	strcpy( DBUSER , user );\n" );
+				fprintf( fp_dsc_ESQL_ec , "	strcpy( DBPASS , pass );\n" );
+				fprintf( fp_dsc_ESQL_ec , "	\n" );
+				fprintf( fp_dsc_ESQL_ec , "	EXEC SQL\n" );
+				fprintf( fp_dsc_ESQL_ec , "		CONNECT TO	:DBNAME\n" );
+				if( pconnection->connection_name )
+				{
+				fprintf( fp_dsc_ESQL_ec , "		AS		%s\n" , pconnection->connection_name );
+				}
+				fprintf( fp_dsc_ESQL_ec , "		USER		:DBUSER\n" );
+				fprintf( fp_dsc_ESQL_ec , "		IDENTIFIED BY	:DBPASS ;\n" );
+			}
+			else if( pcp->output_ec_oracle_flag == 1 )
+			{
+				fprintf( fp_dsc_ESQL_ec , "	strcpy( DBUSER , user );\n" );
+				fprintf( fp_dsc_ESQL_ec , "	strcpy( DBPASS , pass );\n" );
+				fprintf( fp_dsc_ESQL_ec , "	\n" );
+				fprintf( fp_dsc_ESQL_ec , "	EXEC SQL\n" );
+				fprintf( fp_dsc_ESQL_ec , "		CONNECT		:DBUSER\n" );
+				if( pconnection->connection_name )
+				{
+				fprintf( fp_dsc_ESQL_ec , "		AS		%s\n" , pconnection->connection_name );
+				}
+				fprintf( fp_dsc_ESQL_ec , "		IDENTIFIED BY	:DBPASS ;\n" );
+			}
 			fprintf( fp_dsc_ESQL_ec , "	\n" );
-			fprintf( fp_dsc_ESQL_ec , "	EXEC SQL\n" );
-			fprintf( fp_dsc_ESQL_ec , "		CONNECT TO	:DBNAME\n" );
-			fprintf( fp_dsc_ESQL_ec , "		USER		:DBUSER\n" );
-			fprintf( fp_dsc_ESQL_ec , "		IDENTIFIED BY	:DBPASS ;\n" );
+			fprintf( fp_dsc_ESQL_ec , "	return;\n" );
+			fprintf( fp_dsc_ESQL_ec , "}\n" );
 		}
-		else if( pcp->output_ec_oracle_flag == 1 )
-		{
-			fprintf( fp_dsc_ESQL_ec , "	strcpy( DBUSER , user );\n" );
-			fprintf( fp_dsc_ESQL_ec , "	strcpy( DBPASS , pass );\n" );
-			fprintf( fp_dsc_ESQL_ec , "	\n" );
-			fprintf( fp_dsc_ESQL_ec , "	EXEC SQL\n" );
-			fprintf( fp_dsc_ESQL_ec , "		CONNECT		:DBUSER\n" );
-			fprintf( fp_dsc_ESQL_ec , "		IDENTIFIED BY	:DBPASS ;\n" );
-		}
-		fprintf( fp_dsc_ESQL_ec , "	\n" );
-		fprintf( fp_dsc_ESQL_ec , "	return;\n" );
-		fprintf( fp_dsc_ESQL_ec , "}\n" );
 		
 		fprintf( fp_dsc_ESQL_ec , "void DSCDBDISCONN()\n" );
 		fprintf( fp_dsc_ESQL_ec , "{\n" );
 		if( pcp->output_ec_pgsql_flag == 1 )
 		{
 			fprintf( fp_dsc_ESQL_ec , "	EXEC SQL\n" );
-			fprintf( fp_dsc_ESQL_ec , "		DISCONNECT ;\n" );
+			fprintf( fp_dsc_ESQL_ec , "		DISCONNECT ALL ;\n" );
 		}
 		fprintf( fp_dsc_ESQL_ec , "	\n" );
 		fprintf( fp_dsc_ESQL_ec , "	return;\n" );
@@ -7569,7 +7688,8 @@ static void usage()
 	printf( "                    [ -c-compact ] [ -c-compress ]\n" );
 	printf( "                    [ -c-xml | -c-xml-compact ]\n" );
 	printf( "                    [ -c-json | -c-json-compact ]\n" );
-	printf( "                    [ -sql-pgsql | -ec-pgsql ] [ -ec-pgsql | -ec-oracle ]\n" );
+	printf( "                    [ -sql-pgsql ] [ -ec-pgsql ]\n" );
+	printf( "                    [ -sql-oracle ] [ -ec-oracle ]\n" );
 	printf( "                    [ -c-ALL ]\n" );
 }
 

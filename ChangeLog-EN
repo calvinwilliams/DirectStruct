@@ -1,3 +1,6 @@
+ver 1.11.0	2017-06-28	calvin
+		* Add multi-connection support for ESQL
+
 ver 1.10.0	2017-05-02	calvin
 		* Add generate functions
 		  DSCSERIALIZE_XML_DUP_xxx_V,DSCDESERIALIZE_XML_xxx_V

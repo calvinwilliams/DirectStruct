@@ -1,3 +1,6 @@
+ver 1.11.0	2017-06-28	calvin
+		* 新增支持ESQL多连接
+
 ver 1.10.0	2017-05-02	calvin
 		* 新增自动生成函数
 		  DSCSERIALIZE_XML_DUP_xxx_V,DSCDESERIALIZE_XML_xxx_V
