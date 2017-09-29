@@ -1,3 +1,6 @@
+ver 1.13.0	2017-09-30	calvin
+		* STRUCT后加入MESSAGE子句，实现报文中名字别名
+
 ver 1.12.1	2017-09-29	liufei
 		* 将Doc目录下文件名，由中文改为英文EXAMPLE_1.txt EXAMPLE_2.txt 
 
