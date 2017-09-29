@@ -1,3 +1,6 @@
+ver 1.12.1	2017-09-29	liufei
+		* 将Doc目录下文件名，由中文改为英文EXAMPLE_1.txt EXAMPLE_2.txt 
+
 ver 1.12.0	2017-09-29	liufei
 		* 修改GenerateCCode函数中UNCOMPRESS系列宏，增加变量_flag_/_falg_1,替换对原buf[0]的操作
 		* 解决了当修改原字符串时，若原内存无权限访问导致段错误问题
