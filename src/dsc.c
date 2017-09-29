@@ -11,8 +11,8 @@
 #include <string.h>
 #include <errno.h>
 
-char	__DIRECTSTRUCT_VERSION_1_11_0[] = "1.11.0" ;
-char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_11_0 ;
+char	__DIRECTSTRUCT_VERSION_1_11_1[] = "1.11.1" ;
+char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_11_1 ;
 
 #ifndef STRCMP
 #define STRCMP(_a_,_C_,_b_) ( strcmp(_a_,_b_) _C_ 0 )
@@ -4963,16 +4963,17 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_h , "#define UNCOMPRESS_INT4(_buf_,_bufoffset_,_int4_)				\\\n" );
 		fprintf( fp_dsc_h , "	{									\\\n" );
 		fprintf( fp_dsc_h , "		unsigned char	_flag_ = 0 ;					\\\n" );
+		fprintf( fp_dsc_h , "		unsigned char	_flag1_ = 0 ;					\\\n" );
 		fprintf( fp_dsc_h , "		_int4_ = 0 ;							\\\n" );
 		fprintf( fp_dsc_h , "		_flag_ = _buf_[0] & 0xF0 ;					\\\n" );
-		fprintf( fp_dsc_h , "		_buf_[0] &= 0x0F ;						\\\n" );
-		fprintf( fp_dsc_h , "		memcpy( ((unsigned char*)&_int4_) + (4-_buf_[0]) , _buf_+1 , _buf_[0] );\\\n" );
+		fprintf( fp_dsc_h , "		_flag1_ = _buf_[0] & 0x0F ;					\\\n" );
+		fprintf( fp_dsc_h , "		memcpy( ((unsigned char*)&_int4_) + (4-_flag1_) , _buf_+1 , _flag1_ );\\\n" );
 		fprintf( fp_dsc_h , "		_int4_ = ntohl( _int4_ ) ;					\\\n" );
 		fprintf( fp_dsc_h , "		if( _flag_ & 0x10 )						\\\n" );
 		fprintf( fp_dsc_h , "		{								\\\n" );
 		fprintf( fp_dsc_h , "			_int4_ = -_int4_ ;					\\\n" );
 		fprintf( fp_dsc_h , "		}								\\\n" );
-		fprintf( fp_dsc_h , "		_bufoffset_+=1+_buf_[0]; _buf_+=1+_buf_[0];			\\\n" );
+		fprintf( fp_dsc_h , "		_bufoffset_+=1+_flag1_; _buf_+=1+_flag1_;			\\\n" );
 		fprintf( fp_dsc_h , "	}\n" );
 		fprintf( fp_dsc_h , "#endif\n" );
 		fprintf( fp_dsc_h , "\n" );
@@ -5011,13 +5012,14 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_h , "#endif\n" );
 		fprintf( fp_dsc_h , "\n" );
 		fprintf( fp_dsc_h , "#ifndef UNCOMPRESS_UINT4\n" );
-		fprintf( fp_dsc_h , "#define UNCOMPRESS_UINT4(_buf_,_bufoffset_,_uint4_)				\\\n" );
+		fprintf( fp_dsc_h , "#define UNCOMPRESS_UINT4(_buf_,_bufoffset_,_uint4_)			\\\n" );
 		fprintf( fp_dsc_h , "	{									\\\n" );
+		fprintf( fp_dsc_h , "		unsigned char	_flag_ = 0 ;					\\\n" );
 		fprintf( fp_dsc_h , "		_uint4_ = 0 ;							\\\n" );
-		fprintf( fp_dsc_h , "		_buf_[0] &= 0x0F ;						\\\n" );
-		fprintf( fp_dsc_h , "		memcpy( ((unsigned char*)&_uint4_) + (4-_buf_[0]) , _buf_+1 , _buf_[0] );\\\n" );
+		fprintf( fp_dsc_h , "		_flag_ = _buf_[0] & 0x0F ;					\\\n" );
+		fprintf( fp_dsc_h , "		memcpy( ((unsigned char*)&_uint4_) + (4-_flag_) , _buf_+1 , _flag_ );\\\n" );
 		fprintf( fp_dsc_h , "		_uint4_ = ntohl( _uint4_ ) ;					\\\n" );
-		fprintf( fp_dsc_h , "		_bufoffset_+=1+_buf_[0]; _buf_+=1+_buf_[0];			\\\n" );
+		fprintf( fp_dsc_h , "		_bufoffset_+=1+_flag_; _buf_+=1+_flag_;				\\\n" );
 		fprintf( fp_dsc_h , "	}\n" );
 		fprintf( fp_dsc_h , "#endif\n" );
 		fprintf( fp_dsc_h , "\n" );
@@ -5095,16 +5097,17 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_h , "#define UNCOMPRESS_INT8(_buf_,_bufoffset_,_int8_)				\\\n" );
 		fprintf( fp_dsc_h , "	{									\\\n" );
 		fprintf( fp_dsc_h , "		unsigned char	_flag_ = 0 ;					\\\n" );
+		fprintf( fp_dsc_h , "		unsigned char	_flag1_ = 0 ;					\\\n" );
 		fprintf( fp_dsc_h , "		_int8_ = 0 ;							\\\n" );
 		fprintf( fp_dsc_h , "		_flag_ = _buf_[0] & 0xF0 ;					\\\n" );
-		fprintf( fp_dsc_h , "		_buf_[0] &= 0x0F ;						\\\n" );
-		fprintf( fp_dsc_h , "		memcpy( ((unsigned char*)&_int8_) + (8-_buf_[0]) , _buf_+1 , _buf_[0] );\\\n" );
+		fprintf( fp_dsc_h , "		_flag1_ = _buf_[0] & 0x0F ;					\\\n" );
+		fprintf( fp_dsc_h , "		memcpy( ((unsigned char*)&_int8_) + (8-_flag1_) , _buf_+1 , _flag1_ );\\\n" );
 		fprintf( fp_dsc_h , "		__NTOHLL( _int8_ );						\\\n" );
 		fprintf( fp_dsc_h , "		if( _flag_ & 0x10 )						\\\n" );
 		fprintf( fp_dsc_h , "		{								\\\n" );
 		fprintf( fp_dsc_h , "			_int8_ = -_int8_ ;					\\\n" );
 		fprintf( fp_dsc_h , "		}								\\\n" );
-		fprintf( fp_dsc_h , "		_bufoffset_+=1+_buf_[0]; _buf_+=1+_buf_[0];			\\\n" );
+		fprintf( fp_dsc_h , "		_bufoffset_+=1+_flag1_; _buf_+=1+_flag1_;			\\\n" );
 		fprintf( fp_dsc_h , "	}\n" );
 		fprintf( fp_dsc_h , "#endif\n" );
 		fprintf( fp_dsc_h , "\n" );
@@ -5170,11 +5173,12 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 		fprintf( fp_dsc_h , "#ifndef UNCOMPRESS_UINT8\n" );
 		fprintf( fp_dsc_h , "#define UNCOMPRESS_UINT8(_buf_,_bufoffset_,_uint8_)				\\\n" );
 		fprintf( fp_dsc_h , "	{									\\\n" );
+		fprintf( fp_dsc_h , "		unsigned char	_flag_ = 0 ;					\\\n" );
 		fprintf( fp_dsc_h , "		_uint8_ = 0 ;							\\\n" );
-		fprintf( fp_dsc_h , "		_buf_[0] &= 0x0F ;						\\\n" );
-		fprintf( fp_dsc_h , "		memcpy( ((unsigned char*)&_uint8_) + (8-_buf_[0]) , _buf_+1 , _buf_[0] );\\\n" );
+		fprintf( fp_dsc_h , "		_flag_ = _buf_[0] & 0x0F ;					\\\n" );
+		fprintf( fp_dsc_h , "		memcpy( ((unsigned char*)&_uint8_) + (8-_flag_) , _buf_+1 , _flag_ );\\\n" );
 		fprintf( fp_dsc_h , "		__NTOHLL( _uint8_ );						\\\n" );
-		fprintf( fp_dsc_h , "		_bufoffset_+=1+_buf_[0]; _buf_+=1+_buf_[0];			\\\n" );
+		fprintf( fp_dsc_h , "		_bufoffset_+=1+_flag_; _buf_+=1+_flag_;				\\\n" );
 		fprintf( fp_dsc_h , "	}\n" );
 		fprintf( fp_dsc_h , "#endif\n" );
 		fprintf( fp_dsc_h , "\n" );

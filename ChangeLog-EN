@@ -1,3 +1,7 @@
+ver 1.12.0	2017-09-29	liufei
+		* modify GenerateCCode function , add variable _falg_/_falg1_ instead of modify buf[0] operator
+		* Fixed a probelm of out of bound error
+
 ver 1.11.0	2017-06-28	calvin
 		* Add multi-connection support for ESQL
 
