@@ -1,3 +1,6 @@
+ver 1.13.0	2017-09-30	calvin
+		* add keyword MESSAGE after STRUCT
+
 ver 1.12.1	2017-09-29	liufei
 		* rename EXAMPLE_1.txt 	 EXAMPLE_2.txt
 

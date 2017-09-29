@@ -11,8 +11,8 @@
 #include <string.h>
 #include <errno.h>
 
-char	__DIRECTSTRUCT_VERSION_1_12_2[] = "1.12.2" ;
-char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_12_2 ;
+char	__DIRECTSTRUCT_VERSION_1_13_0[] = "1.13.0" ;
+char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_13_0 ;
 
 #ifndef STRCMP
 #define STRCMP(_a_,_C_,_b_) ( strcmp(_a_,_b_) _C_ 0 )
@@ -136,6 +136,7 @@ struct StructInfo
 	int			struct_length ;
 	int			field_count ;
 	int			array_size ;
+	char			message_name[ 64 + 1 ] ;
 	
 	struct HeaderOutput	*first_line ;
 	struct HeaderOutput	*last_line ;
@@ -631,6 +632,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 						return -1;
 					}
 					strncpy( psi_next->struct_name , ptr , sizeof(psi_next->struct_name)-1 );
+					strcpy( psi_next->message_name , psi_next->struct_name );
 					strcpy( psi_next->struct_desc , desc );
 					
 					while(1)
@@ -646,7 +648,11 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 							return -1;
 						}
 						
-						if( STRCMP( ptr , == , "ARRAY" ) )
+						if( STRCMP( ptr , == , "MESSAGE" ) )
+						{
+							strcpy( psi_next->message_name , ptr2 );
+						}
+						else if( STRCMP( ptr , == , "ARRAY" ) )
 						{
 							psi_next->array_size = atoi(ptr2) ;
 						}
@@ -766,6 +772,7 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 						return -1;
 					}
 					strncpy( psi_sub->struct_name , ptr , sizeof(psi_sub->struct_name)-1 );
+					strcpy( psi_sub->message_name , psi_sub->struct_name );
 					strcpy( psi_sub->struct_desc , desc );
 					
 					while(1)
@@ -781,7 +788,11 @@ int ReadDscFile( struct CommandParameter *pcmdparam , int depth , int *p_offset 
 							return -1;
 						}
 						
-						if( STRCMP( ptr , == , "ARRAY" ) )
+						if( STRCMP( ptr , == , "MESSAGE" ) )
+						{
+							strcpy( psi_sub->message_name , ptr2 );
+						}
+						else if( STRCMP( ptr , == , "ARRAY" ) )
 						{
 							psi_sub->array_size = atoi(ptr2) ;
 						}
@@ -2461,7 +2472,7 @@ static int GenerateCCode_c_DSCSERIALIZE_XML( struct CommandParameter *pcp , int 
 			}
 		}
 		
-		fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s<%s>\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth,tabs , pstruct->struct_name );
+		fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s<%s>\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth,tabs , pstruct->message_name );
 		
 		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 		{
@@ -2582,7 +2593,7 @@ static int GenerateCCode_c_DSCSERIALIZE_XML( struct CommandParameter *pcp , int 
 				return nret;
 		}
 		
-		fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s</%s>\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth,tabs , pstruct->struct_name );
+		fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s</%s>\\n\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth,tabs , pstruct->message_name );
 		
 		if( pstruct->array_size > 0 )
 		{
@@ -2627,7 +2638,7 @@ static int GenerateCCode_c_DSCSERIALIZE_XML_COMPACT( struct CommandParameter *pc
 			}
 		}
 		
-		fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pstruct->struct_name );
+		fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"<%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pstruct->message_name );
 		
 		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 		{
@@ -2748,7 +2759,7 @@ static int GenerateCCode_c_DSCSERIALIZE_XML_COMPACT( struct CommandParameter *pc
 				return nret;
 		}
 		
-		fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pstruct->struct_name );
+		fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"</%s>\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pstruct->message_name );
 		
 		if( pstruct->array_size > 0 )
 		{
@@ -2796,7 +2807,7 @@ static int GenerateCCode_c_DSCSERIALIZE_XML_DUP( struct CommandParameter *pcp , 
 			}
 		}
 		
-		fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s<%s>\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth,tabs , pstruct->struct_name );
+		fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s<%s>\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth,tabs , pstruct->message_name );
 		
 		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 		{
@@ -2917,7 +2928,7 @@ static int GenerateCCode_c_DSCSERIALIZE_XML_DUP( struct CommandParameter *pcp , 
 				return nret;
 		}
 		
-		fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s</%s>\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth,tabs , pstruct->struct_name );
+		fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s</%s>\\n\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth,tabs , pstruct->message_name );
 		
 		if( pstruct->array_size > 0 )
 		{
@@ -2962,7 +2973,7 @@ static int GenerateCCode_c_DSCSERIALIZE_XML_COMPACT_DUP( struct CommandParameter
 			}
 		}
 		
-		fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pstruct->struct_name );
+		fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"<%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pstruct->message_name );
 		
 		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
 		{
@@ -3083,7 +3094,7 @@ static int GenerateCCode_c_DSCSERIALIZE_XML_COMPACT_DUP( struct CommandParameter
 				return nret;
 		}
 		
-		fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pstruct->struct_name );
+		fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"</%s>\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pstruct->message_name );
 		
 		if( pstruct->array_size > 0 )
 		{
@@ -3109,7 +3120,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_XML_ENTERNODE( struct CommandParameter
 	{
 		if( pstruct->array_size > 0 )
 		{
-			fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	if( xpath_len == %d && strncmp( xpath , \"%s/%s\" , xpath_len ) == 0 )\n", (int)(strlen(up_xmlpathname)+1+strlen(pstruct->struct_name)) , up_xmlpathname,pstruct->struct_name );
+			fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	if( xpath_len == %d && strncmp( xpath , \"%s/%s\" , xpath_len ) == 0 )\n", (int)(strlen(up_xmlpathname)+1+strlen(pstruct->struct_name)) , up_xmlpathname,pstruct->message_name );
 			fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{if(%s_%s_count>%d) return -8;}\n" , up_pathname,pstruct->struct_name , pstruct->array_size );
 		}
 		
@@ -3157,7 +3168,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_XML_LEAVENODE( struct CommandParameter
 	{
 		if( pstruct->array_size > 0 )
 		{
-			fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	if( xpath_len == %d && strncmp( xpath , \"%s/%s\" , xpath_len ) == 0 )\n" , (int)(strlen(up_xmlpathname)+1+strlen(pstruct->struct_name)) , up_xmlpathname,pstruct->struct_name );
+			fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	if( xpath_len == %d && strncmp( xpath , \"%s/%s\" , xpath_len ) == 0 )\n" , (int)(strlen(up_xmlpathname)+1+strlen(pstruct->struct_name)) , up_xmlpathname,pstruct->message_name );
 			fprintabs( fp_dsc_c , depth ); fprintf( fp_dsc_c , "	{%s_%s_count++;}\n" , up_pathname,pstruct->struct_name );
 		}
 		

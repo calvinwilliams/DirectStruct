@@ -1,4 +1,4 @@
-STRUCT	BankXmlTransaction
+STRUCT	BankXmlTransaction	MESSAGE	hzbank
 {
 	INT	1	version				DEFAULT		1
 	INCLUDE IDL_ResponseHeader.dsc
