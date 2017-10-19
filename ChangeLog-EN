@@ -1,3 +1,6 @@
+ver 1.13.1	2017-10-19	liufei
+		* modify generate xml functionc , Fixed a probelm support for MESSAGE  option
+
 ver 1.13.0	2017-09-30	calvin
 		* add keyword MESSAGE after STRUCT
 

@@ -1,3 +1,6 @@
+ver 1.13.1	2017-10-19	liufei
+		* 修改生成XML文件逻辑 , 解决了xml序列化反序列化中支持MESSAGE问题
+
 ver 1.13.0	2017-09-30	calvin
 		* STRUCT后加入MESSAGE子句，实现报文中名字别名
 
