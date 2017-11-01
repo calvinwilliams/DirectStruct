@@ -1,3 +1,6 @@
+ver 1.13.2	2017-11-01	calvin
+		* Fixed a bug about expect first line "<?xml ..." on pack xml with dup mode
+
 ver 1.13.1	2017-10-19	liufei
 		* modify generate xml functionc , Fixed a probelm support for MESSAGE  option
 

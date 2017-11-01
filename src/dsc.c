@@ -11,8 +11,8 @@
 #include <string.h>
 #include <errno.h>
 
-char	__DIRECTSTRUCT_VERSION_1_13_1[] = "1.13.1" ;
-char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_13_1 ;
+char	__DIRECTSTRUCT_VERSION_1_13_2[] = "1.13.2" ;
+char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_13_2 ;
 
 #ifndef STRCMP
 #define STRCMP(_a_,_C_,_b_) ( strcmp(_a_,_b_) _C_ 0 )
@@ -5512,6 +5512,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "	buf_begin_offset = buf_size-1 - remain_len ;\n" );
 			fprintf( fp_dsc_c , "	buf = (*pp_base) + buf_begin_offset ;\n" );
 			fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	while(1){len=SNPRINTF(buf,remain_len,\"<?xml version=\\\"1.0\\\" encoding=\\\"%%s\\\"?>\\n\",encoding);"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
 			nret = GenerateCCode_c_DSCSERIALIZE_XML_DUP( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
 			if( nret )
 				return nret;
@@ -5595,6 +5596,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "	buf_begin_offset = buf_size-1 - remain_len ;\n" );
 			fprintf( fp_dsc_c , "	buf = (*pp_base) + buf_begin_offset ;\n" );
 			fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	while(1){len=SNPRINTF(buf,remain_len,\"<?xml version=\\\"1.0\\\" encoding=\\\"%%s\\\"?>\",encoding);"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
 			nret = GenerateCCode_c_DSCSERIALIZE_XML_COMPACT_DUP( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
 			if( nret )
 				return nret;
