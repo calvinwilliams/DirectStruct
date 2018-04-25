@@ -1,4 +1,5 @@
 # 此文件由makelocal.sh自动生成
+MAKEFILE_POSTFIX=.Linux
 # 此文件由makeobj.sh自动生成
 ############################################################
 # 项目名 : 
@@ -55,8 +56,8 @@ BIN		=	test_netorder			\
 
 ###### 编译选项
 CFLAGS		=	-I. \
-			-I/usr/local/include/fasterxml	\
-			-I/usr/local/include/fasterjson	\
+			-I$(HOME)/include/fasterxml	\
+			-I$(HOME)/include/fasterjson	\
 
 ###### 链接选项
 LFLAGS		=	-L. \
@@ -72,17 +73,20 @@ CLEAN_ADDITION	=	test_testable.ecE test_testable.c test_testable.o \
 
 ###### 加载mktpl模板库
 # 最终目标列表
-all	:	$(OBJ) $(OBJ2) $(LIB) $(LIB2) $(SQL) $(NOCLEAN_OBJ) $(NOINST_OBJ) $(BIN) $(BIN2)
+all	:	$(OBJ) $(OBJ2) $(LIB) $(LIB2) $(SQL) $(NOINST_OBJ) $(BIN) $(BIN2)
+
+prepro_all	:	$(PREPRO)
+
 
 # 文件系统宏
 CD		=	cd
 RM		=	rm -f
-CP		=	cp -f
+CP		=	cp -rf
 MV		=	mv -f
 MKDIR		=	mkdir -p
 
 # 预定义源文件清理删除关联宏
-_FILE_CLEAN	=	$(c_FILE_CLEAN) $(cpp_FILE_CLEAN) $(SQC_FILE_CLEAN) $(csm_FILE_CLEAN) $(c_html_FILE_CLEAN) $(cui_FILE_CLEAN) $(dtd_FILE_CLEAN) $(prt_FILE_CLEAN) $(fmd_FILE_CLEAN) $(smd_FILE_CLEAN) $(def_FILE_CLEAN) $(act_FILE_CLEAN) $(sml2c_FILE_CLEAN)
+_FILE_CLEAN	=	$(c_FILE_CLEAN) $(cpp_FILE_CLEAN) $(SQC_FILE_CLEAN) $(ec_FILE_CLEAN) $(ec_FILE2_CLEAN) $(csm_FILE_CLEAN) $(c_html_FILE_CLEAN) $(cui_FILE_CLEAN) $(dtd_FILE_CLEAN) $(prt_FILE_CLEAN) $(fmd_FILE_CLEAN) $(smd_FILE_CLEAN) $(def_FILE_CLEAN) $(act_FILE_CLEAN) $(sml2c_FILE_CLEAN)
 
 # 清理删除规则
 .PHONY:clean
@@ -100,44 +104,95 @@ DFTHDER		=	$(csm_FILE_DFTHDER) $(cui_FILE_DFTHDER) $(dtd_FILE_DFTHDER) $(prt_FIL
 .PHONY:install
 install		:	all
 
-ifneq ($(strip $(BIN)),)
 ifneq ($(strip $(BININST)),)
 	@if [ ! -d "$(BININST)" ] ; then \
 		echo $(MKDIR) $(BININST) ; \
 		$(MKDIR) $(BININST) ; \
-	fi ; \
-	for FILE in `echo $(BIN)` ; do \
-		echo $(CP) $$FILE $(BININST)/ ; \
-		$(RM) $(BININST)/$$FILE ; \
-		$(CP) $$FILE $(BININST)/ ; \
+	fi
+ifneq ($(strip $(BIN)),)
+	@for FILE in `echo $(BIN)` ; do \
+		if [ -f $(BININST)/$$FILE ] ; then \
+			echo $(RM) $(BININST)/$$FILE ; \
+			$(RM) $(BININST)/$$FILE ; \
+		fi ; \
+		if [ -f $$FILE ] ; then \
+			echo $(CP) $$FILE $(BININST)/ ; \
+			$(CP) $$FILE $(BININST)/ ; \
+		fi ; \
+	done
+endif
+endif
+ifneq ($(strip $(BININST2)),)
+	@if [ ! -d "$(BININST2)" ] ; then \
+		echo $(MKDIR) $(BININST2) ; \
+		$(MKDIR) $(BININST2) ; \
+	fi
+ifneq ($(strip $(BIN2)),)
+	@for FILE in `echo $(BIN2)` ; do \
+		if [ -f $(BININST2)/$$FILE ] ; then \
+			echo $(RM) $(BININST2)/$$FILE ; \
+			$(RM) $(BININST2)/$$FILE ; \
+		fi ; \
+		if [ -f $$FILE ] ; then \
+			echo $(CP) $$FILE $(BININST2)/ ; \
+			$(CP) $$FILE $(BININST2)/ ; \
+		fi ; \
 	done
 endif
 endif
 
-ifneq ($(strip $(HDER)),)
 ifneq ($(strip $(HDERINST)),)
 	@if [ ! -d "$(HDERINST)" ] ; then \
 		echo $(MKDIR) $(HDERINST) ; \
 		$(MKDIR) $(HDERINST) ; \
-	fi ; \
-	for FILE in `echo $(HDER)` ; do \
-		echo $(CP) $$FILE $(HDERINST)/ ; \
-		$(RM) $(HDERINST)/$$FILE ; \
-		$(CP) $$FILE $(HDERINST)/ ; \
+	fi
+ifneq ($(strip $(HDER)),)
+	@for FILE in `echo $(HDER)` ; do \
+		if [ -f $(HDERINST)/$$FILE ] ; then \
+			echo $(RM) $(HDERINST)/$$FILE ; \
+			$(RM) $(HDERINST)/$$FILE ; \
+		fi ; \
+		if [ -f $$FILE ] ; then \
+			echo $(CP) $$FILE $(HDERINST)/ ; \
+			$(CP) $$FILE $(HDERINST)/ ; \
+		fi ; \
+	done
+endif
+endif
+ifneq ($(strip $(HDERINST2)),)
+	@if [ ! -d "$(HDERINST2)" ] ; then \
+		echo $(MKDIR) $(HDERINST2) ; \
+		$(MKDIR) $(HDERINST2) ; \
+	fi
+ifneq ($(strip $(HDER2)),)
+	@for FILE in `echo $(HDER2)` ; do \
+		if [ -f $(HDERINST2)/$$FILE ] ; then \
+			echo $(RM) $(HDERINST2)/$$FILE ; \
+			$(RM) $(HDERINST2)/$$FILE ; \
+		fi ; \
+		if [ -f $$FILE ] ; then \
+			echo $(CP) $$FILE $(HDERINST2)/ ; \
+			$(CP) $$FILE $(HDERINST2)/ ; \
+		fi ; \
 	done
 endif
 endif
 
-ifneq ($(strip $(DFTHDER)),)
 ifneq ($(strip $(DFTHDERINST)),)
 	@if [ ! -d "$(DFTHDERINST)" ] ; then \
 		echo $(MKDIR) $(DFTHDERINST) ; \
 		$(MKDIR) $(DFTHDERINST) ; \
-	fi ; \
-	for FILE in `echo $(DFTHDER)` ; do \
-		echo $(CP) $$FILE $(DFTHDERINST)/ ; \
-		$(RM) $(DFTHDERINST)/$$FILE ; \
-		$(CP) $$FILE $(DFTHDERINST)/ ; \
+	fi
+ifneq ($(strip $(DFTHDER)),)
+	@for FILE in `echo $(DFTHDER)` ; do \
+		if [ -f $(DFTHDERINST)/$$FILE ] ; then \
+			echo $(RM) $(DFTHDERINST)/$$FILE ; \
+			$(RM) $(DFTHDERINST)/$$FILE ; \
+		fi ; \
+		if [ -f $$FILE ] ; then \
+			echo $(CP) $$FILE $(DFTHDERINST)/ ; \
+			$(CP) $$FILE $(DFTHDERINST)/ ; \
+		fi ; \
 	done
 endif
 endif
@@ -161,19 +216,19 @@ test_trans	:	test_trans.o IDL_CommHead.dsc.o IDL_BankTransaction.dsc.o
 	$(CC) -o $@ test_trans.o IDL_CommHead.dsc.o IDL_BankTransaction.dsc.o $(LFLAGS)
 
 IDL_BankXmlTransaction.dsc.o	:	IDL_BankXmlTransaction.dsc.c
-	$(CC) -I$(HOME)/exinc/fasterxml -I. -c IDL_BankXmlTransaction.dsc.c
+	$(CC) -I$(HOME)/include/fasterxml -I. -c IDL_BankXmlTransaction.dsc.c
 
 test_serialize_xml	:	test_serialize_xml.o IDL_BankXmlTransaction.dsc.o
-	$(CC) -o $@ test_serialize_xml.o IDL_BankXmlTransaction.dsc.o $(LFLAGS) -L/usr/local/lib -lfasterxml
+	$(CC) -o $@ test_serialize_xml.o IDL_BankXmlTransaction.dsc.o $(LFLAGS) -L$(HOME)/lib -lfasterxml
 
 test_serialize_json	:	test_serialize_json.o IDL_BankJsonTransaction.dsc.o
-	$(CC) -o $@ test_serialize_json.o IDL_BankJsonTransaction.dsc.o $(LFLAGS) -L/usr/local/lib -lfasterjson
+	$(CC) -o $@ test_serialize_json.o IDL_BankJsonTransaction.dsc.o $(LFLAGS) -L$(HOME)/lib -lfasterjson
 
 test_serialize_json_utf8	:	test_serialize_json_utf8.o IDL_BankJsonTransaction.dsc.o
-	$(CC) -o $@ test_serialize_json_utf8.o IDL_BankJsonTransaction.dsc.o $(LFLAGS) -L/usr/local/lib -lfasterjson
+	$(CC) -o $@ test_serialize_json_utf8.o IDL_BankJsonTransaction.dsc.o $(LFLAGS) -L$(HOME)/lib -lfasterjson
 
 press_deserialize_json	:	press_deserialize_json.o IDL_BankJsonTransaction.dsc.o
-	$(CC) -o $@ press_deserialize_json.o IDL_BankJsonTransaction.dsc.o $(LFLAGS) -L/usr/local/lib -lfasterjson
+	$(CC) -o $@ press_deserialize_json.o IDL_BankJsonTransaction.dsc.o $(LFLAGS) -L$(HOME)/lib -lfasterjson
 
 ECP	=	ecpg
 

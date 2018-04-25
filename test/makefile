@@ -57,7 +57,7 @@ CLEAN_ADDITION	=	test_testable.ecE test_testable.c test_testable.o \
 #@ make_install_HDERINST
 #@ make_install_DFTHDERINST
 
-include $(MKTPLDIR)/makeobj_$(MKTPLOS).inc
+include $(MKTPL2_HOME)/makeobj_$(MKTPL2_OS).inc
 
 ###### 目标文件依赖关系
 test_netorder	:	test_netorder.o IDL_AllTypes.dsc.o
