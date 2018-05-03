@@ -11,8 +11,8 @@
 #include <string.h>
 #include <errno.h>
 
-char	__DIRECTSTRUCT_VERSION_1_13_0[] = "1.13.0" ;
-char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_13_0 ;
+char	__DIRECTSTRUCT_VERSION_1_13_3[] = "1.13.3" ;
+char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_13_3 ;
 
 #ifndef STRCMP
 #define STRCMP(_a_,_C_,_b_) ( strcmp(_a_,_b_) _C_ 0 )
@@ -3139,7 +3139,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_XML_ENTERNODE( struct CommandParameter
 			{
 				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s[%s_%s_count]." , up_pathname , pstruct->struct_name , up_pathname,pstruct->struct_name );
 			}
-			SNPRINTF( xmlpathname , sizeof(xmlpathname)-1 , "%s/%s" , up_xmlpathname , pstruct->struct_name );
+			SNPRINTF( xmlpathname , sizeof(xmlpathname)-1 , "%s/%s" , up_xmlpathname , pstruct->message_name );
 		}
 		
 		if( pstruct->first_sub_struct )
@@ -3187,7 +3187,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_XML_LEAVENODE( struct CommandParameter
 			{
 				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s[%s_%s_count]." , up_pathname , pstruct->struct_name , up_pathname,pstruct->struct_name );
 			}
-			SNPRINTF( xmlpathname , sizeof(xmlpathname)-1 , "%s/%s" , up_xmlpathname , pstruct->struct_name );
+			SNPRINTF( xmlpathname , sizeof(xmlpathname)-1 , "%s/%s" , up_xmlpathname , pstruct->message_name );
 		}
 		
 		if( pstruct->first_sub_struct )
@@ -3230,7 +3230,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_XML_LEAF( struct CommandParameter *pcp
 			{
 				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s[%s_%s_count]." , up_pathname , pstruct->struct_name , up_pathname,pstruct->struct_name );
 			}
-			SNPRINTF( xmlpathname , sizeof(xmlpathname)-1 , "%s/%s" , up_xmlpathname , pstruct->struct_name );
+			SNPRINTF( xmlpathname , sizeof(xmlpathname)-1 , "%s/%s" , up_xmlpathname , pstruct->message_name );
 		}
 		
 		for( pfield = pstruct->first_field ; pfield ; pfield = pfield->next_field )
@@ -4420,7 +4420,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_JSON_ENTERNODE( struct CommandParamete
 			{
 				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s[%s_%s_count]." , up_pathname , pstruct->struct_name , up_pathname,pstruct->struct_name );
 			}
-			SNPRINTF( jsonpathname , sizeof(jsonpathname)-1 , "%s/%s" , up_jsonpathname , pstruct->struct_name );
+			SNPRINTF( jsonpathname , sizeof(jsonpathname)-1 , "%s/%s" , up_jsonpathname , pstruct->message_name );
 		}
 		
 		if( pstruct->first_sub_struct )
@@ -4475,7 +4475,7 @@ static int GenerateCCode_c_DSCDESERIALIZE_JSON_LEAVENODE( struct CommandParamete
 			{
 				SNPRINTF( pathname , sizeof(pathname)-1 , "%s%s[%s_%s_count]." , up_pathname , pstruct->struct_name , up_pathname,pstruct->struct_name );
 			}
-			SNPRINTF( jsonpathname , sizeof(jsonpathname)-1 , "%s/%s" , up_jsonpathname , pstruct->struct_name );
+			SNPRINTF( jsonpathname , sizeof(jsonpathname)-1 , "%s/%s" , up_jsonpathname , pstruct->message_name );
 		}
 		
 		if( pstruct->first_sub_struct )
@@ -5512,6 +5512,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "	buf_begin_offset = buf_size-1 - remain_len ;\n" );
 			fprintf( fp_dsc_c , "	buf = (*pp_base) + buf_begin_offset ;\n" );
 			fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	while(1){len=SNPRINTF(buf,remain_len,\"<?xml version=\\\"1.0\\\" encoding=\\\"%%s\\\"?>\\n\",encoding);"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
 			nret = GenerateCCode_c_DSCSERIALIZE_XML_DUP( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
 			if( nret )
 				return nret;
@@ -5595,6 +5596,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "	buf_begin_offset = buf_size-1 - remain_len ;\n" );
 			fprintf( fp_dsc_c , "	buf = (*pp_base) + buf_begin_offset ;\n" );
 			fprintf( fp_dsc_c , "	memset( tabs , '\\t' , %d );\n" , DSC_MAXDEPTH );
+			fprintf( fp_dsc_c , "	while(1){len=SNPRINTF(buf,remain_len,\"<?xml version=\\\"1.0\\\" encoding=\\\"%%s\\\"?>\",encoding);"DUP_CHECK"} buf+=len; remain_len-=len;\n" );
 			nret = GenerateCCode_c_DSCSERIALIZE_XML_COMPACT_DUP( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" ) ;
 			if( nret )
 				return nret;
@@ -5631,14 +5633,14 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "	{\n" );
 			fprintf( fp_dsc_c , "		if( type & FASTERXML_NODE_ENTER )\n" );
 			fprintf( fp_dsc_c , "		{\n" );
-			SNPRINTF( xmlpathname , sizeof(xmlpathname)-1 , "/%s" , next_struct->struct_name );
+			SNPRINTF( xmlpathname , sizeof(xmlpathname)-1 , "/%s" , next_struct->message_name );
 			nret = GenerateCCode_c_DSCDESERIALIZE_XML_ENTERNODE( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" , xmlpathname ) ;
 			if( nret )
 				return nret;
 			fprintf( fp_dsc_c , "		}\n" );
 			fprintf( fp_dsc_c , "		else if( type & FASTERXML_NODE_LEAVE )\n" );
 			fprintf( fp_dsc_c , "		{\n" );
-			SNPRINTF( xmlpathname , sizeof(xmlpathname)-1 , "/%s" , next_struct->struct_name );
+			SNPRINTF( xmlpathname , sizeof(xmlpathname)-1 , "/%s" , next_struct->message_name );
 			nret = GenerateCCode_c_DSCDESERIALIZE_XML_LEAVENODE( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" , xmlpathname ) ;
 			if( nret )
 				return nret;
@@ -5646,7 +5648,7 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "	}\n" );
 			fprintf( fp_dsc_c , "	else if( type & FASTERXML_NODE_LEAF )\n" );
 			fprintf( fp_dsc_c , "	{\n" );
-			SNPRINTF( xmlpathname , sizeof(xmlpathname)-1 , "/%s" , next_struct->struct_name );
+			SNPRINTF( xmlpathname , sizeof(xmlpathname)-1 , "/%s" , next_struct->message_name );
 			nret = GenerateCCode_c_DSCDESERIALIZE_XML_LEAF( pcp , 0 , next_struct , 1 , fp_dsc_c , "pst->" , xmlpathname ) ;
 			if( nret )
 				return nret;
@@ -5877,10 +5879,10 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "{\n" );
 			fprintf( fp_dsc_c , "	%s	*pst = (%s*)p ;\n" , next_struct->struct_name , next_struct->struct_name );
 			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ;\n" , DSC_MAXDEPTH );
-			fprintf( fp_dsc_c , "	int	len ;\n" );
+			fprintf( fp_dsc_c , "	int	len = 0 ;\n" );
 			fprintf( fp_dsc_c , "	\n" );
 			fprintf( fp_dsc_c , "	index[0]++; index[0] = 0 ;\n" );
-			fprintf( fp_dsc_c , "	len = 0 ;\n" );
+			fprintf( fp_dsc_c , "	len++; len = 0 ;\n" );
 			fprintf( fp_dsc_c , "	\n" );
 			fprintf( fp_dsc_c , "	if( type & FASTERJSON_NODE_BRANCH )\n" );
 			fprintf( fp_dsc_c , "	{\n" );

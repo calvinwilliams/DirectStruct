@@ -50,6 +50,9 @@ CLEAN_ADDITION	=
 # 最终目标列表
 all	:	$(OBJ) $(OBJ2) $(LIB) $(LIB2) $(SQL) $(NOINST_OBJ) $(BIN) $(BIN2)
 
+prepro_all	:	$(PREPRO)
+
+
 # 文件系统宏
 CD		=	cd
 RM		=	rm -f
@@ -84,6 +87,7 @@ ifneq ($(strip $(BININST)),)
 ifneq ($(strip $(BIN)),)
 	@for FILE in `echo $(BIN)` ; do \
 		if [ -f $(BININST)/$$FILE ] ; then \
+			echo $(RM) $(BININST)/$$FILE ; \
 			$(RM) $(BININST)/$$FILE ; \
 		fi ; \
 		if [ -f $$FILE ] ; then \
@@ -101,6 +105,7 @@ ifneq ($(strip $(BININST2)),)
 ifneq ($(strip $(BIN2)),)
 	@for FILE in `echo $(BIN2)` ; do \
 		if [ -f $(BININST2)/$$FILE ] ; then \
+			echo $(RM) $(BININST2)/$$FILE ; \
 			$(RM) $(BININST2)/$$FILE ; \
 		fi ; \
 		if [ -f $$FILE ] ; then \
@@ -119,6 +124,7 @@ ifneq ($(strip $(HDERINST)),)
 ifneq ($(strip $(HDER)),)
 	@for FILE in `echo $(HDER)` ; do \
 		if [ -f $(HDERINST)/$$FILE ] ; then \
+			echo $(RM) $(HDERINST)/$$FILE ; \
 			$(RM) $(HDERINST)/$$FILE ; \
 		fi ; \
 		if [ -f $$FILE ] ; then \
@@ -136,6 +142,7 @@ ifneq ($(strip $(HDERINST2)),)
 ifneq ($(strip $(HDER2)),)
 	@for FILE in `echo $(HDER2)` ; do \
 		if [ -f $(HDERINST2)/$$FILE ] ; then \
+			echo $(RM) $(HDERINST2)/$$FILE ; \
 			$(RM) $(HDERINST2)/$$FILE ; \
 		fi ; \
 		if [ -f $$FILE ] ; then \
@@ -154,6 +161,7 @@ ifneq ($(strip $(DFTHDERINST)),)
 ifneq ($(strip $(DFTHDER)),)
 	@for FILE in `echo $(DFTHDER)` ; do \
 		if [ -f $(DFTHDERINST)/$$FILE ] ; then \
+			echo $(RM) $(DFTHDERINST)/$$FILE ; \
 			$(RM) $(DFTHDERINST)/$$FILE ; \
 		fi ; \
 		if [ -f $$FILE ] ; then \
