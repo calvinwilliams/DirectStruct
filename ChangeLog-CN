@@ -1,3 +1,6 @@
+ver 1.13.3	2018-05-03	calvin
+		* 解决了函数CallbackOnJsonNode_*当结构规模较小时的变量未使用警告
+
 ver 1.13.2	2017-11-01	calvin
 		* 解决了一个问题：DUP方式打包XML时没有生成"<?xml ..."头行
 

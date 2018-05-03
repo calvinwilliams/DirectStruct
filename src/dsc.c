@@ -11,8 +11,8 @@
 #include <string.h>
 #include <errno.h>
 
-char	__DIRECTSTRUCT_VERSION_1_13_2[] = "1.13.2" ;
-char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_13_2 ;
+char	__DIRECTSTRUCT_VERSION_1_13_3[] = "1.13.3" ;
+char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_13_3 ;
 
 #ifndef STRCMP
 #define STRCMP(_a_,_C_,_b_) ( strcmp(_a_,_b_) _C_ 0 )
@@ -5879,10 +5879,10 @@ int GenerateCCode( struct CommandParameter *pcp , struct StructInfo *pstruct , F
 			fprintf( fp_dsc_c , "{\n" );
 			fprintf( fp_dsc_c , "	%s	*pst = (%s*)p ;\n" , next_struct->struct_name , next_struct->struct_name );
 			fprintf( fp_dsc_c , "	int	index[%d] = { 0 } ;\n" , DSC_MAXDEPTH );
-			fprintf( fp_dsc_c , "	int	len ;\n" );
+			fprintf( fp_dsc_c , "	int	len = 0 ;\n" );
 			fprintf( fp_dsc_c , "	\n" );
 			fprintf( fp_dsc_c , "	index[0]++; index[0] = 0 ;\n" );
-			fprintf( fp_dsc_c , "	len = 0 ;\n" );
+			fprintf( fp_dsc_c , "	len++; len = 0 ;\n" );
 			fprintf( fp_dsc_c , "	\n" );
 			fprintf( fp_dsc_c , "	if( type & FASTERJSON_NODE_BRANCH )\n" );
 			fprintf( fp_dsc_c , "	{\n" );
