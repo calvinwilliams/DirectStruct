@@ -1,5 +1,6 @@
 ver 1.13.3	2018-05-03	calvin
 		* Fixed a warnning in func CallbackOnJsonNode_* for varible unused
+		* Adjust src/makefile for new mktpl2
 
 ver 1.13.2	2017-11-01	calvin
 		* Fixed a bug about expect first line "<?xml ..." on pack xml with dup mode

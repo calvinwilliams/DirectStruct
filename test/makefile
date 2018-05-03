@@ -41,13 +41,22 @@ CFLAGS		=	-I. \
 LFLAGS		=	-L. \
 
 ###### 额外宏定义区
-CLEAN_ADDITION	=	test_testable.ecE test_testable.c test_testable.o \
-			IDL_testable.dsc.ESQL.ecE IDL_testable.dsc.ESQL.c IDL_testable.dsc.ESQL.o \
+CLEAN_ADDITION	=	\
+			IDL_AllTypes.dsc.* \
+			IDL_AllTypes2.dsc.* \
+			IDL_CommHead.dsc.* \
+			IDL_BankTransaction.dsc.* \
+			IDL_BankXmlTransaction.dsc.* \
+			IDL_BankJsonTransaction.dsc.* \
+			IDL_testable.dsc.* \
 			test_serialize_json		\
 			test_serialize_json_utf8	\
 			press_deserialize_json		\
 			test_serialize_xml		\
+			test_testable.ecE test_testable.c test_testable.o \
 			test_testable			\
+
+PREPRO		=	prepro
 
 ###### 加载mktpl模板库
 #@ make_all
@@ -58,6 +67,15 @@ CLEAN_ADDITION	=	test_testable.ecE test_testable.c test_testable.o \
 #@ make_install_DFTHDERINST
 
 include $(MKTPL2_HOME)/makeobj_$(MKTPL2_OS).inc
+
+prepro		:
+	dsc -f IDL_AllTypes.dsc -c-compact -c-compress -c-LOG
+	dsc -f IDL_AllTypes2.dsc -c-compact -c-compress -c-LOG
+	dsc -f IDL_CommHead.dsc -c-compact -c-LOG
+	dsc -f IDL_BankTransaction.dsc -c-compress -c-LOG
+	dsc -f IDL_BankXmlTransaction.dsc -c-xml -c-xml-compact -c-LOG
+	dsc -f IDL_BankJsonTransaction.dsc -c-json -c-json-compact -c-LOG
+	dsc -f IDL_testable.dsc -sql-pgsql -ec-pgsql -c-LOG
 
 ###### 目标文件依赖关系
 test_netorder	:	test_netorder.o IDL_AllTypes.dsc.o
