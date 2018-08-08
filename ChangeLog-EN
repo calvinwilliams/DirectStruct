@@ -1,3 +1,6 @@
+ver 1.13.4	2018-08-08	calvin
+		* Sync depend on fasterjson v1.1.8
+
 ver 1.13.3	2018-05-03	calvin
 		* Fixed a warnning in func CallbackOnJsonNode_* for varible unused
 		* Adjust src/makefile for new mktpl2

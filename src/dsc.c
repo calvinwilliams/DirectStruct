@@ -11,8 +11,8 @@
 #include <string.h>
 #include <errno.h>
 
-char	__DIRECTSTRUCT_VERSION_1_13_3[] = "1.13.3" ;
-char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_13_3 ;
+char	__DIRECTSTRUCT_VERSION_1_13_4[] = "1.13.4" ;
+char	*__DIRECTSTRUCT_VERSION = __DIRECTSTRUCT_VERSION_1_13_4 ;
 
 #ifndef STRCMP
 #define STRCMP(_a_,_C_,_b_) ( strcmp(_a_,_b_) _C_ 0 )
@@ -3537,7 +3537,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON( struct CommandParameter *pcp , int
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"%.*s\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , depth+1,tabs );
 				if( pfield->field_name[0] != '_' )
 					fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"\\\"%s\\\" : \"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
-				fprintf( fp_dsc_c , "\tif(%s%s[0]==127)\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\tif(%s%s[0]==DSCNULL)\n" , pathname,pfield->field_name );
 				fprintf( fp_dsc_c , "\t{\n" );
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"null\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" );
 				fprintf( fp_dsc_c , "\t}\n" );
@@ -3785,7 +3785,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT( struct CommandParameter *p
 			{
 				if( pfield->field_name[0] != '_' )
 						fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"\\\"%s\\\":\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" , pfield->field_name );
-				fprintf( fp_dsc_c , "\tif(%s%s[0]==127)\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\tif(%s%s[0]==DSCNULL)\n" , pathname,pfield->field_name );
 				fprintf( fp_dsc_c , "\t{\n" );
 				fprintf( fp_dsc_c , "\tlen=SNPRINTF(buf,remain_len,\"null\"); if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" );
 				fprintf( fp_dsc_c , "\t}\n" );
@@ -4045,7 +4045,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_DUP( struct CommandParameter *pcp ,
 				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"%.*s\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , depth+1,tabs );
 				if( pfield->field_name[0] != '_' )
 					fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\" : \");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
-				fprintf( fp_dsc_c , "\tif(%s%s[0]==127)\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\tif(%s%s[0]==DSCNULL)\n" , pathname,pfield->field_name );
 				fprintf( fp_dsc_c , "\t{\n" );
 				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"null\");"DUP_CHECK"} if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" );
 				fprintf( fp_dsc_c , "\t}\n" );
@@ -4293,7 +4293,7 @@ static int GenerateCCode_c_DSCSERIALIZE_JSON_COMPACT_DUP( struct CommandParamete
 			{
 				if( pfield->field_name[0] != '_' )
 						fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"\\\"%s\\\":\");"DUP_CHECK"} buf+=len; remain_len-=len;\n" , pfield->field_name );
-				fprintf( fp_dsc_c , "\tif(%s%s[0]==127)\n" , pathname,pfield->field_name );
+				fprintf( fp_dsc_c , "\tif(%s%s[0]==DSCNULL)\n" , pathname,pfield->field_name );
 				fprintf( fp_dsc_c , "\t{\n" );
 				fprintf( fp_dsc_c , "\twhile(1){len=SNPRINTF(buf,remain_len,\"null\");"DUP_CHECK"} if(len<0||remain_len<len)return -1; buf+=len; remain_len-=len;\n" );
 				fprintf( fp_dsc_c , "\t}\n" );
